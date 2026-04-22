@@ -20,6 +20,7 @@ import {
   Calendar,
   BarChart3,
   Settings,
+  Brain,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -334,47 +335,104 @@ export function AdminDashboardClient() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Link href="/dashboard/employees">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-4 flex flex-col items-center text-center">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-2">
-                <Users className="h-5 w-5 text-blue-600" />
-              </div>
-              <span className="text-sm font-medium">Employees</span>
-            </CardContent>
-          </Card>
-        </Link>
-        <Link href="/dashboard/payroll">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-4 flex flex-col items-center text-center">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-2">
-                <DollarSign className="h-5 w-5 text-green-600" />
-              </div>
-              <span className="text-sm font-medium">Payroll</span>
-            </CardContent>
-          </Card>
-        </Link>
-        <Link href="/dashboard/scheduling">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-4 flex flex-col items-center text-center">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-2">
-                <Calendar className="h-5 w-5 text-purple-600" />
-              </div>
-              <span className="text-sm font-medium">Scheduling</span>
-            </CardContent>
-          </Card>
-        </Link>
-        <Link href="/dashboard/reports">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-4 flex flex-col items-center text-center">
-              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-2">
-                <BarChart3 className="h-5 w-5 text-orange-600" />
-              </div>
-              <span className="text-sm font-medium">Reports</span>
-            </CardContent>
-          </Card>
-        </Link>
+      <div>
+        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Quick Actions</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Link href="/dashboard/employees">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4 flex flex-col items-center text-center">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-2">
+                  <Users className="h-5 w-5 text-blue-600" />
+                </div>
+                <span className="text-sm font-medium">Employees</span>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/payroll">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4 flex flex-col items-center text-center">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-2">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                </div>
+                <span className="text-sm font-medium">Payroll</span>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/scheduling">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4 flex flex-col items-center text-center">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-2">
+                  <Calendar className="h-5 w-5 text-purple-600" />
+                </div>
+                <span className="text-sm font-medium">Scheduling</span>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/leave">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4 flex flex-col items-center text-center">
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-2">
+                  <ClipboardList className="h-5 w-5 text-orange-600" />
+                </div>
+                <span className="text-sm font-medium">Leave</span>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      </div>
+
+      {/* Admin-Only Features */}
+      <div>
+        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <Crown className="w-4 h-4 text-purple-600" />
+          Admin-Only Features
+        </h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Link href="/dashboard/finance">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer border-purple-200 hover:border-purple-300">
+              <CardContent className="p-4 flex flex-col items-center text-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center mb-2">
+                  <TrendingUp className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-sm font-medium">Finance Summary</span>
+                <Badge className="mt-1 text-[10px] bg-purple-100 text-purple-700">Admin</Badge>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/ai-insights">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer border-purple-200 hover:border-purple-300">
+              <CardContent className="p-4 flex flex-col items-center text-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-500 rounded-lg flex items-center justify-center mb-2">
+                  <Brain className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-sm font-medium">AI Insights</span>
+                <Badge className="mt-1 text-[10px] bg-purple-100 text-purple-700">Admin</Badge>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/supervisor-assignments">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer border-purple-200 hover:border-purple-300">
+              <CardContent className="p-4 flex flex-col items-center text-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-lg flex items-center justify-center mb-2">
+                  <Crown className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-sm font-medium">Supervisor Roles</span>
+                <Badge className="mt-1 text-[10px] bg-purple-100 text-purple-700">Admin</Badge>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/settings">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer border-purple-200 hover:border-purple-300">
+              <CardContent className="p-4 flex flex-col items-center text-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-gray-500 to-slate-500 rounded-lg flex items-center justify-center mb-2">
+                  <Settings className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-sm font-medium">Settings</span>
+                <Badge className="mt-1 text-[10px] bg-purple-100 text-purple-700">Admin</Badge>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
       </div>
 
       {/* Two Column Layout */}

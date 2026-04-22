@@ -16,6 +16,9 @@ import {
   FileText,
   ChevronDown,
   UserCircle,
+  TrendingUp,
+  Brain,
+  Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -47,9 +50,22 @@ const navigation = [
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
+// Admin-only navigation items
+const adminNavigation = [
+  { name: "Finance", href: "/dashboard/finance", icon: TrendingUp },
+  { name: "AI Insights", href: "/dashboard/ai-insights", icon: Brain },
+  { name: "Supervisor Assignments", href: "/dashboard/supervisor-assignments", icon: Crown },
+];
+
 export function DashboardLayout({ children, title }: DashboardLayoutProps) {
   const pathname = usePathname();
   const unreadCount = mockNotifications.filter((n) => !n.read).length;
+
+  // Check if current page is an admin-only page
+  const isAdminPage = pathname?.includes("/finance") || 
+                      pathname?.includes("/ai-insights") || 
+                      pathname?.includes("/supervisor-assignments") ||
+                      pathname?.includes("/admin");
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -86,6 +102,38 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                         }`}
                       />
                       {item.name}
+                    </Link>
+                  </li>
+                );
+              })}
+              
+              {/* Admin-only section */}
+              <li className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
+                <p className="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                  Admin Only
+                </p>
+              </li>
+              {adminNavigation.map((item) => {
+                const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
+                return (
+                  <li key={item.name}>
+                    <Link
+                      href={item.href}
+                      className={`group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 ${
+                        isActive
+                          ? "bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-purple-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                      }`}
+                    >
+                      <item.icon
+                        className={`h-5 w-5 shrink-0 ${
+                          isActive
+                            ? "text-purple-600 dark:text-purple-400"
+                            : "text-gray-400 group-hover:text-purple-600 dark:text-gray-500"
+                        }`}
+                      />
+                      {item.name}
+                      <Badge className="ml-auto text-[10px] bg-purple-100 text-purple-700">Admin</Badge>
                     </Link>
                   </li>
                 );
@@ -140,6 +188,37 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                             isActive
                               ? "text-blue-600 dark:text-blue-400"
                               : "text-gray-400 group-hover:text-blue-600 dark:text-gray-500"
+                          }`}
+                        />
+                        {item.name}
+                      </Link>
+                    </li>
+                  );
+                })}
+                
+                {/* Admin-only section mobile */}
+                <li className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
+                  <p className="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                    Admin Only
+                  </p>
+                </li>
+                {adminNavigation.map((item) => {
+                  const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
+                  return (
+                    <li key={item.name}>
+                      <Link
+                        href={item.href}
+                        className={`group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 ${
+                          isActive
+                            ? "bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-purple-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                        }`}
+                      >
+                        <item.icon
+                          className={`h-5 w-5 shrink-0 ${
+                            isActive
+                              ? "text-purple-600 dark:text-purple-400"
+                              : "text-gray-400 group-hover:text-purple-600 dark:text-gray-500"
                           }`}
                         />
                         {item.name}
