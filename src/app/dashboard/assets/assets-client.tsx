@@ -14,10 +14,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -35,47 +35,38 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { useStore } from "@/lib/store";
 
-interface Asset {
-  id: string;
-  assetCode: string;
-  name: string;
-  type: string;
-  brand: string;
-  model: string;
-  condition: string;
-  status: "Available" | "Assigned" | "Maintenance";
-  serialNumber?: string;
-}
-
-interface AssetAssignment {
-  id: string;
-  assetId: string;
-  assetName: string;
-  employeeId: string;
-  employeeName: string;
-  dateAssigned: string;
-  conditionOnAssign: string;
-  isActive: boolean;
-}
-
-interface Employee {
-  id: string;
-  fullName: string;
-}
-
-interface AssetsClientProps {
-  assets: Asset[];
-  assignments: AssetAssignment[];
-  employees: Employee[];
-}
-
-export function AssetsClient({ assets, assignments, employees }: AssetsClientProps) {
+export function AssetsClient() {
+  const { assets, assetAssignments, employees, addAsset, assignAsset } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("assets");
+  const [isAssetDialogOpen, setIsAssetDialogOpen] = useState(false);
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [assetForm, setAssetForm] = useState({
+    name: "",
+    type: "",
+    brand: "",
+    model: "",
+    condition: "Good",
+    status: "Available" as const,
+    serialNumber: "",
+  });
+  const [assignForm, setAssignForm] = useState({
+    assetId: "",
+    employeeId: "",
+    conditionOnAssign: "Good",
+  });
 
   const filteredAssets = assets.filter(
     (asset) =>
@@ -83,6 +74,46 @@ export function AssetsClient({ assets, assignments, employees }: AssetsClientPro
       asset.assetCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
       asset.type.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleAddAsset = (e: React.FormEvent) => {
+    e.preventDefault();
+    addAsset(assetForm);
+    toast.success(`Asset ${assetForm.name} added successfully!`);
+    setIsAssetDialogOpen(false);
+    setAssetForm({
+      name: "",
+      type: "",
+      brand: "",
+      model: "",
+      condition: "Good",
+      status: "Available",
+      serialNumber: "",
+    });
+  };
+
+  const handleAssignAsset = (e: React.FormEvent) => {
+    e.preventDefault();
+    const asset = assets.find((a) => a.id === assignForm.assetId);
+    const employee = employees.find((e) => e.id === assignForm.employeeId);
+    if (asset && employee) {
+      assignAsset({
+        assetId: asset.id,
+        assetName: asset.name,
+        employeeId: employee.id,
+        employeeName: employee.fullName,
+        dateAssigned: new Date().toISOString().split("T")[0],
+        conditionOnAssign: assignForm.conditionOnAssign,
+        isActive: true,
+      });
+      toast.success(`${asset.name} assigned to ${employee.fullName}!`);
+      setIsAssignDialogOpen(false);
+      setAssignForm({
+        assetId: "",
+        employeeId: "",
+        conditionOnAssign: "Good",
+      });
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -124,10 +155,188 @@ export function AssetsClient({ assets, assignments, employees }: AssetsClientPro
             Manage company assets and equipment
           </p>
         </div>
-        <Button onClick={() => toast.info("Add asset feature coming soon!")}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Asset
-        </Button>
+        <div className="flex gap-2">
+          <Dialog open={isAssetDialogOpen} onOpenChange={setIsAssetDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Asset
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Add New Asset</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleAddAsset} className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Asset Name *</Label>
+                  <Input
+                    id="name"
+                    required
+                    value={assetForm.name}
+                    onChange={(e) => setAssetForm({ ...assetForm, name: e.target.value })}
+                    placeholder="MacBook Pro 16"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="type">Type *</Label>
+                    <select
+                      id="type"
+                      required
+                      value={assetForm.type}
+                      onChange={(e) => setAssetForm({ ...assetForm, type: e.target.value })}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="">Select Type</option>
+                      <option value="Laptop">Laptop</option>
+                      <option value="Desktop">Desktop</option>
+                      <option value="Mobile Phone">Mobile Phone</option>
+                      <option value="Tablet">Tablet</option>
+                      <option value="Monitor">Monitor</option>
+                      <option value="Printer">Printer</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="brand">Brand *</Label>
+                    <Input
+                      id="brand"
+                      required
+                      value={assetForm.brand}
+                      onChange={(e) => setAssetForm({ ...assetForm, brand: e.target.value })}
+                      placeholder="Apple"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="model">Model</Label>
+                  <Input
+                    id="model"
+                    value={assetForm.model}
+                    onChange={(e) => setAssetForm({ ...assetForm, model: e.target.value })}
+                    placeholder="MacBook Pro M3"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="serialNumber">Serial Number</Label>
+                  <Input
+                    id="serialNumber"
+                    value={assetForm.serialNumber}
+                    onChange={(e) => setAssetForm({ ...assetForm, serialNumber: e.target.value })}
+                    placeholder="ABC123456"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="condition">Condition</Label>
+                    <select
+                      id="condition"
+                      value={assetForm.condition}
+                      onChange={(e) => setAssetForm({ ...assetForm, condition: e.target.value })}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="Excellent">Excellent</option>
+                      <option value="Good">Good</option>
+                      <option value="Fair">Fair</option>
+                      <option value="Poor">Poor</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Status</Label>
+                    <select
+                      id="status"
+                      value={assetForm.status}
+                      onChange={(e) => setAssetForm({ ...assetForm, status: e.target.value as any })}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="Available">Available</option>
+                      <option value="Assigned">Assigned</option>
+                      <option value="Maintenance">Maintenance</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setIsAssetDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">Add Asset</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <User className="mr-2 h-4 w-4" />
+                Assign Asset
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Assign Asset to Employee</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleAssignAsset} className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="assignAsset">Asset *</Label>
+                  <select
+                    id="assignAsset"
+                    required
+                    value={assignForm.assetId}
+                    onChange={(e) => setAssignForm({ ...assignForm, assetId: e.target.value })}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="">Select Asset</option>
+                    {assets
+                      .filter((a) => a.status === "Available")
+                      .map((asset) => (
+                        <option key={asset.id} value={asset.id}>
+                          {asset.name} ({asset.assetCode})
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="assignEmployee">Employee *</Label>
+                  <select
+                    id="assignEmployee"
+                    required
+                    value={assignForm.employeeId}
+                    onChange={(e) => setAssignForm({ ...assignForm, employeeId: e.target.value })}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="">Select Employee</option>
+                    {employees.map((emp) => (
+                      <option key={emp.id} value={emp.id}>
+                        {emp.fullName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="assignCondition">Condition on Assign</Label>
+                  <select
+                    id="assignCondition"
+                    value={assignForm.conditionOnAssign}
+                    onChange={(e) => setAssignForm({ ...assignForm, conditionOnAssign: e.target.value })}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="Excellent">Excellent</option>
+                    <option value="Good">Good</option>
+                    <option value="Fair">Fair</option>
+                    <option value="Poor">Poor</option>
+                  </select>
+                </div>
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setIsAssignDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">Assign Asset</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -258,29 +467,18 @@ export function AssetsClient({ assets, assignments, employees }: AssetsClientPro
                           </TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
-                              <DropdownMenuTrigger>
+                              <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon">
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={() => toast.info(`View ${asset.name}`)}
-                                >
+                                <DropdownMenuItem onClick={() => toast.info(`View ${asset.name}`)}>
                                   View Details
                                 </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => toast.info(`Edit ${asset.name}`)}
-                                >
+                                <DropdownMenuItem onClick={() => toast.info(`Edit ${asset.name}`)}>
                                   Edit
                                 </DropdownMenuItem>
-                                {asset.status === "Available" && (
-                                  <DropdownMenuItem
-                                    onClick={() => toast.info(`Assign ${asset.name}`)}
-                                  >
-                                    Assign to Employee
-                                  </DropdownMenuItem>
-                                )}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
@@ -310,14 +508,14 @@ export function AssetsClient({ assets, assignments, employees }: AssetsClientPro
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {assignments.length === 0 ? (
+                    {assetAssignments.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                           No assignments found
                         </TableCell>
                       </TableRow>
                     ) : (
-                      assignments.map((assignment) => (
+                      assetAssignments.map((assignment) => (
                         <TableRow key={assignment.id}>
                           <TableCell className="font-medium">
                             {assignment.assetName}

@@ -13,6 +13,8 @@ import {
   Edit,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -27,7 +29,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useStore } from "@/lib/store";
 
 interface Announcement {
   id: string;
@@ -40,7 +50,7 @@ interface Announcement {
   priority: "low" | "medium" | "high";
 }
 
-const mockAnnouncements: Announcement[] = [
+const initialAnnouncements: Announcement[] = [
   {
     id: "1",
     title: "Welcome to ClockRoster!",
@@ -74,32 +84,62 @@ const mockAnnouncements: Announcement[] = [
     isPinned: false,
     priority: "high",
   },
-  {
-    id: "4",
-    title: "Company Holiday - Martin Luther King Jr. Day",
-    content:
-      "Please note that the office will be closed on Monday, January 15th in observance of Martin Luther King Jr. Day. Regular operations will resume on Tuesday, January 16th.",
-    category: "Holiday",
-    author: "Admin",
-    createdAt: "2024-01-10T09:00:00Z",
-    isPinned: true,
-    priority: "medium",
-  },
-  {
-    id: "5",
-    title: "Asset Inventory Update",
-    content:
-      "We'll be conducting an asset inventory check next week. Please ensure all company equipment assigned to you is in good condition and report any issues to the IT department.",
-    category: "Assets",
-    author: "IT Department",
-    createdAt: "2024-01-09T11:00:00Z",
-    isPinned: false,
-    priority: "low",
-  },
 ];
 
 export function AnnouncementsClient() {
-  const [announcements, setAnnouncements] = useState(mockAnnouncements);
+  const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { addNotification } = useStore();
+  const [formData, setFormData] = useState({
+    title: "",
+    content: "",
+    category: "General",
+    priority: "medium" as const,
+    isPinned: false,
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newAnnouncement: Announcement = {
+      ...formData,
+      id: String(announcements.length + 1),
+      author: "Admin User",
+      createdAt: new Date().toISOString(),
+    };
+    setAnnouncements([newAnnouncement, ...announcements]);
+    
+    // Also add as notification
+    addNotification({
+      userId: "all",
+      type: "ANNOUNCEMENT",
+      message: `New announcement: ${formData.title}`,
+      read: false,
+    });
+    
+    toast.success("Announcement published successfully!");
+    setIsDialogOpen(false);
+    setFormData({
+      title: "",
+      content: "",
+      category: "General",
+      priority: "medium",
+      isPinned: false,
+    });
+  };
+
+  const togglePin = (id: string) => {
+    setAnnouncements(
+      announcements.map((a) =>
+        a.id === id ? { ...a, isPinned: !a.isPinned } : a
+      )
+    );
+    toast.success("Announcement updated!");
+  };
+
+  const deleteAnnouncement = (id: string) => {
+    setAnnouncements(announcements.filter((a) => a.id !== id));
+    toast.success("Announcement deleted!");
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -146,10 +186,107 @@ export function AnnouncementsClient() {
             Stay updated with company news and important information
           </p>
         </div>
-        <Button onClick={() => toast.info("Create announcement feature coming soon!")}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Announcement
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              New Announcement
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Create New Announcement</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Title *</Label>
+                <Input
+                  id="title"
+                  required
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
+                  placeholder="Enter announcement title..."
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="category">Category</Label>
+                  <select
+                    id="category"
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="General">General</option>
+                    <option value="Scheduling">Scheduling</option>
+                    <option value="Payroll">Payroll</option>
+                    <option value="Holiday">Holiday</option>
+                    <option value="Assets">Assets</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="priority">Priority</Label>
+                  <select
+                    id="priority"
+                    value={formData.priority}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        priority: e.target.value as any,
+                      })
+                    }
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="content">Content *</Label>
+                <textarea
+                  id="content"
+                  required
+                  value={formData.content}
+                  onChange={(e) =>
+                    setFormData({ ...formData, content: e.target.value })
+                  }
+                  placeholder="Enter announcement content..."
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm min-h-[150px]"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="isPinned"
+                  checked={formData.isPinned}
+                  onChange={(e) =>
+                    setFormData({ ...formData, isPinned: e.target.checked })
+                  }
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor="isPinned" className="cursor-pointer">
+                  Pin this announcement
+                </Label>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">Publish</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats */}
@@ -205,6 +342,8 @@ export function AnnouncementsClient() {
                 announcement={announcement}
                 getPriorityColor={getPriorityColor}
                 getCategoryColor={getCategoryColor}
+                onTogglePin={() => togglePin(announcement.id)}
+                onDelete={() => deleteAnnouncement(announcement.id)}
               />
             ))}
           </div>
@@ -221,6 +360,8 @@ export function AnnouncementsClient() {
               announcement={announcement}
               getPriorityColor={getPriorityColor}
               getCategoryColor={getCategoryColor}
+              onTogglePin={() => togglePin(announcement.id)}
+              onDelete={() => deleteAnnouncement(announcement.id)}
             />
           ))}
         </div>
@@ -233,12 +374,16 @@ interface AnnouncementCardProps {
   announcement: Announcement;
   getPriorityColor: (priority: string) => string;
   getCategoryColor: (category: string) => string;
+  onTogglePin: () => void;
+  onDelete: () => void;
 }
 
 function AnnouncementCard({
   announcement,
   getPriorityColor,
   getCategoryColor,
+  onTogglePin,
+  onDelete,
 }: AnnouncementCardProps) {
   return (
     <Card className={announcement.isPinned ? "border-orange-200 dark:border-orange-800" : ""}>
@@ -269,19 +414,23 @@ function AnnouncementCard({
             </CardDescription>
           </div>
           <DropdownMenu>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={onTogglePin}>
+                <Pin className="mr-2 h-4 w-4" />
+                {announcement.isPinned ? "Unpin" : "Pin"}
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => toast.info("Edit feature coming soon!")}>
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-red-600"
-                onClick={() => toast.error("Delete feature coming soon!")}
+                onClick={onDelete}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete

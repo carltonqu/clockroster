@@ -5,18 +5,17 @@ import {
   Search,
   Plus,
   MoreHorizontal,
-  Mail,
-  Phone,
   Building2,
   Briefcase,
   Filter,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -34,8 +33,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useStore } from "@/lib/store";
 
 interface Employee {
   id: string;
@@ -50,24 +57,44 @@ interface Employee {
   hireDate: string;
 }
 
-interface EmployeesClientProps {
-  employees: Employee[];
-}
-
-export function EmployeesClient({ employees }: EmployeesClientProps) {
+export function EmployeesClient() {
+  const { employees, addEmployee } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredEmployees, setFilteredEmployees] = useState(employees);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    department: "",
+    position: "",
+    employmentStatus: "Active",
+    employmentType: "Full-time",
+    hireDate: new Date().toISOString().split("T")[0],
+  });
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    const filtered = employees.filter(
-      (emp) =>
-        emp.fullName.toLowerCase().includes(query.toLowerCase()) ||
-        emp.email.toLowerCase().includes(query.toLowerCase()) ||
-        emp.department.toLowerCase().includes(query.toLowerCase()) ||
-        emp.position.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredEmployees(filtered);
+  const filteredEmployees = employees.filter(
+    (emp) =>
+      emp.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.position.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    addEmployee(formData);
+    toast.success(`Employee ${formData.fullName} added successfully!`);
+    setIsDialogOpen(false);
+    setFormData({
+      fullName: "",
+      email: "",
+      phoneNumber: "",
+      department: "",
+      position: "",
+      employmentStatus: "Active",
+      employmentType: "Full-time",
+      hireDate: new Date().toISOString().split("T")[0],
+    });
   };
 
   const getStatusColor = (status: string) => {
@@ -95,10 +122,133 @@ export function EmployeesClient({ employees }: EmployeesClientProps) {
             Manage your team members and their information
           </p>
         </div>
-        <Button onClick={() => toast.info("Add employee feature coming soon!")}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Employee
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Employee
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Add New Employee</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name *</Label>
+                  <Input
+                    id="fullName"
+                    required
+                    value={formData.fullName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, fullName: e.target.value })
+                    }
+                    placeholder="John Doe"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    placeholder="john@company.com"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Input
+                  id="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phoneNumber: e.target.value })
+                  }
+                  placeholder="+1 555-0123"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="department">Department *</Label>
+                  <select
+                    id="department"
+                    required
+                    value={formData.department}
+                    onChange={(e) =>
+                      setFormData({ ...formData, department: e.target.value })
+                    }
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="">Select Department</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Design">Design</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="HR">HR</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Operations">Operations</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="position">Position *</Label>
+                  <Input
+                    id="position"
+                    required
+                    value={formData.position}
+                    onChange={(e) =>
+                      setFormData({ ...formData, position: e.target.value })
+                    }
+                    placeholder="Software Engineer"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="employmentType">Employment Type</Label>
+                  <select
+                    id="employmentType"
+                    value={formData.employmentType}
+                    onChange={(e) =>
+                      setFormData({ ...formData, employmentType: e.target.value })
+                    }
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="Full-time">Full-time</option>
+                    <option value="Part-time">Part-time</option>
+                    <option value="Contract">Contract</option>
+                    <option value="Intern">Intern</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="hireDate">Hire Date</Label>
+                  <Input
+                    id="hireDate"
+                    type="date"
+                    value={formData.hireDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, hireDate: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">Add Employee</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats Cards */}
@@ -148,7 +298,7 @@ export function EmployeesClient({ employees }: EmployeesClientProps) {
               <Input
                 placeholder="Search employees..."
                 value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
               />
             </div>
@@ -218,7 +368,7 @@ export function EmployeesClient({ employees }: EmployeesClientProps) {
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
-                          <DropdownMenuTrigger>
+                          <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
@@ -233,14 +383,6 @@ export function EmployeesClient({ employees }: EmployeesClientProps) {
                               onClick={() => toast.info(`Edit ${employee.fullName}`)}
                             >
                               Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                window.open(`mailto:${employee.email}`)
-                              }
-                            >
-                              <Mail className="mr-2 h-4 w-4" />
-                              Send Email
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

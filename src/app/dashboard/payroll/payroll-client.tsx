@@ -9,16 +9,14 @@ import {
   CheckCircle,
   Send,
   Filter,
-  TrendingUp,
-  Users,
-  Clock,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -30,42 +28,66 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useStore } from "@/lib/store";
 
-interface PayrollEntry {
-  id: string;
-  userId: string;
-  employeeName: string;
-  periodStart: string;
-  periodEnd: string;
-  status: "DRAFT" | "APPROVED" | "RELEASED";
-  basicPay: number;
-  otPay: number;
-  grossPay: number;
-  deductions: number;
-  netPay: number;
-  hoursWorked: number;
-}
-
-interface Employee {
-  id: string;
-  fullName: string;
-}
-
-interface PayrollClientProps {
-  entries: PayrollEntry[];
-  employees: Employee[];
-}
-
-export function PayrollClient({ entries, employees }: PayrollClientProps) {
+export function PayrollClient() {
+  const { payrollEntries, employees, addPayrollEntry } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    userId: "",
+    employeeName: "",
+    periodStart: "",
+    periodEnd: "",
+    status: "DRAFT" as const,
+    basicPay: 0,
+    otPay: 0,
+    grossPay: 0,
+    deductions: 0,
+    netPay: 0,
+    hoursWorked: 0,
+  });
 
-  const filteredEntries = entries.filter(
+  const filteredEntries = payrollEntries.filter(
     (entry) =>
       entry.employeeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       entry.periodStart.includes(searchQuery)
   );
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    addPayrollEntry(formData);
+    toast.success(`Payroll entry for ${formData.employeeName} added successfully!`);
+    setIsDialogOpen(false);
+    setFormData({
+      userId: "",
+      employeeName: "",
+      periodStart: "",
+      periodEnd: "",
+      status: "DRAFT",
+      basicPay: 0,
+      otPay: 0,
+      grossPay: 0,
+      deductions: 0,
+      netPay: 0,
+      hoursWorked: 0,
+    });
+  };
+
+  const calculateNetPay = () => {
+    const gross = formData.basicPay + formData.otPay;
+    const net = gross - formData.deductions;
+    setFormData({ ...formData, grossPay: gross, netPay: net });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -80,9 +102,9 @@ export function PayrollClient({ entries, employees }: PayrollClientProps) {
     }
   };
 
-  const totalGrossPay = entries.reduce((acc, e) => acc + e.grossPay, 0);
-  const totalNetPay = entries.reduce((acc, e) => acc + e.netPay, 0);
-  const totalDeductions = entries.reduce((acc, e) => acc + e.deductions, 0);
+  const totalGrossPay = payrollEntries.reduce((acc, e) => acc + e.grossPay, 0);
+  const totalNetPay = payrollEntries.reduce((acc, e) => acc + e.netPay, 0);
+  const totalDeductions = payrollEntries.reduce((acc, e) => acc + e.deductions, 0);
 
   return (
     <div className="space-y-6">
@@ -97,13 +119,154 @@ export function PayrollClient({ entries, employees }: PayrollClientProps) {
           </p>
         </div>
         <div className="flex gap-2">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Payroll
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Add Payroll Entry</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="employee">Employee *</Label>
+                  <select
+                    id="employee"
+                    required
+                    value={formData.userId}
+                    onChange={(e) => {
+                      const emp = employees.find((emp) => emp.id === e.target.value);
+                      setFormData({
+                        ...formData,
+                        userId: e.target.value,
+                        employeeName: emp?.fullName || "",
+                      });
+                    }}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="">Select Employee</option>
+                    {employees.map((emp) => (
+                      <option key={emp.id} value={emp.id}>
+                        {emp.fullName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="periodStart">Period Start *</Label>
+                    <Input
+                      id="periodStart"
+                      type="date"
+                      required
+                      value={formData.periodStart}
+                      onChange={(e) =>
+                        setFormData({ ...formData, periodStart: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="periodEnd">Period End *</Label>
+                    <Input
+                      id="periodEnd"
+                      type="date"
+                      required
+                      value={formData.periodEnd}
+                      onChange={(e) =>
+                        setFormData({ ...formData, periodEnd: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="basicPay">Basic Pay *</Label>
+                    <Input
+                      id="basicPay"
+                      type="number"
+                      required
+                      value={formData.basicPay}
+                      onChange={(e) =>
+                        setFormData({ ...formData, basicPay: Number(e.target.value) })
+                      }
+                      onBlur={calculateNetPay}
+                      placeholder="3000"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="otPay">Overtime Pay</Label>
+                    <Input
+                      id="otPay"
+                      type="number"
+                      value={formData.otPay}
+                      onChange={(e) =>
+                        setFormData({ ...formData, otPay: Number(e.target.value) })
+                      }
+                      onBlur={calculateNetPay}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="deductions">Deductions</Label>
+                    <Input
+                      id="deductions"
+                      type="number"
+                      value={formData.deductions}
+                      onChange={(e) =>
+                        setFormData({ ...formData, deductions: Number(e.target.value) })
+                      }
+                      onBlur={calculateNetPay}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="hoursWorked">Hours Worked</Label>
+                    <Input
+                      id="hoursWorked"
+                      type="number"
+                      value={formData.hoursWorked}
+                      onChange={(e) =>
+                        setFormData({ ...formData, hoursWorked: Number(e.target.value) })
+                      }
+                      placeholder="80"
+                    />
+                  </div>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Gross Pay:</span>
+                    <span className="font-medium">${formData.grossPay.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Deductions:</span>
+                    <span className="font-medium text-red-600">-${formData.deductions.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-base font-bold pt-2 border-t">
+                    <span>Net Pay:</span>
+                    <span className="text-green-600">${formData.netPay.toLocaleString()}</span>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit">Add Payroll Entry</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
           <Button variant="outline" onClick={() => toast.info("Export feature coming soon!")}>
             <Download className="mr-2 h-4 w-4" />
             Export
-          </Button>
-          <Button onClick={() => toast.info("Generate payroll feature coming soon!")}>
-            <Calculator className="mr-2 h-4 w-4" />
-            Generate Payroll
           </Button>
         </div>
       </div>
@@ -126,7 +289,7 @@ export function PayrollClient({ entries, employees }: PayrollClientProps) {
             <CardTitle className="text-sm font-medium text-gray-500">
               Total Deductions
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-orange-600" />
+            <DollarSign className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${totalDeductions.toLocaleString()}</div>
@@ -150,11 +313,11 @@ export function PayrollClient({ entries, employees }: PayrollClientProps) {
             <CardTitle className="text-sm font-medium text-gray-500">
               Total Hours
             </CardTitle>
-            <Clock className="h-4 w-4 text-purple-600" />
+            <Calculator className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {entries.reduce((acc, e) => acc + e.hoursWorked, 0)}h
+              {payrollEntries.reduce((acc, e) => acc + e.hoursWorked, 0)}h
             </div>
           </CardContent>
         </Card>

@@ -11,14 +11,13 @@ import {
   XCircle,
   Calendar,
   Clock,
-  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -30,37 +29,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { useStore } from "@/lib/store";
 
-interface LeaveRequest {
-  id: string;
-  employeeId: string;
-  employeeName: string;
-  type: string;
-  startDate: string;
-  endDate: string;
-  reason: string;
-  status: "Pending" | "Approved" | "Rejected";
-  requestedAt: string;
-}
-
-interface Employee {
-  id: string;
-  fullName: string;
-}
-
-interface LeaveClientProps {
-  requests: LeaveRequest[];
-  employees: Employee[];
-}
-
-export function LeaveClient({ requests, employees }: LeaveClientProps) {
+export function LeaveClient() {
+  const { leaveRequests, employees, addLeaveRequest, updateLeaveRequestStatus } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    employeeId: "",
+    type: "Vacation",
+    startDate: "",
+    endDate: "",
+    reason: "",
+  });
 
-  const filteredRequests = requests.filter((request) => {
+  const filteredRequests = leaveRequests.filter((request) => {
     const matchesSearch =
       request.employeeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       request.type.toLowerCase().includes(searchQuery.toLowerCase());
@@ -68,6 +62,38 @@ export function LeaveClient({ requests, employees }: LeaveClientProps) {
     if (activeTab === "all") return matchesSearch;
     return matchesSearch && request.status.toLowerCase() === activeTab;
   });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const employee = employees.find((e) => e.id === formData.employeeId);
+    if (employee) {
+      addLeaveRequest({
+        ...formData,
+        employeeId: employee.id,
+        employeeName: employee.fullName,
+        status: "Pending",
+      });
+      toast.success(`Leave request submitted for ${employee.fullName}!`);
+      setIsDialogOpen(false);
+      setFormData({
+        employeeId: "",
+        type: "Vacation",
+        startDate: "",
+        endDate: "",
+        reason: "",
+      });
+    }
+  };
+
+  const handleApprove = (id: string, employeeName: string) => {
+    updateLeaveRequestStatus(id, "Approved");
+    toast.success(`Approved leave request for ${employeeName}`);
+  };
+
+  const handleReject = (id: string, employeeName: string) => {
+    updateLeaveRequestStatus(id, "Rejected");
+    toast.error(`Rejected leave request for ${employeeName}`);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -95,9 +121,9 @@ export function LeaveClient({ requests, employees }: LeaveClientProps) {
     }
   };
 
-  const pendingCount = requests.filter((r) => r.status === "Pending").length;
-  const approvedCount = requests.filter((r) => r.status === "Approved").length;
-  const rejectedCount = requests.filter((r) => r.status === "Rejected").length;
+  const pendingCount = leaveRequests.filter((r) => r.status === "Pending").length;
+  const approvedCount = leaveRequests.filter((r) => r.status === "Approved").length;
+  const rejectedCount = leaveRequests.filter((r) => r.status === "Rejected").length;
 
   return (
     <div className="space-y-6">
@@ -111,10 +137,106 @@ export function LeaveClient({ requests, employees }: LeaveClientProps) {
             Manage employee leave requests and approvals
           </p>
         </div>
-        <Button onClick={() => toast.info("Request leave feature coming soon!")}>
-          <Plus className="mr-2 h-4 w-4" />
-          Request Leave
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Request Leave
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Submit Leave Request</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="employee">Employee *</Label>
+                <select
+                  id="employee"
+                  required
+                  value={formData.employeeId}
+                  onChange={(e) =>
+                    setFormData({ ...formData, employeeId: e.target.value })
+                  }
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="">Select Employee</option>
+                  {employees.map((emp) => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.fullName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="type">Leave Type *</Label>
+                <select
+                  id="type"
+                  required
+                  value={formData.type}
+                  onChange={(e) =>
+                    setFormData({ ...formData, type: e.target.value })
+                  }
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="Vacation">Vacation</option>
+                  <option value="Sick Leave">Sick Leave</option>
+                  <option value="Personal">Personal</option>
+                  <option value="Emergency">Emergency</option>
+                  <option value="Maternity/Paternity">Maternity/Paternity</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="startDate">Start Date *</Label>
+                  <Input
+                    id="startDate"
+                    type="date"
+                    required
+                    value={formData.startDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, startDate: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="endDate">End Date *</Label>
+                  <Input
+                    id="endDate"
+                    type="date"
+                    required
+                    value={formData.endDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, endDate: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reason">Reason</Label>
+                <textarea
+                  id="reason"
+                  value={formData.reason}
+                  onChange={(e) =>
+                    setFormData({ ...formData, reason: e.target.value })
+                  }
+                  placeholder="Enter reason for leave..."
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm min-h-[100px]"
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">Submit Request</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats Cards */}
@@ -127,7 +249,7 @@ export function LeaveClient({ requests, employees }: LeaveClientProps) {
             <FileText className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{requests.length}</div>
+            <div className="text-2xl font-bold">{leaveRequests.length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -260,7 +382,7 @@ export function LeaveClient({ requests, employees }: LeaveClientProps) {
                                   variant="ghost"
                                   size="sm"
                                   className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                  onClick={() => toast.success(`Approved leave for ${request.employeeName}`)}
+                                  onClick={() => handleApprove(request.id, request.employeeName)}
                                 >
                                   <CheckCircle className="h-4 w-4" />
                                 </Button>
@@ -268,7 +390,7 @@ export function LeaveClient({ requests, employees }: LeaveClientProps) {
                                   variant="ghost"
                                   size="sm"
                                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                  onClick={() => toast.error(`Rejected leave for ${request.employeeName}`)}
+                                  onClick={() => handleReject(request.id, request.employeeName)}
                                 >
                                   <XCircle className="h-4 w-4" />
                                 </Button>
