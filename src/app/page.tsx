@@ -10,6 +10,9 @@ import {
   ArrowRight,
   Users,
   Zap,
+  Crown,
+  UserCircle,
+  Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -123,6 +126,36 @@ const tierColors: Record<string, string> = {
     "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
 };
 
+const dashboardExperiences = [
+  {
+    role: "Admin",
+    title: "Admin Dashboard",
+    description: "Full access to all features including financial reports, employee management, and system settings.",
+    icon: Crown,
+    color: "from-purple-600 to-indigo-600",
+    bgColor: "bg-purple-50",
+    href: "/dashboard/admin",
+  },
+  {
+    role: "Supervisor",
+    title: "Supervisor Dashboard",
+    description: "Manage team attendance, performance, and scheduling. Financial reports are hidden.",
+    icon: Briefcase,
+    color: "from-blue-600 to-cyan-600",
+    bgColor: "bg-blue-50",
+    href: "/dashboard/supervisor",
+  },
+  {
+    role: "Employee",
+    title: "Employee Dashboard",
+    description: "Personal portal for clocking in/out, viewing schedules, managing leave, and accessing payslips.",
+    icon: UserCircle,
+    color: "from-green-600 to-emerald-600",
+    bgColor: "bg-green-50",
+    href: "/dashboard/employee",
+  },
+];
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
@@ -180,6 +213,49 @@ export default function LandingPage() {
               View Demo
             </Button>
           </Link>
+        </div>
+      </section>
+
+      {/* Dashboard Experience Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-gray-50 dark:bg-gray-900">
+        <div className="text-center mb-12">
+          <Badge className="mb-4 bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800">
+            <Shield className="w-3 h-3 mr-1" />
+            Role-Based Experience
+          </Badge>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            Experience Different Dashboard Views
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+            ClockRoster provides tailored experiences for every role. Try each dashboard to see how it fits your needs.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {dashboardExperiences.map((exp) => (
+            <Card
+              key={exp.role}
+              className="border-2 border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+            >
+              <div className={`h-2 bg-gradient-to-r ${exp.color}`} />
+              <CardHeader>
+                <div className={`w-14 h-14 ${exp.bgColor} rounded-xl flex items-center justify-center mb-4`}>
+                  <exp.icon className={`w-7 h-7 bg-gradient-to-r ${exp.color} bg-clip-text text-transparent`} style={{ color: exp.role === 'Admin' ? '#7c3aed' : exp.role === 'Supervisor' ? '#2563eb' : '#059669' }} />
+                </div>
+                <CardTitle className="text-xl">{exp.title}</CardTitle>
+                <CardDescription>{exp.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href={exp.href}>
+                  <Button
+                    className={`w-full bg-gradient-to-r ${exp.color} text-white hover:opacity-90`}
+                  >
+                    Experience as {exp.role}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </section>
 
