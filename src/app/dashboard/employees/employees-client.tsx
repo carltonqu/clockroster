@@ -370,7 +370,7 @@ export function EmployeesClient() {
               Add Employee
             </Button>
           </DialogTrigger>
-          <DialogContent className="w-[70vw] max-h-[95vh] overflow-y-auto rounded-2xl p-0">
+          <DialogContent className="w-[85vw] max-w-[1200px] max-h-[95vh] overflow-y-auto rounded-2xl p-0">
             <DialogHeader className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
@@ -438,7 +438,7 @@ export function EmployeesClient() {
               <div className="min-h-[400px]">
                 {/* Step 1: Personal Details */}
                 {currentStep === 1 && (
-                  <div className="space-y-6 animate-fade-in-up max-w-2xl mx-auto">
+                  <div className="space-y-6 animate-fade-in-up w-full max-w-3xl mx-auto px-8">
                     <div className="flex items-center gap-3 mb-8">
                       <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
                         <UserCircle className="w-6 h-6 text-white" />
@@ -499,7 +499,7 @@ export function EmployeesClient() {
 
                 {/* Step 2: Salary */}
                 {currentStep === 2 && (
-                  <div className="space-y-6 animate-fade-in-up max-w-2xl mx-auto">
+                  <div className="space-y-6 animate-fade-in-up w-full max-w-3xl mx-auto px-8">
                     <div className="flex items-center gap-3 mb-8">
                       <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center">
                         <CreditCard className="w-6 h-6 text-white" />
@@ -569,7 +569,7 @@ export function EmployeesClient() {
 
                 {/* Step 3: Team Assignment */}
                 {currentStep === 3 && (
-                  <div className="space-y-6 animate-fade-in-up max-w-2xl mx-auto">
+                  <div className="space-y-6 animate-fade-in-up w-full max-w-3xl mx-auto px-8">
                     <div className="flex items-center gap-3 mb-8">
                       <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
                         <Users2 className="w-6 h-6 text-white" />
@@ -646,7 +646,7 @@ export function EmployeesClient() {
 
                 {/* Step 4: Work Setup */}
                 {currentStep === 4 && (
-                  <div className="space-y-6 animate-fade-in-up max-w-2xl mx-auto">
+                  <div className="space-y-6 animate-fade-in-up w-full max-w-3xl mx-auto px-8">
                     <div className="flex items-center gap-3 mb-8">
                       <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
                         <Settings className="w-6 h-6 text-white" />
@@ -716,7 +716,7 @@ export function EmployeesClient() {
 
                 {/* Step 5: Documents */}
                 {currentStep === 5 && (
-                  <div className="space-y-6 animate-fade-in-up max-w-2xl mx-auto">
+                  <div className="space-y-6 animate-fade-in-up w-full max-w-3xl mx-auto px-8">
                     <div className="flex items-center gap-3 mb-8">
                       <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
                         <FileText className="w-6 h-6 text-white" />
