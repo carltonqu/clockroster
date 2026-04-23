@@ -370,7 +370,7 @@ export function EmployeesClient() {
               Add Employee
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-6xl w-[95vw] max-h-[95vh] overflow-y-auto rounded-2xl p-0">
+          <DialogContent className="max-w-5xl w-[95vw] max-h-[95vh] overflow-y-auto rounded-2xl p-0">
             <DialogHeader className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
