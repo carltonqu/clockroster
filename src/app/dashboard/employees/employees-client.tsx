@@ -27,6 +27,11 @@ import {
   CreditCard,
   Users2,
   Settings,
+  FileText,
+  Upload,
+  File,
+  Trash2,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,6 +83,15 @@ interface Employee {
   workLocation?: string;
   manager?: string;
   workSchedule?: string;
+  documents?: Document[];
+}
+
+interface Document {
+  id: string;
+  name: string;
+  type: string;
+  size: string;
+  uploadedAt: string;
 }
 
 function AnimatedCounter({ value }: { value: number }) {
@@ -173,6 +187,17 @@ const STEPS = [
   { id: 2, label: "Salary", icon: CreditCard },
   { id: 3, label: "Team Assignment", icon: Users2 },
   { id: 4, label: "Work Setup", icon: Settings },
+  { id: 5, label: "Documents", icon: FileText },
+];
+
+const DOCUMENT_TYPES = [
+  { value: "contract", label: "Employment Contract", icon: FileText },
+  { value: "police_clearance", label: "Police Clearance", icon: FileText },
+  { value: "office_id", label: "Office ID", icon: FileText },
+  { value: "memo", label: "Internal Memo", icon: FileText },
+  { value: "resume", label: "Resume/CV", icon: FileText },
+  { value: "certificate", label: "Certificate", icon: FileText },
+  { value: "other", label: "Other Document", icon: FileText },
 ];
 
 export function EmployeesClient() {
@@ -200,7 +225,10 @@ export function EmployeesClient() {
     workSchedule: "Standard",
     hireDate: new Date().toISOString().split("T")[0],
     employmentStatus: "Active",
+    // Documents
+    documents: [] as Document[],
   });
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   const filteredEmployees = employees.filter(
     (emp) =>
@@ -211,7 +239,7 @@ export function EmployeesClient() {
   );
 
   const handleNext = () => {
-    if (currentStep < 4) {
+    if (currentStep < 5) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -222,7 +250,30 @@ export function EmployeesClient() {
     }
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setUploadedFiles([...uploadedFiles, ...newFiles]);
+      toast.success(`${newFiles.length} file(s) selected for upload`);
+    }
+  };
+
+  const removeFile = (index: number) => {
+    const newFiles = [...uploadedFiles];
+    newFiles.splice(index, 1);
+    setUploadedFiles(newFiles);
+  };
+
   const handleSubmit = () => {
+    const docs: Document[] = uploadedFiles.map((file, index) => ({
+      id: `doc-${Date.now()}-${index}`,
+      name: file.name,
+      type: file.type || "application/pdf",
+      size: `${(file.size / 1024).toFixed(1)} KB`,
+      uploadedAt: new Date().toISOString(),
+    }));
+
     addEmployee({
       fullName: formData.fullName,
       email: formData.email,
@@ -238,10 +289,12 @@ export function EmployeesClient() {
       workLocation: formData.workLocation,
       manager: formData.manager,
       workSchedule: formData.workSchedule,
+      documents: docs,
     });
     toast.success(`Employee ${formData.fullName} added successfully!`);
     setIsDialogOpen(false);
     setCurrentStep(1);
+    setUploadedFiles([]);
     setFormData({
       fullName: "",
       email: "",
@@ -258,6 +311,7 @@ export function EmployeesClient() {
       workSchedule: "Standard",
       hireDate: new Date().toISOString().split("T")[0],
       employmentStatus: "Active",
+      documents: [],
     });
   };
 
@@ -271,6 +325,8 @@ export function EmployeesClient() {
         return formData.department && formData.position;
       case 4:
         return formData.workLocation && formData.workSchedule;
+      case 5:
+        return true; // Documents are optional
       default:
         return false;
     }
@@ -314,8 +370,8 @@ export function EmployeesClient() {
               Add Employee
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl">
-            <DialogHeader className="pb-4 border-b border-gray-100 dark:border-gray-800">
+          <DialogContent className="max-w-4xl w-[90vw] max-h-[90vh] overflow-y-auto rounded-2xl p-0">
+            <DialogHeader className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
                   <User className="w-4 h-4 text-white" />
@@ -324,357 +380,493 @@ export function EmployeesClient() {
               </div>
             </DialogHeader>
 
-            {/* Stepper */}
-            <div className="mt-6 mb-8">
-              <div className="flex items-center justify-between">
-                {STEPS.map((step, index) => {
-                  const Icon = step.icon;
-                  const isActive = currentStep === step.id;
-                  const isCompleted = currentStep > step.id;
-                  
-                  return (
-                    <div key={step.id} className="flex items-center flex-1">
-                      <div className="flex flex-col items-center">
-                        <div
-                          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                            isActive
-                              ? "bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-md"
-                              : isCompleted
-                              ? "bg-gradient-to-br from-emerald-500 to-green-500 text-white"
-                              : "bg-gray-100 dark:bg-gray-800 text-gray-400"
-                          }`}
-                        >
-                          {isCompleted ? (
-                            <Check className="w-5 h-5" />
-                          ) : (
-                            <Icon className="w-5 h-5" />
-                          )}
+            <div className="p-6">
+              {/* Stepper */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between">
+                  {STEPS.map((step, index) => {
+                    const Icon = step.icon;
+                    const isActive = currentStep === step.id;
+                    const isCompleted = currentStep > step.id;
+                    
+                    return (
+                      <div key={step.id} className="flex items-center flex-1">
+                        <div className="flex flex-col items-center">
+                          <div
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                              isActive
+                                ? "bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-md"
+                                : isCompleted
+                                ? "bg-gradient-to-br from-emerald-500 to-green-500 text-white"
+                                : "bg-gray-100 dark:bg-gray-800 text-gray-400"
+                            }`}
+                          >
+                            {isCompleted ? (
+                              <Check className="w-5 h-5" />
+                            ) : (
+                              <Icon className="w-5 h-5" />
+                            )}
+                          </div>
+                          <span
+                            className={`text-xs mt-2 font-medium text-center ${
+                              isActive
+                                ? "text-blue-600 dark:text-blue-400"
+                                : isCompleted
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : "text-gray-400"
+                            }`}
+                          >
+                            {step.label}
+                          </span>
                         </div>
-                        <span
-                          className={`text-xs mt-2 font-medium ${
-                            isActive
-                              ? "text-blue-600 dark:text-blue-400"
-                              : isCompleted
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-gray-400"
-                          }`}
-                        >
-                          {step.label}
-                        </span>
+                        {index < STEPS.length - 1 && (
+                          <div
+                            className={`flex-1 h-1 mx-2 rounded-full transition-all duration-300 ${
+                              isCompleted
+                                ? "bg-gradient-to-r from-emerald-500 to-green-500"
+                                : "bg-gray-200 dark:bg-gray-700"
+                            }`}
+                          />
+                        )}
                       </div>
-                      {index < STEPS.length - 1 && (
-                        <div
-                          className={`flex-1 h-1 mx-2 rounded-full transition-all duration-300 ${
-                            isCompleted
-                              ? "bg-gradient-to-r from-emerald-500 to-green-500"
-                              : "bg-gray-200 dark:bg-gray-700"
-                          }`}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
 
-            {/* Form Content */}
-            <div className="space-y-6 min-h-[300px]">
-              {/* Step 1: Personal Details */}
-              {currentStep === 1 && (
-                <div className="space-y-4 animate-fade-in-up">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                      <UserCircle className="w-4 h-4 text-white" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Personal Details</h3>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="fullName" className="text-xs font-medium text-gray-500">Full Name *</Label>
-                      <Input
-                        id="fullName"
-                        required
-                        value={formData.fullName}
-                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                        placeholder="John Doe"
-                        className="rounded-xl"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-xs font-medium text-gray-500">Email *</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        required
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="john@company.com"
-                        className="rounded-xl"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="phoneNumber" className="text-xs font-medium text-gray-500">Phone Number</Label>
-                      <Input
-                        id="phoneNumber"
-                        value={formData.phoneNumber}
-                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                        placeholder="+1 555-0123"
-                        className="rounded-xl"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="employeeId" className="text-xs font-medium text-gray-500">Employee ID (Optional)</Label>
-                      <Input
-                        id="employeeId"
-                        value={formData.employeeId}
-                        onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
-                        placeholder={`EMP${String(employees.length + 1).padStart(3, '0')}`}
-                        className="rounded-xl"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 2: Salary */}
-              {currentStep === 2 && (
-                <div className="space-y-4 animate-fade-in-up">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-green-500 rounded-lg flex items-center justify-center">
-                      <CreditCard className="w-4 h-4 text-white" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Salary Information</h3>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="salary" className="text-xs font-medium text-gray-500">Annual Salary *</Label>
-                      <div className="relative">
-                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <Input
-                          id="salary"
-                          type="number"
-                          required
-                          value={formData.salary}
-                          onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
-                          placeholder="50000"
-                          className="pl-9 rounded-xl"
-                        />
+              {/* Form Content */}
+              <div className="min-h-[400px]">
+                {/* Step 1: Personal Details */}
+                {currentStep === 1 && (
+                  <div className="space-y-6 animate-fade-in-up">
+                    <div className="flex items-center gap-2 mb-6">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                        <UserCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Personal Details</h3>
+                        <p className="text-sm text-gray-500">Enter the employee's basic information</p>
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="currency" className="text-xs font-medium text-gray-500">Currency</Label>
-                      <select
-                        id="currency"
-                        value={formData.currency}
-                        onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
-                      >
-                        <option value="USD">USD - US Dollar</option>
-                        <option value="EUR">EUR - Euro</option>
-                        <option value="GBP">GBP - British Pound</option>
-                        <option value="PHP">PHP - Philippine Peso</option>
-                      </select>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-3">
+                        <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">Full Name *</Label>
+                        <Input
+                          id="fullName"
+                          required
+                          value={formData.fullName}
+                          onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                          placeholder="John Doe"
+                          className="rounded-xl h-12"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email Address *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          required
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          placeholder="john@company.com"
+                          className="rounded-xl h-12"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="phoneNumber" className="text-sm font-medium text-gray-700">Phone Number</Label>
+                        <Input
+                          id="phoneNumber"
+                          value={formData.phoneNumber}
+                          onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                          placeholder="+1 555-0123"
+                          className="rounded-xl h-12"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="employeeId" className="text-sm font-medium text-gray-700">Employee ID</Label>
+                        <Input
+                          id="employeeId"
+                          value={formData.employeeId}
+                          onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
+                          placeholder={`EMP${String(employees.length + 1).padStart(3, '0')}`}
+                          className="rounded-xl h-12"
+                        />
+                        <p className="text-xs text-gray-500">Leave empty to auto-generate</p>
+                      </div>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="payFrequency" className="text-xs font-medium text-gray-500">Pay Frequency</Label>
-                    <select
-                      id="payFrequency"
-                      value={formData.payFrequency}
-                      onChange={(e) => setFormData({ ...formData, payFrequency: e.target.value })}
-                      className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
-                    >
-                      <option value="Monthly">Monthly</option>
-                      <option value="Bi-weekly">Bi-weekly</option>
-                      <option value="Weekly">Weekly</option>
-                    </select>
-                  </div>
-                  <div className="p-4 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                    <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
-                      <Wallet className="w-5 h-5" />
-                      <span className="font-medium">
-                        Estimated {formData.payFrequency.toLowerCase()} pay: ${formData.salary ? (Number(formData.salary) / (formData.payFrequency === "Monthly" ? 12 : formData.payFrequency === "Bi-weekly" ? 26 : 52)).toFixed(2) : "0.00"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
+                )}
 
-              {/* Step 3: Team Assignment */}
-              {currentStep === 3 && (
-                <div className="space-y-4 animate-fade-in-up">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                      <Users2 className="w-4 h-4 text-white" />
+                {/* Step 2: Salary */}
+                {currentStep === 2 && (
+                  <div className="space-y-6 animate-fade-in-up">
+                    <div className="flex items-center gap-2 mb-6">
+                      <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center">
+                        <CreditCard className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Salary Information</h3>
+                        <p className="text-sm text-gray-500">Set the employee's compensation details</p>
+                      </div>
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Team Assignment</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="space-y-3">
+                        <Label htmlFor="salary" className="text-sm font-medium text-gray-700">Annual Salary *</Label>
+                        <div className="relative">
+                          <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          <Input
+                            id="salary"
+                            type="number"
+                            required
+                            value={formData.salary}
+                            onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
+                            placeholder="50000"
+                            className="pl-12 rounded-xl h-12"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="currency" className="text-sm font-medium text-gray-700">Currency</Label>
+                        <select
+                          id="currency"
+                          value={formData.currency}
+                          onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                          className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                        >
+                          <option value="USD">USD - US Dollar</option>
+                          <option value="EUR">EUR - Euro</option>
+                          <option value="GBP">GBP - British Pound</option>
+                          <option value="PHP">PHP - Philippine Peso</option>
+                        </select>
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="payFrequency" className="text-sm font-medium text-gray-700">Pay Frequency</Label>
+                        <select
+                          id="payFrequency"
+                          value={formData.payFrequency}
+                          onChange={(e) => setFormData({ ...formData, payFrequency: e.target.value })}
+                          className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                        >
+                          <option value="Monthly">Monthly</option>
+                          <option value="Bi-weekly">Bi-weekly</option>
+                          <option value="Weekly">Weekly</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                      <div className="flex items-center gap-3 text-emerald-800 dark:text-emerald-300">
+                        <Wallet className="w-6 h-6" />
+                        <div>
+                          <p className="font-medium">Estimated {formData.payFrequency.toLowerCase()} pay</p>
+                          <p className="text-2xl font-bold">
+                            ${formData.salary ? (Number(formData.salary) / (formData.payFrequency === "Monthly" ? 12 : formData.payFrequency === "Bi-weekly" ? 26 : 52)).toFixed(2) : "0.00"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="department" className="text-xs font-medium text-gray-500">Department *</Label>
-                      <select
-                        id="department"
-                        required
-                        value={formData.department}
-                        onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
-                      >
-                        <option value="">Select Department</option>
-                        <option value="Engineering">Engineering</option>
-                        <option value="Design">Design</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="HR">HR</option>
-                        <option value="Sales">Sales</option>
-                        <option value="Finance">Finance</option>
-                        <option value="Operations">Operations</option>
-                      </select>
+                )}
+
+                {/* Step 3: Team Assignment */}
+                {currentStep === 3 && (
+                  <div className="space-y-6 animate-fade-in-up">
+                    <div className="flex items-center gap-2 mb-6">
+                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                        <Users2 className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Team Assignment</h3>
+                        <p className="text-sm text-gray-500">Assign the employee to a department and team</p>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="position" className="text-xs font-medium text-gray-500">Position *</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-3">
+                        <Label htmlFor="department" className="text-sm font-medium text-gray-700">Department *</Label>
+                        <select
+                          id="department"
+                          required
+                          value={formData.department}
+                          onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                          className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                        >
+                          <option value="">Select Department</option>
+                          <option value="Engineering">Engineering</option>
+                          <option value="Design">Design</option>
+                          <option value="Marketing">Marketing</option>
+                          <option value="HR">HR</option>
+                          <option value="Sales">Sales</option>
+                          <option value="Finance">Finance</option>
+                          <option value="Operations">Operations</option>
+                        </select>
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="position" className="text-sm font-medium text-gray-700">Position *</Label>
+                        <Input
+                          id="position"
+                          required
+                          value={formData.position}
+                          onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                          placeholder="Software Engineer"
+                          className="rounded-xl h-12"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="manager" className="text-sm font-medium text-gray-700">Manager</Label>
+                        <select
+                          id="manager"
+                          value={formData.manager}
+                          onChange={(e) => setFormData({ ...formData, manager: e.target.value })}
+                          className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                        >
+                          <option value="">Select Manager</option>
+                          {employees.map((emp) => (
+                            <option key={emp.id} value={emp.fullName}>
+                              {emp.fullName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="employmentType" className="text-sm font-medium text-gray-700">Employment Type</Label>
+                        <select
+                          id="employmentType"
+                          value={formData.employmentType}
+                          onChange={(e) => setFormData({ ...formData, employmentType: e.target.value })}
+                          className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                        >
+                          <option value="Full-time">Full-time</option>
+                          <option value="Part-time">Part-time</option>
+                          <option value="Contract">Contract</option>
+                          <option value="Intern">Intern</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 4: Work Setup */}
+                {currentStep === 4 && (
+                  <div className="space-y-6 animate-fade-in-up">
+                    <div className="flex items-center gap-2 mb-6">
+                      <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
+                        <Settings className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Work Setup</h3>
+                        <p className="text-sm text-gray-500">Configure the employee's work arrangement</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-3">
+                        <Label htmlFor="workLocation" className="text-sm font-medium text-gray-700">Work Location</Label>
+                        <select
+                          id="workLocation"
+                          value={formData.workLocation}
+                          onChange={(e) => setFormData({ ...formData, workLocation: e.target.value })}
+                          className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                        >
+                          <option value="Office">Office</option>
+                          <option value="Remote">Remote</option>
+                          <option value="Hybrid">Hybrid</option>
+                        </select>
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="workSchedule" className="text-sm font-medium text-gray-700">Work Schedule</Label>
+                        <select
+                          id="workSchedule"
+                          value={formData.workSchedule}
+                          onChange={(e) => setFormData({ ...formData, workSchedule: e.target.value })}
+                          className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                        >
+                          <option value="Standard">Standard (9AM - 5PM)</option>
+                          <option value="Flexible">Flexible Hours</option>
+                          <option value="Night Shift">Night Shift</option>
+                          <option value="Weekend">Weekend Only</option>
+                        </select>
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="hireDate" className="text-sm font-medium text-gray-700">Hire Date</Label>
+                        <div className="relative">
+                          <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          <Input
+                            id="hireDate"
+                            type="date"
+                            value={formData.hireDate}
+                            onChange={(e) => setFormData({ ...formData, hireDate: e.target.value })}
+                            className="pl-12 rounded-xl h-12"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="employmentStatus" className="text-sm font-medium text-gray-700">Employment Status</Label>
+                        <select
+                          id="employmentStatus"
+                          value={formData.employmentStatus}
+                          onChange={(e) => setFormData({ ...formData, employmentStatus: e.target.value })}
+                          className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                        >
+                          <option value="Active">Active</option>
+                          <option value="Inactive">Inactive</option>
+                          <option value="On Leave">On Leave</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 5: Documents */}
+                {currentStep === 5 && (
+                  <div className="space-y-6 animate-fade-in-up">
+                    <div className="flex items-center gap-2 mb-6">
+                      <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
+                        <FileText className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Documents</h3>
+                        <p className="text-sm text-gray-500">Upload employee documents and files</p>
+                      </div>
+                    </div>
+
+                    {/* Upload Area */}
+                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <Upload className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Upload Documents</h4>
+                      <p className="text-sm text-gray-500 mb-4">Drag and drop files here, or click to browse</p>
+                      <p className="text-xs text-gray-400 mb-4">Supported: PDF, DOC, DOCX, JPG, PNG (max 10MB each)</p>
                       <Input
-                        id="position"
-                        required
-                        value={formData.position}
-                        onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                        placeholder="Software Engineer"
-                        className="rounded-xl"
+                        type="file"
+                        multiple
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        id="file-upload"
                       />
+                      <Label htmlFor="file-upload" className="cursor-pointer">
+                        <Button type="button" variant="outline" className="rounded-xl">
+                          <Upload className="mr-2 h-4 w-4" />
+                          Select Files
+                        </Button>
+                      </Label>
                     </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="manager" className="text-xs font-medium text-gray-500">Manager</Label>
-                      <select
-                        id="manager"
-                        value={formData.manager}
-                        onChange={(e) => setFormData({ ...formData, manager: e.target.value })}
-                        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
-                      >
-                        <option value="">Select Manager</option>
-                        {employees.map((emp) => (
-                          <option key={emp.id} value={emp.fullName}>
-                            {emp.fullName}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="employmentType" className="text-xs font-medium text-gray-500">Employment Type</Label>
-                      <select
-                        id="employmentType"
-                        value={formData.employmentType}
-                        onChange={(e) => setFormData({ ...formData, employmentType: e.target.value })}
-                        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
-                      >
-                        <option value="Full-time">Full-time</option>
-                        <option value="Part-time">Part-time</option>
-                        <option value="Contract">Contract</option>
-                        <option value="Intern">Intern</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              )}
 
-              {/* Step 4: Work Setup */}
-              {currentStep === 4 && (
-                <div className="space-y-4 animate-fade-in-up">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center">
-                      <Settings className="w-4 h-4 text-white" />
+                    {/* Document Types Info */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {DOCUMENT_TYPES.slice(0, 4).map((doc) => {
+                        const Icon = doc.icon;
+                        return (
+                          <div key={doc.value} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <Icon className="w-4 h-4 text-gray-500" />
+                            <span className="text-xs text-gray-600 dark:text-gray-400">{doc.label}</span>
+                          </div>
+                        );
+                      })}
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Work Setup</h3>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="workLocation" className="text-xs font-medium text-gray-500">Work Location</Label>
-                      <select
-                        id="workLocation"
-                        value={formData.workLocation}
-                        onChange={(e) => setFormData({ ...formData, workLocation: e.target.value })}
-                        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
-                      >
-                        <option value="Office">Office</option>
-                        <option value="Remote">Remote</option>
-                        <option value="Hybrid">Hybrid</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="workSchedule" className="text-xs font-medium text-gray-500">Work Schedule</Label>
-                      <select
-                        id="workSchedule"
-                        value={formData.workSchedule}
-                        onChange={(e) => setFormData({ ...formData, workSchedule: e.target.value })}
-                        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
-                      >
-                        <option value="Standard">Standard (9AM - 5PM)</option>
-                        <option value="Flexible">Flexible Hours</option>
-                        <option value="Night Shift">Night Shift</option>
-                        <option value="Weekend">Weekend Only</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="hireDate" className="text-xs font-medium text-gray-500">Hire Date</Label>
-                    <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="hireDate"
-                        type="date"
-                        value={formData.hireDate}
-                        onChange={(e) => setFormData({ ...formData, hireDate: e.target.value })}
-                        className="pl-9 rounded-xl"
-                      />
-                    </div>
-                  </div>
-                  <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
-                    <h4 className="font-medium text-blue-900 dark:text-blue-300 mb-2">Review Information</h4>
-                    <div className="space-y-1 text-sm text-blue-800 dark:text-blue-400">
-                      <p><span className="font-medium">Name:</span> {formData.fullName || "—"}</p>
-                      <p><span className="font-medium">Email:</span> {formData.email || "—"}</p>
-                      <p><span className="font-medium">Salary:</span> ${formData.salary ? Number(formData.salary).toLocaleString() : "—"} / {formData.payFrequency.toLowerCase()}</p>
-                      <p><span className="font-medium">Department:</span> {formData.department || "—"}</p>
-                      <p><span className="font-medium">Position:</span> {formData.position || "—"}</p>
-                      <p><span className="font-medium">Work Setup:</span> {formData.workLocation} • {formData.workSchedule}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
 
-            {/* Navigation Buttons */}
-            <div className="flex justify-between pt-6 mt-6 border-t border-gray-100 dark:border-gray-800">
-              <Button
-                variant="outline"
-                onClick={handleBack}
-                disabled={currentStep === 1}
-                className="rounded-xl"
-              >
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Back
-              </Button>
-              
-              {currentStep < 4 ? (
+                    {/* Uploaded Files List */}
+                    {uploadedFiles.length > 0 && (
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-gray-900 dark:text-white">Files to Upload ({uploadedFiles.length})</h4>
+                        <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                          {uploadedFiles.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                                  <File className="w-5 h-5 text-white" />
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-900 dark:text-white text-sm">{file.name}</p>
+                                  <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeFile(index)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Review Summary */}
+                    <div className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
+                      <h4 className="font-medium text-blue-900 dark:text-blue-300 mb-4 flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5" />
+                        Review Information
+                      </h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-500">Name</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{formData.fullName || "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Email</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{formData.email || "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Salary</p>
+                          <p className="font-medium text-gray-900 dark:text-white">${formData.salary ? Number(formData.salary).toLocaleString() : "—"} / {formData.payFrequency.toLowerCase()}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Department</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{formData.department || "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Position</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{formData.position || "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Work Setup</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{formData.workLocation} • {formData.workSchedule}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Documents</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{uploadedFiles.length} file(s)</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className="flex justify-between pt-6 mt-8 border-t border-gray-100 dark:border-gray-800">
                 <Button
-                  onClick={handleNext}
-                  disabled={!isStepValid()}
-                  className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl"
+                  variant="outline"
+                  onClick={handleBack}
+                  disabled={currentStep === 1}
+                  className="rounded-xl h-12 px-6"
                 >
-                  Next
-                  <ChevronRight className="ml-2 h-4 w-4" />
+                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  Back
                 </Button>
-              ) : (
-                <Button
-                  onClick={handleSubmit}
-                  disabled={!isStepValid()}
-                  className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white rounded-xl"
-                >
-                  <Check className="mr-2 h-4 w-4" />
-                  Create Employee
-                </Button>
-              )}
+                
+                {currentStep < 5 ? (
+                  <Button
+                    onClick={handleNext}
+                    disabled={!isStepValid()}
+                    className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl h-12 px-6"
+                  >
+                    Next
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={!isStepValid()}
+                    className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white rounded-xl h-12 px-6"
+                  >
+                    <Check className="mr-2 h-4 w-4" />
+                    Create Employee
+                  </Button>
+                )}
+              </div>
             </div>
           </DialogContent>
         </Dialog>
