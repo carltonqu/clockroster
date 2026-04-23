@@ -370,7 +370,7 @@ export function EmployeesClient() {
               Add Employee
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl w-[90vw] max-h-[90vh] overflow-y-auto rounded-2xl p-0">
+          <DialogContent className="max-w-6xl w-[95vw] max-h-[95vh] overflow-y-auto rounded-2xl p-0">
             <DialogHeader className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
@@ -438,18 +438,18 @@ export function EmployeesClient() {
               <div className="min-h-[400px]">
                 {/* Step 1: Personal Details */}
                 {currentStep === 1 && (
-                  <div className="space-y-6 animate-fade-in-up">
-                    <div className="flex items-center gap-2 mb-6">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
-                        <UserCircle className="w-5 h-5 text-white" />
+                  <div className="space-y-6 animate-fade-in-up max-w-2xl mx-auto">
+                    <div className="flex items-center gap-3 mb-8">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                        <UserCircle className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Personal Details</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Personal Details</h3>
                         <p className="text-sm text-gray-500">Enter the employee's basic information</p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-3">
+                    <div className="space-y-5">
+                      <div className="space-y-2">
                         <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">Full Name *</Label>
                         <Input
                           id="fullName"
@@ -460,7 +460,7 @@ export function EmployeesClient() {
                           className="rounded-xl h-12"
                         />
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email Address *</Label>
                         <Input
                           id="email"
@@ -472,7 +472,7 @@ export function EmployeesClient() {
                           className="rounded-xl h-12"
                         />
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <Label htmlFor="phoneNumber" className="text-sm font-medium text-gray-700">Phone Number</Label>
                         <Input
                           id="phoneNumber"
@@ -482,7 +482,7 @@ export function EmployeesClient() {
                           className="rounded-xl h-12"
                         />
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <Label htmlFor="employeeId" className="text-sm font-medium text-gray-700">Employee ID</Label>
                         <Input
                           id="employeeId"
@@ -499,18 +499,18 @@ export function EmployeesClient() {
 
                 {/* Step 2: Salary */}
                 {currentStep === 2 && (
-                  <div className="space-y-6 animate-fade-in-up">
-                    <div className="flex items-center gap-2 mb-6">
-                      <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center">
-                        <CreditCard className="w-5 h-5 text-white" />
+                  <div className="space-y-6 animate-fade-in-up max-w-2xl mx-auto">
+                    <div className="flex items-center gap-3 mb-8">
+                      <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center">
+                        <CreditCard className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Salary Information</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Salary Information</h3>
                         <p className="text-sm text-gray-500">Set the employee's compensation details</p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="space-y-3">
+                    <div className="space-y-5">
+                      <div className="space-y-2">
                         <Label htmlFor="salary" className="text-sm font-medium text-gray-700">Annual Salary *</Label>
                         <div className="relative">
                           <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -525,7 +525,7 @@ export function EmployeesClient() {
                           />
                         </div>
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <Label htmlFor="currency" className="text-sm font-medium text-gray-700">Currency</Label>
                         <select
                           id="currency"
@@ -539,7 +539,7 @@ export function EmployeesClient() {
                           <option value="PHP">PHP - Philippine Peso</option>
                         </select>
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <Label htmlFor="payFrequency" className="text-sm font-medium text-gray-700">Pay Frequency</Label>
                         <select
                           id="payFrequency"
@@ -569,18 +569,18 @@ export function EmployeesClient() {
 
                 {/* Step 3: Team Assignment */}
                 {currentStep === 3 && (
-                  <div className="space-y-6 animate-fade-in-up">
-                    <div className="flex items-center gap-2 mb-6">
-                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                        <Users2 className="w-5 h-5 text-white" />
+                  <div className="space-y-6 animate-fade-in-up max-w-2xl mx-auto">
+                    <div className="flex items-center gap-3 mb-8">
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                        <Users2 className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Team Assignment</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Team Assignment</h3>
                         <p className="text-sm text-gray-500">Assign the employee to a department and team</p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-3">
+                    <div className="space-y-5">
+                      <div className="space-y-2">
                         <Label htmlFor="department" className="text-sm font-medium text-gray-700">Department *</Label>
                         <select
                           id="department"
@@ -599,7 +599,7 @@ export function EmployeesClient() {
                           <option value="Operations">Operations</option>
                         </select>
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <Label htmlFor="position" className="text-sm font-medium text-gray-700">Position *</Label>
                         <Input
                           id="position"
@@ -610,7 +610,7 @@ export function EmployeesClient() {
                           className="rounded-xl h-12"
                         />
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <Label htmlFor="manager" className="text-sm font-medium text-gray-700">Manager</Label>
                         <select
                           id="manager"
@@ -626,7 +626,7 @@ export function EmployeesClient() {
                           ))}
                         </select>
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <Label htmlFor="employmentType" className="text-sm font-medium text-gray-700">Employment Type</Label>
                         <select
                           id="employmentType"
@@ -646,18 +646,18 @@ export function EmployeesClient() {
 
                 {/* Step 4: Work Setup */}
                 {currentStep === 4 && (
-                  <div className="space-y-6 animate-fade-in-up">
-                    <div className="flex items-center gap-2 mb-6">
-                      <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
-                        <Settings className="w-5 h-5 text-white" />
+                  <div className="space-y-6 animate-fade-in-up max-w-2xl mx-auto">
+                    <div className="flex items-center gap-3 mb-8">
+                      <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
+                        <Settings className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Work Setup</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Work Setup</h3>
                         <p className="text-sm text-gray-500">Configure the employee's work arrangement</p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-3">
+                    <div className="space-y-5">
+                      <div className="space-y-2">
                         <Label htmlFor="workLocation" className="text-sm font-medium text-gray-700">Work Location</Label>
                         <select
                           id="workLocation"
@@ -670,7 +670,7 @@ export function EmployeesClient() {
                           <option value="Hybrid">Hybrid</option>
                         </select>
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <Label htmlFor="workSchedule" className="text-sm font-medium text-gray-700">Work Schedule</Label>
                         <select
                           id="workSchedule"
@@ -684,7 +684,7 @@ export function EmployeesClient() {
                           <option value="Weekend">Weekend Only</option>
                         </select>
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <Label htmlFor="hireDate" className="text-sm font-medium text-gray-700">Hire Date</Label>
                         <div className="relative">
                           <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -697,7 +697,7 @@ export function EmployeesClient() {
                           />
                         </div>
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <Label htmlFor="employmentStatus" className="text-sm font-medium text-gray-700">Employment Status</Label>
                         <select
                           id="employmentStatus"
@@ -716,13 +716,13 @@ export function EmployeesClient() {
 
                 {/* Step 5: Documents */}
                 {currentStep === 5 && (
-                  <div className="space-y-6 animate-fade-in-up">
-                    <div className="flex items-center gap-2 mb-6">
-                      <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
-                        <FileText className="w-5 h-5 text-white" />
+                  <div className="space-y-6 animate-fade-in-up max-w-2xl mx-auto">
+                    <div className="flex items-center gap-3 mb-8">
+                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
+                        <FileText className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Documents</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Documents</h3>
                         <p className="text-sm text-gray-500">Upload employee documents and files</p>
                       </div>
                     </div>
@@ -752,7 +752,7 @@ export function EmployeesClient() {
                     </div>
 
                     {/* Document Types Info */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       {DOCUMENT_TYPES.slice(0, 4).map((doc) => {
                         const Icon = doc.icon;
                         return (
@@ -800,32 +800,32 @@ export function EmployeesClient() {
                         <CheckCircle2 className="w-5 h-5" />
                         Review Information
                       </h4>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
+                      <div className="space-y-3 text-sm">
+                        <div className="flex justify-between border-b border-blue-100 dark:border-blue-800 pb-2">
                           <p className="text-gray-500">Name</p>
                           <p className="font-medium text-gray-900 dark:text-white">{formData.fullName || "—"}</p>
                         </div>
-                        <div>
+                        <div className="flex justify-between border-b border-blue-100 dark:border-blue-800 pb-2">
                           <p className="text-gray-500">Email</p>
                           <p className="font-medium text-gray-900 dark:text-white">{formData.email || "—"}</p>
                         </div>
-                        <div>
+                        <div className="flex justify-between border-b border-blue-100 dark:border-blue-800 pb-2">
                           <p className="text-gray-500">Salary</p>
                           <p className="font-medium text-gray-900 dark:text-white">${formData.salary ? Number(formData.salary).toLocaleString() : "—"} / {formData.payFrequency.toLowerCase()}</p>
                         </div>
-                        <div>
+                        <div className="flex justify-between border-b border-blue-100 dark:border-blue-800 pb-2">
                           <p className="text-gray-500">Department</p>
                           <p className="font-medium text-gray-900 dark:text-white">{formData.department || "—"}</p>
                         </div>
-                        <div>
+                        <div className="flex justify-between border-b border-blue-100 dark:border-blue-800 pb-2">
                           <p className="text-gray-500">Position</p>
                           <p className="font-medium text-gray-900 dark:text-white">{formData.position || "—"}</p>
                         </div>
-                        <div>
+                        <div className="flex justify-between border-b border-blue-100 dark:border-blue-800 pb-2">
                           <p className="text-gray-500">Work Setup</p>
                           <p className="font-medium text-gray-900 dark:text-white">{formData.workLocation} • {formData.workSchedule}</p>
                         </div>
-                        <div>
+                        <div className="flex justify-between">
                           <p className="text-gray-500">Documents</p>
                           <p className="font-medium text-gray-900 dark:text-white">{uploadedFiles.length} file(s)</p>
                         </div>
