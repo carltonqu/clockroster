@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useRef } from "react";
 import {
   ArrowLeft,
   Mail,
@@ -175,6 +176,8 @@ export function ProfileClient({
   const [activeTab, setActiveTab] = useState("overview");
   const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false);
   const [messageText, setMessageText] = useState("");
+  const [profilePhoto, setProfilePhoto] = useState(employee.profilePhoto);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const statusConfig = STATUS_CONFIG[employee.employmentStatus] || STATUS_CONFIG.Active;
   const StatusIcon = statusConfig.icon;
@@ -257,17 +260,44 @@ export function ProfileClient({
         
         <div className="relative p-6 sm:p-8">
           <div className="flex flex-col lg:flex-row lg:items-center gap-6">
-            {/* Avatar */}
-            <div className="relative">
-              <Avatar className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-white shadow-2xl">
-                <AvatarImage src={employee.profilePhoto} />
+            {/* Avatar - Editable */}
+            <div className="relative group">
+              <Avatar 
+                className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-white shadow-2xl cursor-pointer transition-transform group-hover:scale-105"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <AvatarImage src={profilePhoto} />
                 <AvatarFallback className={`bg-gradient-to-br ${avatarGradient} text-white text-2xl sm:text-3xl font-bold`}>
                   {getInitials(employee.fullName)}
                 </AvatarFallback>
               </Avatar>
+              {/* Upload Overlay */}
+              <div 
+                className="absolute inset-0 w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer border-4 border-white"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="w-8 h-8 text-white" />
+              </div>
               <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-r ${statusConfig.gradient} flex items-center justify-center border-2 border-white shadow-lg`}>
                 <StatusIcon className="w-4 h-4 text-white" />
               </div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setProfilePhoto(reader.result as string);
+                      toast.success("Profile photo updated!");
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
             </div>
 
             {/* Info */}
@@ -296,60 +326,58 @@ export function ProfileClient({
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="flex flex-wrap gap-2 lg:flex-col lg:items-end">
-              <Button
-                variant="secondary"
-                size="sm"
-                className="bg-white/20 text-white hover:bg-white/30 border-0 backdrop-blur-sm"
-                onClick={() => toast.info("Edit mode coming soon!")}
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
-              <Dialog open={isMessageDialogOpen} onOpenChange={setIsMessageDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="bg-white/20 text-white hover:bg-white/30 border-0 backdrop-blur-sm"
-                  >
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Message
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="rounded-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Send Message to {employee.fullName}</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 pt-4">
-                    <textarea
-                      value={messageText}
-                      onChange={(e) => setMessageText(e.target.value)}
-                      placeholder="Type your message here..."
-                      className="w-full min-h-[120px] p-3 border border-gray-200 dark:border-gray-700 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setIsMessageDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button onClick={handleSendMessage} className="bg-gradient-to-r from-blue-600 to-cyan-500">
-                        Send Message
-                      </Button>
+            {/* Quick Actions Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="bg-white/20 text-white hover:bg-white/30 border-0 backdrop-blur-sm"
+                >
+                  <MoreHorizontal className="w-4 h-4 mr-2" />
+                  Actions
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 rounded-xl">
+                <DropdownMenuItem onClick={() => toast.info("Edit mode coming soon!")}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </DropdownMenuItem>
+                <Dialog open={isMessageDialogOpen} onOpenChange={setIsMessageDialogOpen}>
+                  <DialogTrigger asChild>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Send Message
+                    </DropdownMenuItem>
+                  </DialogTrigger>
+                  <DialogContent className="rounded-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Send Message to {employee.fullName}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-4">
+                      <textarea
+                        value={messageText}
+                        onChange={(e) => setMessageText(e.target.value)}
+                        placeholder="Type your message here..."
+                        className="w-full min-h-[120px] p-3 border border-gray-200 dark:border-gray-700 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => setIsMessageDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={handleSendMessage} className="bg-gradient-to-r from-blue-600 to-cyan-500">
+                          Send Message
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="bg-white/20 text-white hover:bg-white/30 border-0 backdrop-blur-sm"
-                onClick={handleDownloadProfile}
-              >
-                <FileDown className="w-4 h-4 mr-2" />
-                Download PDF
-              </Button>
-            </div>
+                  </DialogContent>
+                </Dialog>
+                <DropdownMenuItem onClick={handleDownloadProfile}>
+                  <FileDown className="w-4 h-4 mr-2" />
+                  Download PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
