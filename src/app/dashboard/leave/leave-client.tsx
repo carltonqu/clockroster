@@ -38,6 +38,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
+import { Separator } from "@/components/ui/separator";
 
 function AnimatedCounter({ value }: { value: number }) {
   const [displayValue, setDisplayValue] = useState(0);
@@ -222,43 +223,66 @@ export function LeaveClient() {
       </div>
 
       {/* Tabs and Table */}
-      <Card className="border-gray-100 dark:border-gray-800 shadow-sm animate-fade-in-up" style={{ animationDelay: '500ms' }}>
-        <CardHeader className="pb-4 border-b border-gray-50 dark:border-gray-800">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <TabsList className="rounded-xl">
-                <TabsTrigger value="all" className="rounded-lg">All</TabsTrigger>
-                <TabsTrigger value="pending" className="rounded-lg">
-                  Pending
-                  {pendingCount > 0 && (
-                    <Badge className="ml-2 bg-amber-100 text-amber-700 border-0">{pendingCount}</Badge>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="approved" className="rounded-lg">Approved</TabsTrigger>
-                <TabsTrigger value="rejected" className="rounded-lg">Rejected</TabsTrigger>
-              </TabsList>
-              <div className="flex gap-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search requests..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 w-[250px] rounded-xl"
-                  />
-                </div>
-                {searchQuery && (
-                  <Button variant="ghost" size="sm" onClick={() => setSearchQuery("")} className="rounded-xl">
-                    <X className="h-4 w-4 mr-1" /> Clear
-                  </Button>
-                )}
-                <Button variant="outline" size="icon" onClick={() => toast.info("Filter feature coming soon!")} className="rounded-xl">
-                  <Filter className="h-4 w-4" />
-                </Button>
-              </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex gap-6 animate-fade-in-up" style={{ animationDelay: '500ms' }}>
+        {/* Vertical Sidebar Tabs */}
+        <TabsList className="flex-col h-fit min-w-[180px] bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-2 rounded-xl">
+          <TabsTrigger value="all" className="w-full justify-start gap-3 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white py-3">
+            <FileText className="w-4 h-4" />
+            All
+          </TabsTrigger>
+          <TabsTrigger value="pending" className="w-full justify-start gap-3 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white py-3">
+            <Clock className="w-4 h-4" />
+            Pending
+            {pendingCount > 0 && (
+              <Badge className="ml-auto bg-amber-100 text-amber-700 border-0">{pendingCount}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="approved" className="w-full justify-start gap-3 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white py-3">
+            <CheckCircle className="w-4 h-4" />
+            Approved
+          </TabsTrigger>
+          <TabsTrigger value="rejected" className="w-full justify-start gap-3 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white py-3">
+            <XCircle className="w-4 h-4" />
+            Rejected
+          </TabsTrigger>
+          <Separator className="my-2" />
+          <div className="p-2 space-y-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 w-full rounded-xl text-sm"
+              />
             </div>
-
-            <TabsContent value={activeTab} className="mt-4">
+            {searchQuery && (
+              <Button variant="ghost" size="sm" onClick={() => setSearchQuery("")} className="w-full rounded-xl justify-start">
+                <X className="h-4 w-4 mr-1" /> Clear
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={() => toast.info("Filter feature coming soon!")} className="w-full rounded-xl justify-start">
+              <Filter className="h-4 w-4 mr-2" /> Filter
+            </Button>
+          </div>
+        </TabsList>
+        
+        {/* Content Area */}
+        <div className="flex-1">
+          <Card className="border-gray-100 dark:border-gray-800 shadow-sm">
+            <CardHeader className="pb-4 border-b border-gray-50 dark:border-gray-800">
+              <CardTitle className="text-base flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-white" />
+                </div>
+                {activeTab === "all" && "All Leave Requests"}
+                {activeTab === "pending" && "Pending Requests"}
+                {activeTab === "approved" && "Approved Requests"}
+                {activeTab === "rejected" && "Rejected Requests"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <TabsContent value={activeTab} className="mt-0">
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -348,9 +372,10 @@ export function LeaveClient() {
                 </Table>
               </div>
             </TabsContent>
-          </Tabs>
-        </CardHeader>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+      </Tabs>
     </div>
   );
 }

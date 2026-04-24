@@ -61,12 +61,14 @@ function StatCard({
   value,
   gradient,
   delay = 0,
+  suffix,
 }: {
   icon: any;
   label: string;
   value: number;
   gradient: string;
   delay?: number;
+  suffix?: string;
 }) {
   return (
     <Card
@@ -84,6 +86,7 @@ function StatCard({
       <CardContent>
         <div className="text-2xl font-bold text-gray-900 dark:text-white">
           <AnimatedCounter value={value} />
+          {suffix && <span className="text-lg ml-0.5">{suffix}</span>}
         </div>
       </CardContent>
     </Card>
@@ -160,29 +163,33 @@ export function SettingsClient() {
         <StatCard icon={Zap} label="System Status" value={100} gradient="from-purple-500 to-pink-500" delay={300} suffix="%" />
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-6 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 lg:w-fit rounded-xl p-1">
-          <TabsTrigger value="profile" className="rounded-lg gap-2">
+      <Tabs defaultValue="profile" className="flex gap-6 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+        {/* Vertical Sidebar Tabs */}
+        <TabsList className="flex-col h-fit min-w-[200px] bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-2 rounded-xl">
+          <TabsTrigger value="profile" className="w-full justify-start gap-3 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white py-3">
             <User className="h-4 w-4" />
             Profile
           </TabsTrigger>
-          <TabsTrigger value="company" className="rounded-lg gap-2">
+          <TabsTrigger value="company" className="w-full justify-start gap-3 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-600 data-[state=active]:to-green-500 data-[state=active]:text-white py-3">
             <Building2 className="h-4 w-4" />
             Company
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="rounded-lg gap-2">
+          <TabsTrigger value="notifications" className="w-full justify-start gap-3 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-500 data-[state=active]:text-white py-3">
             <Bell className="h-4 w-4" />
             Notifications
           </TabsTrigger>
-          <TabsTrigger value="security" className="rounded-lg gap-2">
+          <TabsTrigger value="security" className="w-full justify-start gap-3 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-600 data-[state=active]:to-pink-500 data-[state=active]:text-white py-3">
             <Shield className="h-4 w-4" />
             Security
           </TabsTrigger>
-          <TabsTrigger value="appearance" className="rounded-lg gap-2">
+          <TabsTrigger value="appearance" className="w-full justify-start gap-3 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-white py-3">
             <Palette className="h-4 w-4" />
             Appearance
           </TabsTrigger>
         </TabsList>
+        
+        {/* Content Area */}
+        <div className="flex-1 space-y-6">
 
         {/* Profile Settings */}
         <TabsContent value="profile">
@@ -512,6 +519,7 @@ export function SettingsClient() {
             </CardContent>
           </Card>
         </TabsContent>
+        </div>
       </Tabs>
     </div>
   );
