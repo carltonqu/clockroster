@@ -19,6 +19,8 @@ import {
   MapPin,
   Briefcase,
   UserCircle,
+  Laptop,
+  Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +32,8 @@ import {
   mockLeaveRequests,
   mockPayrollEntries,
   mockNotifications,
+  mockCurrentUser,
+  mockAssetAssignments,
 } from "@/lib/mock-data";
 
 function greeting() {
@@ -128,7 +132,11 @@ function QuickAction({
 
 export function EmployeeDashboardClient() {
   const [isClockedIn, setIsClockedIn] = useState(false);
-  const user = { name: "John Smith", role: "Employee" };
+  const user = {
+    name: mockCurrentUser.name,
+    role: mockCurrentUser.role,
+    email: mockCurrentUser.email,
+  };
 
   // Get today's data
   const today = new Date().toISOString().slice(0, 10);
@@ -152,14 +160,21 @@ export function EmployeeDashboardClient() {
 
   // My requests
   const myRequests = mockLeaveRequests
-    .filter((r) => r.employeeName === "John Smith")
+    .filter((r) => r.employeeName === user.name)
     .slice(0, 3);
 
   // Pending count
   const pendingCount = myRequests.filter((r) => r.status === "Pending").length;
 
-  // Recent payslip
-  const recentPayslip = mockPayrollEntries[0];
+  // Recent payslip - find payslip for current user
+  const recentPayslip = mockPayrollEntries.find(
+    (p) => p.employeeName === user.name
+  ) || mockPayrollEntries[0];
+
+  // My assets
+  const myAssets = mockAssetAssignments.filter(
+    (a) => a.employeeName === user.name && a.isActive
+  );
 
   // Unread notifications
   const unreadCount = mockNotifications.filter((n) => !n.read).length;
@@ -172,9 +187,9 @@ export function EmployeeDashboardClient() {
       gradient: "from-blue-500 to-cyan-500",
     },
     {
-      href: "/dashboard/scheduling",
-      label: "My Schedule",
-      icon: Calendar,
+      href: "/dashboard/assets",
+      label: "My Assets",
+      icon: Package,
       gradient: "from-purple-500 to-violet-500",
     },
     {
@@ -475,70 +490,57 @@ export function EmployeeDashboardClient() {
         </Card>
       </div>
 
-      {/* Recent Payslip & Notifications */}
+      {/* My Assets & Notifications */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* My Assets Card */}
         <Card className="border-0 shadow-lg shadow-gray-100/50">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                <DollarSign className="w-4 h-4 text-white" />
-              </div>
-              Recent Payslip
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                  <Laptop className="w-4 h-4 text-white" />
+                </div>
+                My Assets
+              </CardTitle>
+              <Link href="/dashboard/assets">
+                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 gap-1">
+                  View all <ArrowRight className="w-3 h-3" />
+                </Button>
+              </Link>
+            </div>
           </CardHeader>
           <CardContent className="pt-0">
-            {recentPayslip ? (
-              <div className="rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-sm text-emerald-600 font-medium">
-                      {new Date(recentPayslip.periodStart).toLocaleDateString(
-                        "en-US",
-                        { month: "long", year: "numeric" }
-                      )}
-                    </p>
-                    <p className="text-xs text-emerald-500">
-                      Period: {new Date(recentPayslip.periodStart).toLocaleDateString()} -{" "}
-                      {new Date(recentPayslip.periodEnd).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <Badge
-                    className={
-                      recentPayslip.status === "RELEASED"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }
-                  >
-                    {recentPayslip.status}
-                  </Badge>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Gross Pay</span>
-                    <span className="font-medium">
-                      ${recentPayslip.grossPay.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Deductions</span>
-                    <span className="font-medium text-red-600">
-                      -${recentPayslip.totalDeductions.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="border-t border-emerald-200 pt-2 mt-2">
-                    <div className="flex justify-between">
-                      <span className="font-semibold text-gray-900">Net Pay</span>
-                      <span className="font-bold text-emerald-700">
-                        ${recentPayslip.netPay.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+            {myAssets.length === 0 ? (
+              <div className="text-center py-8 text-gray-400 bg-gray-50 rounded-2xl">
+                <Package className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                <p className="text-sm">No assets assigned</p>
+                <Link href="/dashboard/assets">
+                  <Button variant="outline" size="sm" className="mt-3 rounded-xl">
+                    Request Asset
+                  </Button>
+                </Link>
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-400">
-                <DollarSign className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                <p className="text-sm">No payslip available</p>
+              <div className="space-y-2">
+                {myAssets.slice(0, 3).map((asset) => (
+                  <div
+                    key={asset.id}
+                    className="flex items-center gap-3 p-3 rounded-xl bg-indigo-50/50 hover:bg-indigo-50 transition-colors border border-transparent hover:border-indigo-100"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                      <Laptop className="w-5 h-5 text-indigo-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">
+                        {asset.assetName}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        Assigned: {new Date(asset.dateAssigned).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Badge className="bg-green-100 text-green-700">Active</Badge>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>

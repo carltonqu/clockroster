@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { DashboardClient } from "./dashboard-client";
 import {
@@ -9,6 +10,14 @@ import {
 } from "@/lib/mock-data";
 
 export default function DashboardPage() {
+  // Check user role and redirect employees to their dashboard
+  const userRole = mockCurrentUser.role;
+  
+  // If user is an EMPLOYEE, redirect to the employee dashboard
+  if (userRole === "EMPLOYEE") {
+    redirect("/dashboard/employee");
+  }
+
   // Get recent entries (last 5)
   const recentEntries = mockTimeEntries.slice(0, 5).map((e) => ({
     ...e,

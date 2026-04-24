@@ -19,6 +19,8 @@ import {
   TrendingUp,
   Brain,
   Crown,
+  Plane,
+  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -38,7 +40,29 @@ interface DashboardLayoutProps {
   title?: string;
 }
 
-const navigation = [
+// Role type
+type UserRole = "EMPLOYEE" | "MANAGER" | "HR" | "ADMIN";
+
+// Check if user is an employee (limited access)
+const isEmployee = (role: string): boolean => role === "EMPLOYEE";
+
+// Check if user has full access
+const hasFullAccess = (role: string): boolean => 
+  role === "MANAGER" || role === "HR" || role === "ADMIN";
+
+// Employee navigation (limited access)
+const employeeNavigation = [
+  { name: "Dashboard", href: "/dashboard/employee", icon: LayoutDashboard },
+  { name: "Attendance", href: "/dashboard/attendance", icon: Clock },
+  { name: "My Assets", href: "/dashboard/assets", icon: Briefcase },
+  { name: "Request Leave", href: "/dashboard/leave", icon: Plane },
+  { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
+  { name: "Settings", href: "/dashboard/settings", icon: Settings },
+  { name: "Profile", href: "/dashboard/employees/1", icon: User },
+];
+
+// Manager/Admin navigation (full access)
+const managerNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Employees", href: "/dashboard/employees", icon: Users },
   { name: "Attendance", href: "/dashboard/attendance", icon: Clock },
@@ -60,12 +84,18 @@ const adminNavigation = [
 export function DashboardLayout({ children, title }: DashboardLayoutProps) {
   const pathname = usePathname();
   const unreadCount = mockNotifications.filter((n) => !n.read).length;
+  const userRole = mockCurrentUser.role as UserRole;
+  const userIsEmployee = isEmployee(userRole);
+  const userHasFullAccess = hasFullAccess(userRole);
 
   // Check if current page is an admin-only page
   const isAdminPage = pathname?.includes("/finance") || 
                       pathname?.includes("/ai-insights") || 
                       pathname?.includes("/supervisor-assignments") ||
                       pathname?.includes("/admin");
+
+  // Get navigation based on user role
+  const navigation = userIsEmployee ? employeeNavigation : managerNavigation;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -107,13 +137,15 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                 );
               })}
               
-              {/* Admin-only section */}
-              <li className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
-                <p className="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                  Admin Only
-                </p>
-              </li>
-              {adminNavigation.map((item) => {
+              {/* Admin-only section - only show for managers/admins */}
+              {userHasFullAccess && (
+                <>
+                  <li className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
+                    <p className="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                      Admin Only
+                    </p>
+                  </li>
+                  {adminNavigation.map((item) => {
                 const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
                 return (
                   <li key={item.name}>
@@ -138,6 +170,8 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                   </li>
                 );
               })}
+                </>
+              )}
             </ul>
           </nav>
           <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800">
@@ -180,7 +214,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                         className={`group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 ${
                           isActive
                             ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-blue-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-blue-600 dark:text-gray-300 dark:hover:bg-gray-800`
                         }`}
                       >
                         <item.icon
@@ -196,13 +230,15 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                   );
                 })}
                 
-                {/* Admin-only section mobile */}
-                <li className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
-                  <p className="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                    Admin Only
-                  </p>
-                </li>
-                {adminNavigation.map((item) => {
+                {/* Admin-only section mobile - only show for managers/admins */}
+                {userHasFullAccess && (
+                  <>
+                    <li className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
+                      <p className="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                        Admin Only
+                      </p>
+                    </li>
+                    {adminNavigation.map((item) => {
                   const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
                   return (
                     <li key={item.name}>
@@ -226,6 +262,8 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                     </li>
                   );
                 })}
+                  </>
+                )}
               </ul>
             </nav>
           </SheetContent>
@@ -282,14 +320,18 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <UserCircle className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
+                <Link href={`/dashboard/employees/${mockCurrentUser.id}`}>
+                  <DropdownMenuItem>
+                    <UserCircle className="mr-2 h-4 w-4" />
+                    Profile
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/dashboard/settings">
+                  <DropdownMenuItem>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </DropdownMenuItem>
+                </Link>
                 <DropdownMenuSeparator />
                 <Link href="/">
                   <DropdownMenuItem>

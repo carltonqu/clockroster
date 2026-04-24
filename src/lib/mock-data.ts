@@ -674,6 +674,10 @@ export const mockLeaveRequests: LeaveRequest[] = [
 ];
 
 // Mock current user
+// To test EMPLOYEE role: change role to "EMPLOYEE"
+// To test MANAGER role: change role to "MANAGER"
+// To test HR role: change role to "HR"
+// To test ADMIN role: change role to "ADMIN"
 export const mockCurrentUser = {
   id: "1",
   name: "Admin User",
