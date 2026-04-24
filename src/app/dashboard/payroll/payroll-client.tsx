@@ -1196,7 +1196,7 @@ export function PayrollClient({ entries: initialEntries, employees, currentUserI
 
       {/* ── Payslip View Modal ── */}
       <Dialog open={viewOpen} onOpenChange={setViewOpen}>
-        <DialogContent className="max-w-4xl rounded-2xl">
+        <DialogContent className="max-w-[1440px] rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="w-5 h-5 text-emerald-600" />
