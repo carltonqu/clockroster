@@ -680,9 +680,9 @@ export const mockLeaveRequests: LeaveRequest[] = [
 // To test different roles: change role to "EMPLOYEE", "MANAGER", "HR", or "ADMIN"
 export const mockCurrentUser = {
   id: "1",
-  name: "Juan Santos",
-  email: "juan.santos@company.com",
-  role: "EMPLOYEE",
+  name: "Admin User",
+  email: "admin@clockroster.com",
+  role: "ADMIN",
   tier: "Advanced",
   orgId: "org-1",
   image: null,

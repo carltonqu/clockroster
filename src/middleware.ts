@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 // Mock user role - in production this would come from session/token
 // For demo purposes, we're using the mock data role
 // NOTE: Update this to match mockCurrentUser.role in mock-data.ts
-const MOCK_USER_ROLE = "EMPLOYEE"; // Change to "MANAGER" or "ADMIN" to test admin access
+const MOCK_USER_ROLE = "ADMIN"; // Change to "EMPLOYEE" or "MANAGER" to test other roles
 
 // Define role hierarchy
 const ROLE_HIERARCHY = {
