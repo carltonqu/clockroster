@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -33,17 +32,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
+import { useRouter } from "next/navigation";
 
 function AnimatedCounter({ value }: { value: number }) {
   const [displayValue, setDisplayValue] = useState(0);
@@ -151,17 +145,11 @@ function TypeBadge({ type }: { type: string }) {
 }
 
 export function LeaveClient() {
+  const router = useRouter();
   const { leaveRequests, employees, addLeaveRequest, updateLeaveRequestStatus } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    employeeId: "",
-    type: "Vacation",
-    startDate: "",
-    endDate: "",
-    reason: "",
-  });
+
 
   const filteredRequests = leaveRequests.filter((request) => {
     const matchesSearch =
@@ -172,27 +160,7 @@ export function LeaveClient() {
     return matchesSearch && request.status.toLowerCase() === activeTab;
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const employee = employees.find((e) => e.id === formData.employeeId);
-    if (employee) {
-      addLeaveRequest({
-        ...formData,
-        employeeId: employee.id,
-        employeeName: employee.fullName,
-        status: "Pending",
-      });
-      toast.success(`Leave request submitted for ${employee.fullName}!`);
-      setIsDialogOpen(false);
-      setFormData({
-        employeeId: "",
-        type: "Vacation",
-        startDate: "",
-        endDate: "",
-        reason: "",
-      });
-    }
-  };
+
 
   const handleApprove = (id: string, employeeName: string) => {
     updateLeaveRequestStatus(id, "Approved");
@@ -236,116 +204,13 @@ export function LeaveClient() {
             Manage employee leave requests and approvals
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-md rounded-xl">
-              <Plus className="mr-2 h-4 w-4" />
-              Request Leave
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl">
-            <DialogHeader className="pb-4 border-b border-gray-100 dark:border-gray-800">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                  <Plus className="w-4 h-4 text-white" />
-                </div>
-                <DialogTitle>Submit Leave Request</DialogTitle>
-              </div>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label htmlFor="employee" className="text-xs font-medium text-gray-500">Employee *</Label>
-                <select
-                  id="employee"
-                  required
-                  value={formData.employeeId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, employeeId: e.target.value })
-                  }
-                  className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
-                >
-                  <option value="">Select Employee</option>
-                  {employees.map((emp) => (
-                    <option key={emp.id} value={emp.id}>
-                      {emp.fullName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="type" className="text-xs font-medium text-gray-500">Leave Type *</Label>
-                <select
-                  id="type"
-                  required
-                  value={formData.type}
-                  onChange={(e) =>
-                    setFormData({ ...formData, type: e.target.value })
-                  }
-                  className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
-                >
-                  <option value="Vacation">Vacation</option>
-                  <option value="Sick Leave">Sick Leave</option>
-                  <option value="Personal">Personal</option>
-                  <option value="Emergency">Emergency</option>
-                  <option value="Maternity/Paternity">Maternity/Paternity</option>
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="startDate" className="text-xs font-medium text-gray-500">Start Date *</Label>
-                  <Input
-                    id="startDate"
-                    type="date"
-                    required
-                    value={formData.startDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, startDate: e.target.value })
-                    }
-                    className="rounded-xl"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="endDate" className="text-xs font-medium text-gray-500">End Date *</Label>
-                  <Input
-                    id="endDate"
-                    type="date"
-                    required
-                    value={formData.endDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, endDate: e.target.value })
-                    }
-                    className="rounded-xl"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="reason" className="text-xs font-medium text-gray-500">Reason</Label>
-                <textarea
-                  id="reason"
-                  value={formData.reason}
-                  onChange={(e) =>
-                    setFormData({ ...formData, reason: e.target.value })
-                  }
-                  placeholder="Enter reason for leave..."
-                  className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm min-h-[100px] bg-white dark:bg-gray-800 resize-none"
-                />
-              </div>
-              <div className="flex justify-end gap-2 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsDialogOpen(false)}
-                  className="rounded-xl"
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl">
-                  Submit Request
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button 
+          onClick={() => router.push("/dashboard/leave/new")}
+          className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-md rounded-xl"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Request Leave
+        </Button>
       </div>
 
       {/* Stats Cards */}

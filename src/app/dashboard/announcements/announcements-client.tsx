@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -33,15 +32,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
+import { useRouter } from "next/navigation";
 
 interface Announcement {
   id: string;
@@ -194,17 +188,10 @@ const initialAnnouncements: Announcement[] = [
 ];
 
 export function AnnouncementsClient() {
+  const router = useRouter();
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { addNotification } = useStore();
-  const [formData, setFormData] = useState({
-    title: "",
-    content: "",
-    category: "General",
-    priority: "medium" as const,
-    isPinned: false,
-  });
 
   const filteredAnnouncements = announcements.filter(
     (a) =>
@@ -213,32 +200,8 @@ export function AnnouncementsClient() {
       a.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newAnnouncement: Announcement = {
-      ...formData,
-      id: String(announcements.length + 1),
-      author: "Admin User",
-      createdAt: new Date().toISOString(),
-    };
-    setAnnouncements([newAnnouncement, ...announcements]);
-    
-    addNotification({
-      userId: "all",
-      type: "ANNOUNCEMENT",
-      message: `New announcement: ${formData.title}`,
-      read: false,
-    });
-    
-    toast.success("Announcement published successfully!");
-    setIsDialogOpen(false);
-    setFormData({
-      title: "",
-      content: "",
-      category: "General",
-      priority: "medium",
-      isPinned: false,
-    });
+  const handleNewAnnouncement = () => {
+    router.push("/dashboard/announcements/new");
   };
 
   const togglePin = (id: string) => {
@@ -301,116 +264,13 @@ export function AnnouncementsClient() {
               <X className="h-4 w-4 mr-1" /> Clear
             </Button>
           )}
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white shadow-md rounded-xl">
-                <Plus className="mr-2 h-4 w-4" />
-                New Announcement
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl">
-              <DialogHeader className="pb-4 border-b border-gray-100 dark:border-gray-800">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                    <Plus className="w-4 h-4 text-white" />
-                  </div>
-                  <DialogTitle>Create New Announcement</DialogTitle>
-                </div>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title" className="text-xs font-medium text-gray-500">Title *</Label>
-                  <Input
-                    id="title"
-                    required
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
-                    }
-                    placeholder="Enter announcement title..."
-                    className="rounded-xl"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="category" className="text-xs font-medium text-gray-500">Category</Label>
-                    <select
-                      id="category"
-                      value={formData.category}
-                      onChange={(e) =>
-                        setFormData({ ...formData, category: e.target.value })
-                      }
-                      className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
-                    >
-                      <option value="General">General</option>
-                      <option value="Scheduling">Scheduling</option>
-                      <option value="Payroll">Payroll</option>
-                      <option value="Holiday">Holiday</option>
-                      <option value="Assets">Assets</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="priority" className="text-xs font-medium text-gray-500">Priority</Label>
-                    <select
-                      id="priority"
-                      value={formData.priority}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          priority: e.target.value as any,
-                        })
-                      }
-                      className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
-                    >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="content" className="text-xs font-medium text-gray-500">Content *</Label>
-                  <textarea
-                    id="content"
-                    required
-                    value={formData.content}
-                    onChange={(e) =>
-                      setFormData({ ...formData, content: e.target.value })
-                    }
-                    placeholder="Enter announcement content..."
-                    className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm min-h-[150px] bg-white dark:bg-gray-800 resize-none"
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="isPinned"
-                    checked={formData.isPinned}
-                    onChange={(e) =>
-                      setFormData({ ...formData, isPinned: e.target.checked })
-                    }
-                    className="rounded border-gray-300"
-                  />
-                  <Label htmlFor="isPinned" className="cursor-pointer text-sm">
-                    Pin this announcement
-                  </Label>
-                </div>
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsDialogOpen(false)}
-                    className="rounded-xl"
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white rounded-xl">
-                    Publish
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <Button 
+            onClick={handleNewAnnouncement}
+            className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white shadow-md rounded-xl"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            New Post
+          </Button>
         </div>
       </div>
 

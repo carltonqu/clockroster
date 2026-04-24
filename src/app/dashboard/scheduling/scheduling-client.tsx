@@ -307,13 +307,14 @@ export function SchedulingClient({ schedules, employees }: SchedulingClientProps
             <Copy className="mr-2 h-4 w-4" />
             Copy Week
           </Button>
-          <Dialog open={isAddShiftOpen} onOpenChange={setIsAddShiftOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-md rounded-xl">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Shift
-              </Button>
-            </DialogTrigger>
+          <Button 
+            onClick={() => router.push('/dashboard/scheduling/new')}
+            className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-md rounded-xl"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Shift
+          </Button>
+          <Dialog open={false} onOpenChange={() => {}}>
             <DialogContent className="w-[90vw] max-w-[1440px] max-h-[90vh] overflow-y-auto rounded-2xl p-0">
               <DialogHeader className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-2">

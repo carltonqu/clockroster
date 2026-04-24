@@ -50,6 +50,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
+import { useRouter } from "next/navigation";
 
 function AnimatedCounter({ value }: { value: number }) {
   const [displayValue, setDisplayValue] = useState(0);
@@ -156,20 +157,11 @@ function ConditionBadge({ condition }: { condition: string }) {
 }
 
 export function AssetsClient() {
+  const router = useRouter();
   const { assets, assetAssignments, employees, addAsset, assignAsset } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("assets");
-  const [isAssetDialogOpen, setIsAssetDialogOpen] = useState(false);
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
-  const [assetForm, setAssetForm] = useState({
-    name: "",
-    type: "",
-    brand: "",
-    model: "",
-    condition: "Good",
-    status: "Available" as const,
-    serialNumber: "",
-  });
   const [assignForm, setAssignForm] = useState({
     assetId: "",
     employeeId: "",
@@ -182,22 +174,6 @@ export function AssetsClient() {
       asset.assetCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
       asset.type.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const handleAddAsset = (e: React.FormEvent) => {
-    e.preventDefault();
-    addAsset(assetForm);
-    toast.success(`Asset ${assetForm.name} added successfully!`);
-    setIsAssetDialogOpen(false);
-    setAssetForm({
-      name: "",
-      type: "",
-      brand: "",
-      model: "",
-      condition: "Good",
-      status: "Available",
-      serialNumber: "",
-    });
-  };
 
   const handleAssignAsset = (e: React.FormEvent) => {
     e.preventDefault();
@@ -256,126 +232,13 @@ export function AssetsClient() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Dialog open={isAssetDialogOpen} onOpenChange={setIsAssetDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md rounded-xl">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Asset
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl">
-              <DialogHeader className="pb-4 border-b border-gray-100 dark:border-gray-800">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center">
-                    <Plus className="w-4 h-4 text-white" />
-                  </div>
-                  <DialogTitle>Add New Asset</DialogTitle>
-                </div>
-              </DialogHeader>
-              <form onSubmit={handleAddAsset} className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-xs font-medium text-gray-500">Asset Name *</Label>
-                  <Input
-                    id="name"
-                    required
-                    value={assetForm.name}
-                    onChange={(e) => setAssetForm({ ...assetForm, name: e.target.value })}
-                    placeholder="MacBook Pro 16"
-                    className="rounded-xl"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="type" className="text-xs font-medium text-gray-500">Type *</Label>
-                    <select
-                      id="type"
-                      required
-                      value={assetForm.type}
-                      onChange={(e) => setAssetForm({ ...assetForm, type: e.target.value })}
-                      className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
-                    >
-                      <option value="">Select Type</option>
-                      <option value="Laptop">Laptop</option>
-                      <option value="Desktop">Desktop</option>
-                      <option value="Mobile Phone">Mobile Phone</option>
-                      <option value="Tablet">Tablet</option>
-                      <option value="Monitor">Monitor</option>
-                      <option value="Printer">Printer</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="brand" className="text-xs font-medium text-gray-500">Brand *</Label>
-                    <Input
-                      id="brand"
-                      required
-                      value={assetForm.brand}
-                      onChange={(e) => setAssetForm({ ...assetForm, brand: e.target.value })}
-                      placeholder="Apple"
-                      className="rounded-xl"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="model" className="text-xs font-medium text-gray-500">Model</Label>
-                  <Input
-                    id="model"
-                    value={assetForm.model}
-                    onChange={(e) => setAssetForm({ ...assetForm, model: e.target.value })}
-                    placeholder="MacBook Pro M3"
-                    className="rounded-xl"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="serialNumber" className="text-xs font-medium text-gray-500">Serial Number</Label>
-                  <Input
-                    id="serialNumber"
-                    value={assetForm.serialNumber}
-                    onChange={(e) => setAssetForm({ ...assetForm, serialNumber: e.target.value })}
-                    placeholder="ABC123456"
-                    className="rounded-xl"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="condition" className="text-xs font-medium text-gray-500">Condition</Label>
-                    <select
-                      id="condition"
-                      value={assetForm.condition}
-                      onChange={(e) => setAssetForm({ ...assetForm, condition: e.target.value })}
-                      className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
-                    >
-                      <option value="Excellent">Excellent</option>
-                      <option value="Good">Good</option>
-                      <option value="Fair">Fair</option>
-                      <option value="Poor">Poor</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="status" className="text-xs font-medium text-gray-500">Status</Label>
-                    <select
-                      id="status"
-                      value={assetForm.status}
-                      onChange={(e) => setAssetForm({ ...assetForm, status: e.target.value as any })}
-                      className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
-                    >
-                      <option value="Available">Available</option>
-                      <option value="Assigned">Assigned</option>
-                      <option value="Maintenance">Maintenance</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setIsAssetDialogOpen(false)} className="rounded-xl">
-                    Cancel
-                  </Button>
-                  <Button type="submit" className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl">
-                    Add Asset
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <Button 
+            onClick={() => router.push("/dashboard/assets/new")}
+            className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md rounded-xl"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Asset
+          </Button>
           <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" className="rounded-xl">
