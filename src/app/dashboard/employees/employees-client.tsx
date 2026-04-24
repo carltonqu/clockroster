@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Plus,
@@ -279,6 +281,7 @@ function getTenureLabel(tenure: TenureRange): string {
 }
 
 export function EmployeesClient() {
+  const router = useRouter();
   const { employees, addEmployee, updateEmployee, deleteEmployee } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -544,8 +547,7 @@ export function EmployeesClient() {
 
   // Action handlers
   const handleViewProfile = (employee: Employee) => {
-    setSelectedEmployee(employee);
-    setViewProfileOpen(true);
+    router.push(`/dashboard/employees/${employee.id}`);
   };
 
   const handleEdit = (employee: Employee) => {
@@ -1348,17 +1350,19 @@ export function EmployeesClient() {
                 {filteredEmployees.map((employee, index) => (
                   <TableRow key={employee.id} className="hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
                     <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-white font-semibold">
-                          {employee.fullName.charAt(0)}
+                      <Link href={`/dashboard/employees/${employee.id}`} className="block">
+                        <div className="flex items-center gap-3 cursor-pointer group">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-white font-semibold group-hover:scale-105 transition-transform">
+                            {employee.fullName.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">{employee.fullName}</p>
+                            <p className="text-xs text-gray-500 flex items-center gap-1">
+                              <Mail className="w-3 h-3" /> {employee.email}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">{employee.fullName}</p>
-                          <p className="text-xs text-gray-500 flex items-center gap-1">
-                            <Mail className="w-3 h-3" /> {employee.email}
-                          </p>
-                        </div>
-                      </div>
+                      </Link>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">
@@ -1386,9 +1390,11 @@ export function EmployeesClient() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="rounded-xl">
-                          <DropdownMenuItem onClick={() => handleViewProfile(employee)} className="cursor-pointer">
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Profile
+                          <DropdownMenuItem className="cursor-pointer p-0">
+                            <Link href={`/dashboard/employees/${employee.id}`} className="flex items-center px-2 py-1.5 w-full">
+                              <Eye className="mr-2 h-4 w-4" />
+                              View Profile
+                            </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleEdit(employee)} className="cursor-pointer">
                             <Pencil className="mr-2 h-4 w-4" />
