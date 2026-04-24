@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Search,
   Plus,
@@ -39,6 +39,12 @@ import {
   IdCard,
   BadgeCheck,
   UserCheck,
+  ArrowUpDown,
+  ArrowDownAZ,
+  ArrowUpZA,
+  CalendarArrowDown,
+  CalendarArrowUp,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -81,6 +87,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+  SheetClose,
+} from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
@@ -110,6 +132,19 @@ interface Document {
   type: string;
   size: string;
   uploadedAt: string;
+}
+
+// Filter types
+type TenureRange = "all" | "new" | "junior" | "mid" | "senior";
+type SortDirection = "asc" | "desc" | null;
+
+interface FilterState {
+  department: string;
+  position: string;
+  status: string;
+  tenure: TenureRange;
+  nameSort: SortDirection;
+  dateSort: SortDirection;
 }
 
 function AnimatedCounter({ value }: { value: number }) {
@@ -218,11 +253,47 @@ const DOCUMENT_TYPES = [
   { value: "other", label: "Other Document", icon: FileText },
 ];
 
+// Helper function to calculate tenure from hire date
+function getTenureCategory(hireDate: string): TenureRange {
+  const hire = new Date(hireDate);
+  const now = new Date();
+  const diffTime = now.getTime() - hire.getTime();
+  const diffMonths = diffTime / (1000 * 60 * 60 * 24 * 30.44);
+
+  if (diffMonths < 6) return "new";
+  if (diffMonths < 24) return "junior";
+  if (diffMonths < 60) return "mid";
+  return "senior";
+}
+
+// Helper function to get tenure label
+function getTenureLabel(tenure: TenureRange): string {
+  const labels: Record<TenureRange, string> = {
+    all: "All Tenure",
+    new: "New Hires (0-6 months)",
+    junior: "Junior (6 months - 2 years)",
+    mid: "Mid-level (2-5 years)",
+    senior: "Senior (5+ years)",
+  };
+  return labels[tenure];
+}
+
 export function EmployeesClient() {
   const { employees, addEmployee, updateEmployee, deleteEmployee } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+
+  // Filter state
+  const [filters, setFilters] = useState<FilterState>({
+    department: "all",
+    position: "all",
+    status: "all",
+    tenure: "all",
+    nameSort: null,
+    dateSort: null,
+  });
 
   // Action menu state
   const [viewProfileOpen, setViewProfileOpen] = useState(false);
@@ -274,13 +345,105 @@ export function EmployeesClient() {
   });
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
-  const filteredEmployees = employees.filter(
-    (emp) =>
-      emp.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      emp.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      emp.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      emp.position.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Get unique departments and positions for filter dropdowns
+  const uniqueDepartments = useMemo(() => {
+    const depts = new Set(employees.map((emp) => emp.department).filter(Boolean));
+    return Array.from(depts).sort();
+  }, [employees]);
+
+  const uniquePositions = useMemo(() => {
+    const positions = new Set(employees.map((emp) => emp.position).filter(Boolean));
+    return Array.from(positions).sort();
+  }, [employees]);
+
+  // Calculate active filter count
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (filters.department !== "all") count++;
+    if (filters.position !== "all") count++;
+    if (filters.status !== "all") count++;
+    if (filters.tenure !== "all") count++;
+    if (filters.nameSort !== null) count++;
+    if (filters.dateSort !== null) count++;
+    return count;
+  }, [filters]);
+
+  // Filter and sort employees
+  const filteredEmployees = useMemo(() => {
+    let result = employees.filter((emp) => {
+      // Search query filter
+      const matchesSearch =
+        searchQuery === "" ||
+        emp.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        emp.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        emp.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        emp.position.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // Department filter
+      const matchesDepartment =
+        filters.department === "all" || emp.department === filters.department;
+
+      // Position filter
+      const matchesPosition =
+        filters.position === "all" || emp.position === filters.position;
+
+      // Status filter
+      const matchesStatus =
+        filters.status === "all" || emp.employmentStatus === filters.status;
+
+      // Tenure filter
+      const matchesTenure =
+        filters.tenure === "all" ||
+        getTenureCategory(emp.hireDate) === filters.tenure;
+
+      return (
+        matchesSearch &&
+        matchesDepartment &&
+        matchesPosition &&
+        matchesStatus &&
+        matchesTenure
+      );
+    });
+
+    // Sorting
+    if (filters.nameSort) {
+      result = [...result].sort((a, b) => {
+        const comparison = a.fullName.localeCompare(b.fullName);
+        return filters.nameSort === "asc" ? comparison : -comparison;
+      });
+    }
+
+    if (filters.dateSort) {
+      result = [...result].sort((a, b) => {
+        const dateA = new Date(a.hireDate).getTime();
+        const dateB = new Date(b.hireDate).getTime();
+        return filters.dateSort === "asc" ? dateA - dateB : dateB - dateA;
+      });
+    }
+
+    return result;
+  }, [employees, searchQuery, filters]);
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setFilters({
+      department: "all",
+      position: "all",
+      status: "all",
+      tenure: "all",
+      nameSort: null,
+      dateSort: null,
+    });
+    setSearchQuery("");
+  };
+
+  // Update single filter
+  const updateFilter = <K extends keyof FilterState>(
+    key: K,
+    value: FilterState[K]
+  ) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleNext = () => {
     if (currentStep < 5) {
@@ -1042,12 +1205,131 @@ export function EmployeesClient() {
                 className="pl-10 rounded-xl"
               />
             </div>
-            {searchQuery && (
-              <Button variant="ghost" size="sm" onClick={() => setSearchQuery("")} className="rounded-xl">
-                <X className="h-4 w-4 mr-1" /> Clear
+            <div className="flex items-center gap-2">
+              {/* Filters Button */}
+              <Button
+                variant="outline"
+                onClick={() => setIsFilterSheetOpen(true)}
+                className="rounded-xl relative"
+              >
+                <SlidersHorizontal className="h-4 w-4 mr-2" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <Badge className="ml-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 text-xs">
+                    {activeFilterCount}
+                  </Badge>
+                )}
               </Button>
-            )}
+              
+              {/* Clear All Button - Only show when filters are active */}
+              {(activeFilterCount > 0 || searchQuery) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="rounded-xl text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-4 w-4 mr-1" /> Clear All
+                </Button>
+              )}
+            </div>
           </div>
+          
+          {/* Active Filter Pills */}
+          {activeFilterCount > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {filters.department !== "all" && (
+                <Badge 
+                  variant="secondary" 
+                  className="rounded-full px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200"
+                >
+                  <Building2 className="w-3 h-3 mr-1" />
+                  {filters.department}
+                  <button 
+                    onClick={() => updateFilter("department", "all")}
+                    className="ml-2 hover:text-blue-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </Badge>
+              )}
+              {filters.position !== "all" && (
+                <Badge 
+                  variant="secondary" 
+                  className="rounded-full px-3 py-1 bg-purple-50 text-purple-700 border border-purple-200"
+                >
+                  <Briefcase className="w-3 h-3 mr-1" />
+                  {filters.position}
+                  <button 
+                    onClick={() => updateFilter("position", "all")}
+                    className="ml-2 hover:text-purple-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </Badge>
+              )}
+              {filters.status !== "all" && (
+                <Badge 
+                  variant="secondary" 
+                  className="rounded-full px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200"
+                >
+                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                  {filters.status}
+                  <button 
+                    onClick={() => updateFilter("status", "all")}
+                    className="ml-2 hover:text-emerald-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </Badge>
+              )}
+              {filters.tenure !== "all" && (
+                <Badge 
+                  variant="secondary" 
+                  className="rounded-full px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200"
+                >
+                  <Clock className="w-3 h-3 mr-1" />
+                  {getTenureLabel(filters.tenure)}
+                  <button 
+                    onClick={() => updateFilter("tenure", "all")}
+                    className="ml-2 hover:text-amber-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </Badge>
+              )}
+              {filters.nameSort && (
+                <Badge 
+                  variant="secondary" 
+                  className="rounded-full px-3 py-1 bg-cyan-50 text-cyan-700 border border-cyan-200"
+                >
+                  {filters.nameSort === "asc" ? <ArrowDownAZ className="w-3 h-3 mr-1" /> : <ArrowUpZA className="w-3 h-3 mr-1" />}
+                  Name: {filters.nameSort === "asc" ? "A-Z" : "Z-A"}
+                  <button 
+                    onClick={() => updateFilter("nameSort", null)}
+                    className="ml-2 hover:text-cyan-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </Badge>
+              )}
+              {filters.dateSort && (
+                <Badge 
+                  variant="secondary" 
+                  className="rounded-full px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200"
+                >
+                    {filters.dateSort === "desc" ? <CalendarArrowDown className="w-3 h-3 mr-1" /> : <CalendarArrowUp className="w-3 h-3 mr-1" />}
+                  Hired: {filters.dateSort === "desc" ? "Newest" : "Oldest"}
+                  <button 
+                    onClick={() => updateFilter("dateSort", null)}
+                    className="ml-2 hover:text-indigo-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </Badge>
+              )}
+            </div>
+          )}
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -1137,13 +1419,234 @@ export function EmployeesClient() {
             <div className="flex flex-col items-center justify-center py-16 text-gray-400">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center mb-4">
                 <Users className="w-8 h-8 text-gray-300 dark:text-gray-600" />
+
               </div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No employees found</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Try adjusting your search</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Try adjusting your search or filters</p>
+              {(activeFilterCount > 0 || searchQuery) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="mt-4 rounded-xl"
+                >
+                  <X className="h-4 w-4 mr-1" /> Clear All Filters
+                </Button>
+              )}
             </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Filter Sheet */}
+      <Sheet open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
+        <SheetContent side="right" className="w-[400px] sm:w-[450px] p-0">
+          <SheetHeader className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                <Filter className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <SheetTitle className="text-lg font-semibold">Filters</SheetTitle>
+                <SheetDescription className="text-sm text-gray-500">
+                  Refine your employee list
+                </SheetDescription>
+              </div>
+            </div>
+          </SheetHeader>
+          
+          <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]">
+            {/* Department Filter */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-blue-500" />
+                Department
+              </Label>
+              <Select
+                value={filters.department}
+                onValueChange={(value) => updateFilter("department", value || "all")}
+              >
+                <SelectTrigger className="w-full rounded-xl h-12">
+                  <SelectValue placeholder="Select Department" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Departments</SelectItem>
+                  {uniqueDepartments.map((dept) => (
+                    <SelectItem key={dept} value={dept}>
+                      {dept}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Position Filter */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-purple-500" />
+                Position
+              </Label>
+              <Select
+                value={filters.position}
+                onValueChange={(value) => updateFilter("position", value || "all")}
+              >
+                <SelectTrigger className="w-full rounded-xl h-12">
+                  <SelectValue placeholder="Select Position" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Positions</SelectItem>
+                  {uniquePositions.map((pos) => (
+                    <SelectItem key={pos} value={pos}>
+                      {pos}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Status Filter */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                Employment Status
+              </Label>
+              <Select
+                value={filters.status}
+                onValueChange={(value) => updateFilter("status", value || "all")}
+              >
+                <SelectTrigger className="w-full rounded-xl h-12">
+                  <SelectValue placeholder="Select Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Inactive">Inactive</SelectItem>
+                  <SelectItem value="On Leave">On Leave</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Tenure Filter */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-amber-500" />
+                Tenure (Years of Service)
+              </Label>
+              <Select
+                value={filters.tenure}
+                onValueChange={(value) => updateFilter("tenure", (value || "all") as TenureRange)}
+              >
+                <SelectTrigger className="w-full rounded-xl h-12">
+                  <SelectValue placeholder="Select Tenure Range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Tenure</SelectItem>
+                  <SelectItem value="new">New Hires (0-6 months)</SelectItem>
+                  <SelectItem value="junior">Junior (6 months - 2 years)</SelectItem>
+                  <SelectItem value="mid">Mid-level (2-5 years)</SelectItem>
+                  <SelectItem value="senior">Senior (5+ years)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-gray-200 dark:bg-gray-700" />
+
+            {/* Sort Options */}
+            <div className="space-y-4">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <ArrowUpDown className="w-4 h-4 text-cyan-500" />
+                Sort Options
+              </Label>
+              
+              {/* Name Sort */}
+              <div className="space-y-2">
+                <Label className="text-xs text-gray-500">Sort by Name</Label>
+                <div className="flex gap-2">
+                  <Button
+                    variant={filters.nameSort === "asc" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => updateFilter("nameSort", filters.nameSort === "asc" ? null : "asc")}
+                    className={`flex-1 rounded-xl ${
+                      filters.nameSort === "asc" 
+                        ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white" 
+                        : ""
+                    }`}
+                  >
+                    <ArrowDownAZ className="w-4 h-4 mr-2" />
+                    A-Z
+                  </Button>
+                  <Button
+                    variant={filters.nameSort === "desc" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => updateFilter("nameSort", filters.nameSort === "desc" ? null : "desc")}
+                    className={`flex-1 rounded-xl ${
+                      filters.nameSort === "desc" 
+                        ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white" 
+                        : ""
+                    }`}
+                  >
+                    <ArrowUpZA className="w-4 h-4 mr-2" />
+                    Z-A
+                  </Button>
+                </div>
+              </div>
+
+              {/* Date Hired Sort */}
+              <div className="space-y-2">
+                <Label className="text-xs text-gray-500">Sort by Date Hired</Label>
+                <div className="flex gap-2">
+                  <Button
+                    variant={filters.dateSort === "desc" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => updateFilter("dateSort", filters.dateSort === "desc" ? null : "desc")}
+                    className={`flex-1 rounded-xl ${
+                      filters.dateSort === "desc" 
+                        ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white" 
+                        : ""
+                    }`}
+                  >
+                    <CalendarArrowDown className="w-4 h-4 mr-2" />
+                    Newest First
+                  </Button>
+                  <Button
+                    variant={filters.dateSort === "asc" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => updateFilter("dateSort", filters.dateSort === "asc" ? null : "asc")}
+                    className={`flex-1 rounded-xl ${
+                      filters.dateSort === "asc" 
+                        ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white" 
+                        : ""
+                    }`}
+                  >
+                    <CalendarArrowUp className="w-4 h-4 mr-2" />
+                    Oldest First
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <SheetFooter className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 flex-row gap-3">
+            <Button
+              variant="outline"
+              onClick={clearAllFilters}
+              disabled={activeFilterCount === 0 && !searchQuery}
+              className="flex-1 rounded-xl"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Clear All
+            </Button>
+            <Button 
+              onClick={() => setIsFilterSheetOpen(false)}
+              className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl"
+            >
+              <Check className="w-4 h-4 mr-2" />
+              Apply Filters
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
 
       {/* View Profile Dialog */}
       <Dialog open={viewProfileOpen} onOpenChange={setViewProfileOpen}>
