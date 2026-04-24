@@ -354,26 +354,30 @@ export function ProfileClient({
         </div>
       </div>
 
-      {/* Tabs Section */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-1 rounded-xl">
-          <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white">
-            <User className="w-4 h-4 mr-2" />
+      {/* Tabs Section - Vertical Sidebar Layout */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex gap-6">
+        {/* Vertical Sidebar Tabs */}
+        <TabsList className="flex-col h-fit min-w-[200px] bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-2 rounded-xl">
+          <TabsTrigger value="overview" className="w-full justify-start gap-3 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white py-3">
+            <User className="w-4 h-4" />
             Overview
           </TabsTrigger>
-          <TabsTrigger value="employment" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white">
-            <Briefcase className="w-4 h-4 mr-2" />
+          <TabsTrigger value="employment" className="w-full justify-start gap-3 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white py-3">
+            <Briefcase className="w-4 h-4" />
             Employment
           </TabsTrigger>
-          <TabsTrigger value="documents" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white">
-            <FolderOpen className="w-4 h-4 mr-2" />
+          <TabsTrigger value="documents" className="w-full justify-start gap-3 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white py-3">
+            <FolderOpen className="w-4 h-4" />
             Documents
           </TabsTrigger>
-          <TabsTrigger value="activity" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white">
-            <History className="w-4 h-4 mr-2" />
+          <TabsTrigger value="activity" className="w-full justify-start gap-3 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white py-3">
+            <History className="w-4 h-4" />
             Activity
           </TabsTrigger>
         </TabsList>
+        
+        {/* Content Area */}
+        <div className="flex-1">
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6 animate-fade-in-up">
@@ -938,6 +942,7 @@ export function ProfileClient({
             </Card>
           )}
         </TabsContent>
+        </div>
       </Tabs>
     </div>
   );
