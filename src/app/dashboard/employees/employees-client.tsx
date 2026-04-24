@@ -32,6 +32,13 @@ import {
   File,
   Trash2,
   Download,
+  Eye,
+  Pencil,
+  Snowflake,
+  AlertTriangle,
+  IdCard,
+  BadgeCheck,
+  UserCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,6 +62,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Dialog,
@@ -63,6 +71,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
@@ -201,10 +219,36 @@ const DOCUMENT_TYPES = [
 ];
 
 export function EmployeesClient() {
-  const { employees, addEmployee } = useStore();
+  const { employees, addEmployee, updateEmployee, deleteEmployee } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+
+  // Action menu state
+  const [viewProfileOpen, setViewProfileOpen] = useState(false);
+  const [editEmployeeOpen, setEditEmployeeOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [freezeConfirmOpen, setFreezeConfirmOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [editStep, setEditStep] = useState(1);
+  const [editFormData, setEditFormData] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    employeeId: "",
+    salary: "",
+    payFrequency: "Monthly",
+    currency: "USD",
+    department: "",
+    position: "",
+    manager: "",
+    employmentType: "Full-time",
+    workLocation: "Office",
+    workSchedule: "Standard",
+    hireDate: "",
+    employmentStatus: "Active",
+  });
+
   const [formData, setFormData] = useState({
     // Personal Details
     fullName: "",
@@ -334,6 +378,112 @@ export function EmployeesClient() {
 
   const activeCount = employees.filter((e) => e.employmentStatus === "Active").length;
   const departmentCount = new Set(employees.map((e) => e.department).filter(Boolean)).size;
+
+  // Action handlers
+  const handleViewProfile = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setViewProfileOpen(true);
+  };
+
+  const handleEdit = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setEditFormData({
+      fullName: employee.fullName,
+      email: employee.email,
+      phoneNumber: employee.phoneNumber || "",
+      employeeId: employee.employeeId,
+      salary: String(employee.salary || ""),
+      payFrequency: employee.payFrequency || "Monthly",
+      currency: "USD",
+      department: employee.department,
+      position: employee.position,
+      manager: employee.manager || "",
+      employmentType: employee.employmentType,
+      workLocation: employee.workLocation || "Office",
+      workSchedule: employee.workSchedule || "Standard",
+      hireDate: employee.hireDate,
+      employmentStatus: employee.employmentStatus,
+    });
+    setEditStep(1);
+    setEditEmployeeOpen(true);
+  };
+
+  const handleFreeze = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setFreezeConfirmOpen(true);
+  };
+
+  const confirmFreeze = () => {
+    if (selectedEmployee) {
+      updateEmployee(selectedEmployee.id, { employmentStatus: "Inactive" });
+      toast.success(`${selectedEmployee.fullName}'s account has been frozen`);
+      setFreezeConfirmOpen(false);
+      setSelectedEmployee(null);
+    }
+  };
+
+  const handleDelete = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedEmployee) {
+      deleteEmployee(selectedEmployee.id);
+      toast.success(`${selectedEmployee.fullName} has been deleted`);
+      setDeleteConfirmOpen(false);
+      setSelectedEmployee(null);
+    }
+  };
+
+  const handleEditNext = () => {
+    if (editStep < 5) setEditStep(editStep + 1);
+  };
+
+  const handleEditBack = () => {
+    if (editStep > 1) setEditStep(editStep - 1);
+  };
+
+  const isEditStepValid = () => {
+    switch (editStep) {
+      case 1:
+        return editFormData.fullName && editFormData.email;
+      case 2:
+        return editFormData.salary && Number(editFormData.salary) > 0;
+      case 3:
+        return editFormData.department && editFormData.position;
+      case 4:
+        return editFormData.workLocation && editFormData.workSchedule;
+      case 5:
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  const handleEditSubmit = () => {
+    if (selectedEmployee) {
+      updateEmployee(selectedEmployee.id, {
+        fullName: editFormData.fullName,
+        email: editFormData.email,
+        phoneNumber: editFormData.phoneNumber,
+        employeeId: editFormData.employeeId,
+        salary: Number(editFormData.salary) || 0,
+        payFrequency: editFormData.payFrequency,
+        department: editFormData.department,
+        position: editFormData.position,
+        manager: editFormData.manager,
+        employmentType: editFormData.employmentType,
+        workLocation: editFormData.workLocation,
+        workSchedule: editFormData.workSchedule,
+        hireDate: editFormData.hireDate,
+        employmentStatus: editFormData.employmentStatus,
+      });
+      toast.success(`${editFormData.fullName} updated successfully!`);
+      setEditEmployeeOpen(false);
+      setEditStep(1);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -954,9 +1104,27 @@ export function EmployeesClient() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="rounded-xl">
-                          <DropdownMenuItem>View Profile</DropdownMenuItem>
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleViewProfile(employee)} className="cursor-pointer">
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Profile
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEdit(employee)} className="cursor-pointer">
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => handleFreeze(employee)} 
+                            className="cursor-pointer text-amber-600"
+                            disabled={employee.employmentStatus === "Inactive"}
+                          >
+                            <Snowflake className="mr-2 h-4 w-4" />
+                            Freeze Account
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDelete(employee)} className="cursor-pointer text-red-600">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Employee
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -976,6 +1144,675 @@ export function EmployeesClient() {
           )}
         </CardContent>
       </Card>
+
+      {/* View Profile Dialog */}
+      <Dialog open={viewProfileOpen} onOpenChange={setViewProfileOpen}>
+        <DialogContent className="w-[90vw] max-w-[600px] max-h-[90vh] overflow-y-auto rounded-2xl p-0">
+          <DialogHeader className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                <User className="w-4 h-4 text-white" />
+              </div>
+              <DialogTitle>Employee Profile</DialogTitle>
+            </div>
+          </DialogHeader>
+          {selectedEmployee && (
+            <div className="p-6 space-y-6">
+              {/* Header */}
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center text-white font-bold text-2xl">
+                  {selectedEmployee.fullName.charAt(0)}
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{selectedEmployee.fullName}</h3>
+                  <p className="text-gray-500">{selectedEmployee.position}</p>
+                  <div className="mt-1">
+                    <StatusBadge status={selectedEmployee.employmentStatus} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Personal Info */}
+              <div className="space-y-3">
+                <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <UserCircle className="w-4 h-4 text-blue-500" />
+                  Personal Information
+                </h4>
+                <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                  <div>
+                    <p className="text-xs text-gray-500">Employee ID</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-1">
+                      <IdCard className="w-3 h-3" /> {selectedEmployee.employeeId}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Email</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-1">
+                      <Mail className="w-3 h-3" /> {selectedEmployee.email}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Phone</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-1">
+                      <Phone className="w-3 h-3" /> {selectedEmployee.phoneNumber || "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Hire Date</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-1">
+                      <Calendar className="w-3 h-3" /> {selectedEmployee.hireDate}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Employment Info */}
+              <div className="space-y-3">
+                <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-emerald-500" />
+                  Employment Information
+                </h4>
+                <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                  <div>
+                    <p className="text-xs text-gray-500">Department</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-1">
+                      <Building2 className="w-3 h-3" /> {selectedEmployee.department}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Position</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedEmployee.position}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Employment Type</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedEmployee.employmentType}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Status</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedEmployee.employmentStatus}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Work Setup */}
+              <div className="space-y-3">
+                <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Settings className="w-4 h-4 text-purple-500" />
+                  Work Setup
+                </h4>
+                <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                  <div>
+                    <p className="text-xs text-gray-500">Work Location</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-1">
+                      <MapPin className="w-3 h-3" /> {selectedEmployee.workLocation || "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Work Schedule</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {selectedEmployee.workSchedule || "—"}
+                    </p>
+                  </div>
+                  {selectedEmployee.manager && (
+                    <div>
+                      <p className="text-xs text-gray-500">Manager</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-1">
+                        <UserCheck className="w-3 h-3" /> {selectedEmployee.manager}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Salary Info */}
+              {selectedEmployee.salary && (
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-emerald-500" />
+                    Salary Information
+                  </h4>
+                  <div className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 rounded-xl p-4 border border-emerald-200 dark:border-emerald-800">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400">Annual Salary</p>
+                        <p className="text-2xl font-bold text-emerald-900 dark:text-emerald-300">
+                          ${selectedEmployee.salary.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400">Pay Frequency</p>
+                        <p className="text-sm font-medium text-emerald-900 dark:text-emerald-300">
+                          {selectedEmployee.payFrequency}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Documents */}
+              {selectedEmployee.documents && selectedEmployee.documents.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-indigo-500" />
+                    Documents ({selectedEmployee.documents.length})
+                  </h4>
+                  <div className="space-y-2">
+                    {selectedEmployee.documents.map((doc) => (
+                      <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <File className="w-4 h-4 text-gray-400" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">{doc.name}</p>
+                            <p className="text-xs text-gray-500">{doc.size}</p>
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="sm" className="rounded-lg">
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+                <Button
+                  variant="outline"
+                  onClick={() => setViewProfileOpen(false)}
+                  className="flex-1 rounded-xl"
+                >
+                  Close
+                </Button>
+                <Button
+                  onClick={() => {
+                    setViewProfileOpen(false);
+                    handleEdit(selectedEmployee);
+                  }}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl"
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Employee Dialog */}
+      <Dialog open={editEmployeeOpen} onOpenChange={setEditEmployeeOpen}>
+        <DialogContent className="w-[85vw] max-w-[1200px] max-h-[95vh] overflow-y-auto rounded-2xl p-0">
+          <DialogHeader className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                <Pencil className="w-4 h-4 text-white" />
+              </div>
+              <DialogTitle>Edit Employee</DialogTitle>
+            </div>
+          </DialogHeader>
+
+          <div className="p-6">
+            {/* Stepper */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between">
+                {STEPS.map((step, index) => {
+                  const Icon = step.icon;
+                  const isActive = editStep === step.id;
+                  const isCompleted = editStep > step.id;
+                  
+                  return (
+                    <div key={step.id} className="flex items-center flex-1">
+                      <div className="flex flex-col items-center">
+                        <div
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                            isActive
+                              ? "bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-md"
+                              : isCompleted
+                              ? "bg-gradient-to-br from-emerald-500 to-green-500 text-white"
+                              : "bg-gray-100 dark:bg-gray-800 text-gray-400"
+                          }`}
+                        >
+                          {isCompleted ? (
+                            <Check className="w-5 h-5" />
+                          ) : (
+                            <Icon className="w-5 h-5" />
+                          )}
+                        </div>
+                        <span
+                          className={`text-xs mt-2 font-medium text-center ${
+                            isActive
+                              ? "text-blue-600 dark:text-blue-400"
+                              : isCompleted
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          {step.label}
+                        </span>
+                      </div>
+                      {index < STEPS.length - 1 && (
+                        <div
+                          className={`flex-1 h-1 mx-2 rounded-full transition-all duration-300 ${
+                            isCompleted
+                              ? "bg-gradient-to-r from-emerald-500 to-green-500"
+                              : "bg-gray-200 dark:bg-gray-700"
+                          }`}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Form Content */}
+            <div className="min-h-[400px]">
+              {/* Step 1: Personal Details */}
+              {editStep === 1 && (
+                <div className="space-y-6 animate-fade-in-up w-full max-w-3xl mx-auto px-8">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                      <UserCircle className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Personal Details</h3>
+                      <p className="text-sm text-gray-500">Update the employee's basic information</p>
+                    </div>
+                  </div>
+                  <div className="space-y-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-fullName" className="text-sm font-medium text-gray-700">Full Name *</Label>
+                      <Input
+                        id="edit-fullName"
+                        required
+                        value={editFormData.fullName}
+                        onChange={(e) => setEditFormData({ ...editFormData, fullName: e.target.value })}
+                        placeholder="John Doe"
+                        className="rounded-xl h-12"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-email" className="text-sm font-medium text-gray-700">Email Address *</Label>
+                      <Input
+                        id="edit-email"
+                        type="email"
+                        required
+                        value={editFormData.email}
+                        onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                        placeholder="john@company.com"
+                        className="rounded-xl h-12"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-phoneNumber" className="text-sm font-medium text-gray-700">Phone Number</Label>
+                      <Input
+                        id="edit-phoneNumber"
+                        value={editFormData.phoneNumber}
+                        onChange={(e) => setEditFormData({ ...editFormData, phoneNumber: e.target.value })}
+                        placeholder="+1 555-0123"
+                        className="rounded-xl h-12"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-employeeId" className="text-sm font-medium text-gray-700">Employee ID</Label>
+                      <Input
+                        id="edit-employeeId"
+                        value={editFormData.employeeId}
+                        onChange={(e) => setEditFormData({ ...editFormData, employeeId: e.target.value })}
+                        className="rounded-xl h-12"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Salary */}
+              {editStep === 2 && (
+                <div className="space-y-6 animate-fade-in-up w-full max-w-3xl mx-auto px-8">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center">
+                      <CreditCard className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Salary Information</h3>
+                      <p className="text-sm text-gray-500">Update the employee's compensation details</p>
+                    </div>
+                  </div>
+                  <div className="space-y-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-salary" className="text-sm font-medium text-gray-700">Annual Salary *</Label>
+                      <div className="relative">
+                        <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <Input
+                          id="edit-salary"
+                          type="number"
+                          required
+                          value={editFormData.salary}
+                          onChange={(e) => setEditFormData({ ...editFormData, salary: e.target.value })}
+                          placeholder="50000"
+                          className="pl-12 rounded-xl h-12"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-currency" className="text-sm font-medium text-gray-700">Currency</Label>
+                      <select
+                        id="edit-currency"
+                        value={editFormData.currency}
+                        onChange={(e) => setEditFormData({ ...editFormData, currency: e.target.value })}
+                        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                      >
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="GBP">GBP - British Pound</option>
+                        <option value="PHP">PHP - Philippine Peso</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-payFrequency" className="text-sm font-medium text-gray-700">Pay Frequency</Label>
+                      <select
+                        id="edit-payFrequency"
+                        value={editFormData.payFrequency}
+                        onChange={(e) => setEditFormData({ ...editFormData, payFrequency: e.target.value })}
+                        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                      >
+                        <option value="Monthly">Monthly</option>
+                        <option value="Bi-weekly">Bi-weekly</option>
+                        <option value="Weekly">Weekly</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Team Assignment */}
+              {editStep === 3 && (
+                <div className="space-y-6 animate-fade-in-up w-full max-w-3xl mx-auto px-8">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                      <Users2 className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Team Assignment</h3>
+                      <p className="text-sm text-gray-500">Update the employee's department and team</p>
+                    </div>
+                  </div>
+                  <div className="space-y-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-department" className="text-sm font-medium text-gray-700">Department *</Label>
+                      <select
+                        id="edit-department"
+                        required
+                        value={editFormData.department}
+                        onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
+                        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                      >
+                        <option value="">Select Department</option>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Design">Design</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="HR">HR</option>
+                        <option value="Sales">Sales</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Operations">Operations</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-position" className="text-sm font-medium text-gray-700">Position *</Label>
+                      <Input
+                        id="edit-position"
+                        required
+                        value={editFormData.position}
+                        onChange={(e) => setEditFormData({ ...editFormData, position: e.target.value })}
+                        placeholder="Software Engineer"
+                        className="rounded-xl h-12"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-manager" className="text-sm font-medium text-gray-700">Manager</Label>
+                      <select
+                        id="edit-manager"
+                        value={editFormData.manager}
+                        onChange={(e) => setEditFormData({ ...editFormData, manager: e.target.value })}
+                        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                      >
+                        <option value="">Select Manager</option>
+                        {employees.filter(e => e.id !== selectedEmployee?.id).map((emp) => (
+                          <option key={emp.id} value={emp.fullName}>
+                            {emp.fullName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-employmentType" className="text-sm font-medium text-gray-700">Employment Type</Label>
+                      <select
+                        id="edit-employmentType"
+                        value={editFormData.employmentType}
+                        onChange={(e) => setEditFormData({ ...editFormData, employmentType: e.target.value })}
+                        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                      >
+                        <option value="Full-time">Full-time</option>
+                        <option value="Part-time">Part-time</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Intern">Intern</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 4: Work Setup */}
+              {editStep === 4 && (
+                <div className="space-y-6 animate-fade-in-up w-full max-w-3xl mx-auto px-8">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
+                      <Settings className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Work Setup</h3>
+                      <p className="text-sm text-gray-500">Update the employee's work arrangement</p>
+                    </div>
+                  </div>
+                  <div className="space-y-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-workLocation" className="text-sm font-medium text-gray-700">Work Location</Label>
+                      <select
+                        id="edit-workLocation"
+                        value={editFormData.workLocation}
+                        onChange={(e) => setEditFormData({ ...editFormData, workLocation: e.target.value })}
+                        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                      >
+                        <option value="Office">Office</option>
+                        <option value="Remote">Remote</option>
+                        <option value="Hybrid">Hybrid</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-workSchedule" className="text-sm font-medium text-gray-700">Work Schedule</Label>
+                      <select
+                        id="edit-workSchedule"
+                        value={editFormData.workSchedule}
+                        onChange={(e) => setEditFormData({ ...editFormData, workSchedule: e.target.value })}
+                        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                      >
+                        <option value="Standard">Standard (9AM - 5PM)</option>
+                        <option value="Flexible">Flexible Hours</option>
+                        <option value="Night Shift">Night Shift</option>
+                        <option value="Weekend">Weekend Only</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-hireDate" className="text-sm font-medium text-gray-700">Hire Date</Label>
+                      <div className="relative">
+                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <Input
+                          id="edit-hireDate"
+                          type="date"
+                          value={editFormData.hireDate}
+                          onChange={(e) => setEditFormData({ ...editFormData, hireDate: e.target.value })}
+                          className="pl-12 rounded-xl h-12"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-employmentStatus" className="text-sm font-medium text-gray-700">Employment Status</Label>
+                      <select
+                        id="edit-employmentStatus"
+                        value={editFormData.employmentStatus}
+                        onChange={(e) => setEditFormData({ ...editFormData, employmentStatus: e.target.value })}
+                        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-gray-800 h-12"
+                      >
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                        <option value="On Leave">On Leave</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 5: Review */}
+              {editStep === 5 && (
+                <div className="space-y-6 animate-fade-in-up w-full max-w-3xl mx-auto px-8">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
+                      <CheckCircle2 className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Review Changes</h3>
+                      <p className="text-sm text-gray-500">Review and confirm the updated information</p>
+                    </div>
+                  </div>
+
+                  <div className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between border-b border-blue-100 dark:border-blue-800 pb-2">
+                        <p className="text-gray-500">Name</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{editFormData.fullName}</p>
+                      </div>
+                      <div className="flex justify-between border-b border-blue-100 dark:border-blue-800 pb-2">
+                        <p className="text-gray-500">Email</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{editFormData.email}</p>
+                      </div>
+                      <div className="flex justify-between border-b border-blue-100 dark:border-blue-800 pb-2">
+                        <p className="text-gray-500">Salary</p>
+                        <p className="font-medium text-gray-900 dark:text-white">${editFormData.salary ? Number(editFormData.salary).toLocaleString() : "—"} / {editFormData.payFrequency.toLowerCase()}</p>
+                      </div>
+                      <div className="flex justify-between border-b border-blue-100 dark:border-blue-800 pb-2">
+                        <p className="text-gray-500">Department</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{editFormData.department}</p>
+                      </div>
+                      <div className="flex justify-between border-b border-blue-100 dark:border-blue-800 pb-2">
+                        <p className="text-gray-500">Position</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{editFormData.position}</p>
+                      </div>
+                      <div className="flex justify-between border-b border-blue-100 dark:border-blue-800 pb-2">
+                        <p className="text-gray-500">Work Setup</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{editFormData.workLocation} • {editFormData.workSchedule}</p>
+                      </div>
+                      <div className="flex justify-between">
+                        <p className="text-gray-500">Status</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{editFormData.employmentStatus}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Navigation Buttons */}
+            <div className="flex justify-between pt-6 mt-8 border-t border-gray-100 dark:border-gray-800">
+              <Button
+                variant="outline"
+                onClick={handleEditBack}
+                disabled={editStep === 1}
+                className="rounded-xl h-12 px-6"
+              >
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                Back
+              </Button>
+              
+              {editStep < 5 ? (
+                <Button
+                  onClick={handleEditNext}
+                  disabled={!isEditStepValid()}
+                  className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl h-12 px-6"
+                >
+                  Next
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleEditSubmit}
+                  className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white rounded-xl h-12 px-6"
+                >
+                  <Check className="mr-2 h-4 w-4" />
+                  Save Changes
+                </Button>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Freeze Account Confirmation */}
+      <AlertDialog open={freezeConfirmOpen} onOpenChange={setFreezeConfirmOpen}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+                <Snowflake className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <AlertDialogTitle>Freeze Account?</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="pt-2">
+              This will set <strong>{selectedEmployee?.fullName}</strong>'s employment status to "Inactive". 
+              They will no longer be able to access the system until their account is reactivated.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmFreeze}
+              className="bg-amber-500 hover:bg-amber-600 text-white rounded-xl"
+            >
+              <Snowflake className="mr-2 h-4 w-4" />
+              Freeze Account
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Employee Confirmation */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+              </div>
+              <AlertDialogTitle>Delete Employee?</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="pt-2">
+              This action cannot be undone. This will permanently delete <strong>{selectedEmployee?.fullName}</strong> 
+              and all associated data from the system.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-500 hover:bg-red-600 text-white rounded-xl"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Employee
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

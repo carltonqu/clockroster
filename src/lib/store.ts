@@ -51,6 +51,18 @@ export function useStore() {
     return newEmployee;
   }, []);
 
+  const updateEmployee = useCallback((id: string, updates: Partial<Employee>) => {
+    globalEmployees = globalEmployees.map((emp) =>
+      emp.id === id ? { ...emp, ...updates } : emp
+    );
+    setEmployeesState(globalEmployees);
+  }, []);
+
+  const deleteEmployee = useCallback((id: string) => {
+    globalEmployees = globalEmployees.filter((emp) => emp.id !== id);
+    setEmployeesState(globalEmployees);
+  }, []);
+
   // Payroll
   const addPayrollEntry = useCallback((entry: Omit<PayrollEntry, "id">) => {
     const newId = String(globalPayrollEntries.length + 1);
@@ -169,6 +181,8 @@ export function useStore() {
     notifications,
     holidays,
     addEmployee,
+    updateEmployee,
+    deleteEmployee,
     addPayrollEntry,
     updatePayrollStatus,
     approvePayroll,
