@@ -522,7 +522,7 @@ export function EmployeeDashboardClient() {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Deductions</span>
                     <span className="font-medium text-red-600">
-                      -${recentPayslip.deductions.toLocaleString()}
+                      -${recentPayslip.totalDeductions.toLocaleString()}
                     </span>
                   </div>
                   <div className="border-t border-emerald-200 pt-2 mt-2">

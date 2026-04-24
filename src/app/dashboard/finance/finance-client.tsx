@@ -200,7 +200,7 @@ export function FinanceClient() {
       const row = map.get(dept)!;
       row.employeeCount += 1;
       row.grossPay += e.grossPay;
-      row.deductions += e.deductions;
+      row.deductions += e.totalDeductions;
       row.netPay += e.netPay;
     });
     return Array.from(map.values()).sort((a, b) => b.netPay - a.netPay);
@@ -211,7 +211,7 @@ export function FinanceClient() {
       .map((e) => ({
         name: e.employeeName,
         grossPay: e.grossPay,
-        deductions: e.deductions,
+        deductions: e.totalDeductions,
         netPay: e.netPay,
         status: e.status,
       }))

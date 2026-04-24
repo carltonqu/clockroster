@@ -23,7 +23,7 @@ export default function DashboardPage() {
   }));
 
   // Get last payroll
-  const lastPayroll = mockPayrollEntries[0]?.total ?? null;
+  const lastPayroll = mockPayrollEntries[0]?.netPay ?? null;
 
   const stats = {
     totalHours: mockDashboardStats.totalHoursThisMonth,

@@ -8,12 +8,14 @@ import {
   mockAssetAssignments,
   mockLeaveRequests,
   mockNotifications,
+  mockHolidays,
   Employee,
   PayrollEntry,
   Asset,
   AssetAssignment,
   LeaveRequest,
   Notification,
+  Holiday,
 } from "./mock-data";
 
 // Global store (singleton pattern for demo)
@@ -23,6 +25,7 @@ let globalAssets = [...mockAssets];
 let globalAssetAssignments = [...mockAssetAssignments];
 let globalLeaveRequests = [...mockLeaveRequests];
 let globalNotifications = [...mockNotifications];
+let globalHolidays = [...mockHolidays];
 
 // Hook to use the store
 export function useStore() {
@@ -32,6 +35,7 @@ export function useStore() {
   const [assetAssignments, setAssetAssignmentsState] = useState(globalAssetAssignments);
   const [leaveRequests, setLeaveRequestsState] = useState(globalLeaveRequests);
   const [notifications, setNotificationsState] = useState(globalNotifications);
+  const [holidays, setHolidaysState] = useState(globalHolidays);
 
   // Employees
   const addEmployee = useCallback((employee: Omit<Employee, "id" | "employeeId">) => {
@@ -54,10 +58,25 @@ export function useStore() {
       ...entry,
       id: newId,
     };
-    globalPayrollEntries = [...globalPayrollEntries, newEntry];
+    globalPayrollEntries = [newEntry, ...globalPayrollEntries];
     setPayrollEntriesState(globalPayrollEntries);
     return newEntry;
   }, []);
+
+  const updatePayrollStatus = useCallback((id: string, status: PayrollEntry["status"]) => {
+    globalPayrollEntries = globalPayrollEntries.map((entry) =>
+      entry.id === id ? { ...entry, status } : entry
+    );
+    setPayrollEntriesState(globalPayrollEntries);
+  }, []);
+
+  const approvePayroll = useCallback((id: string) => {
+    updatePayrollStatus(id, "APPROVED");
+  }, [updatePayrollStatus]);
+
+  const releasePayroll = useCallback((id: string) => {
+    updatePayrollStatus(id, "RELEASED");
+  }, [updatePayrollStatus]);
 
   // Assets
   const addAsset = useCallback((asset: Omit<Asset, "id" | "assetCode">) => {
@@ -124,6 +143,23 @@ export function useStore() {
     setNotificationsState(globalNotifications);
   }, []);
 
+  // Holidays
+  const addHoliday = useCallback((holiday: Omit<Holiday, "id">) => {
+    const newId = String(globalHolidays.length + 1);
+    const newHoliday: Holiday = {
+      ...holiday,
+      id: newId,
+    };
+    globalHolidays = [...globalHolidays, newHoliday];
+    setHolidaysState(globalHolidays);
+    return newHoliday;
+  }, []);
+
+  const deleteHoliday = useCallback((id: string) => {
+    globalHolidays = globalHolidays.filter((h) => h.id !== id);
+    setHolidaysState(globalHolidays);
+  }, []);
+
   return {
     employees,
     payrollEntries,
@@ -131,13 +167,19 @@ export function useStore() {
     assetAssignments,
     leaveRequests,
     notifications,
+    holidays,
     addEmployee,
     addPayrollEntry,
+    updatePayrollStatus,
+    approvePayroll,
+    releasePayroll,
     addAsset,
     assignAsset,
     addLeaveRequest,
     updateLeaveRequestStatus,
     addNotification,
     markNotificationAsRead,
+    addHoliday,
+    deleteHoliday,
   };
 }

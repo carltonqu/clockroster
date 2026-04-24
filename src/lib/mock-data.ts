@@ -40,19 +40,69 @@ export interface Shift {
   role: string;
 }
 
+export interface Allowance {
+  name: string;
+  amount: number;
+}
+
+export interface OtherDeduction {
+  name: string;
+  amount: number;
+}
+
 export interface PayrollEntry {
   id: string;
   userId: string;
   employeeName: string;
   periodStart: string;
   periodEnd: string;
+  periodType: "WEEKLY" | "SEMI_MONTHLY" | "MONTHLY";
   status: "DRAFT" | "APPROVED" | "RELEASED";
+  
+  // Rate information
+  rateType: "MONTHLY" | "DAILY" | "HOURLY";
+  rate: number;
+  dailyRate: number;
+  hourlyRate: number;
+  
+  // Attendance
+  daysWorked: number;
+  hoursWorked: number;
+  lateMinutes: number;
+  undertimeMinutes: number;
+  absenceDays: number;
+  
+  // Earnings breakdown
   basicPay: number;
   otPay: number;
+  nightDiffPay: number;
+  holidayPay: number;
+  totalAllowances: number;
+  allowances: Allowance[];
+  
+  // Attendance deductions
+  lateDeduction: number;
+  undertimeDeduction: number;
+  absenceDeduction: number;
+  
+  // Government deductions (Philippine)
+  sssEmployee: number;
+  sssEmployer: number;
+  philhealthEmployee: number;
+  philhealthEmployer: number;
+  pagibigEmployee: number;
+  pagibigEmployer: number;
+  withholdingTax: number;
+  taxableIncome: number;
+  
+  // Other deductions
+  otherDeductions: OtherDeduction[];
+  totalOtherDeductions: number;
+  
+  // Totals
   grossPay: number;
-  deductions: number;
+  totalDeductions: number;
   netPay: number;
-  hoursWorked: number;
 }
 
 export interface Notification {
@@ -99,14 +149,14 @@ export interface LeaveRequest {
   requestedAt: string;
 }
 
-// Mock Employees
+// Mock Employees - Filipino Names
 export const mockEmployees: Employee[] = [
   {
     id: "1",
     employeeId: "EMP001",
-    fullName: "John Smith",
-    email: "john.smith@company.com",
-    phoneNumber: "+1 555-0101",
+    fullName: "Juan Santos",
+    email: "juan.santos@company.ph",
+    phoneNumber: "+63 912-345-6789",
     department: "Engineering",
     position: "Senior Developer",
     employmentStatus: "Active",
@@ -116,9 +166,9 @@ export const mockEmployees: Employee[] = [
   {
     id: "2",
     employeeId: "EMP002",
-    fullName: "Sarah Johnson",
-    email: "sarah.johnson@company.com",
-    phoneNumber: "+1 555-0102",
+    fullName: "Maria Garcia",
+    email: "maria.garcia@company.ph",
+    phoneNumber: "+63 913-456-7890",
     department: "Design",
     position: "UI/UX Designer",
     employmentStatus: "Active",
@@ -128,9 +178,9 @@ export const mockEmployees: Employee[] = [
   {
     id: "3",
     employeeId: "EMP003",
-    fullName: "Michael Chen",
-    email: "michael.chen@company.com",
-    phoneNumber: "+1 555-0103",
+    fullName: "Ricardo Reyes",
+    email: "ricardo.reyes@company.ph",
+    phoneNumber: "+63 914-567-8901",
     department: "Marketing",
     position: "Marketing Manager",
     employmentStatus: "Active",
@@ -140,9 +190,9 @@ export const mockEmployees: Employee[] = [
   {
     id: "4",
     employeeId: "EMP004",
-    fullName: "Emily Davis",
-    email: "emily.davis@company.com",
-    phoneNumber: "+1 555-0104",
+    fullName: "Ana Dela Cruz",
+    email: "ana.delacruz@company.ph",
+    phoneNumber: "+63 915-678-9012",
     department: "HR",
     position: "HR Specialist",
     employmentStatus: "Active",
@@ -152,9 +202,9 @@ export const mockEmployees: Employee[] = [
   {
     id: "5",
     employeeId: "EMP005",
-    fullName: "David Wilson",
-    email: "david.wilson@company.com",
-    phoneNumber: "+1 555-0105",
+    fullName: "Roberto Lim",
+    email: "roberto.lim@company.ph",
+    phoneNumber: "+63 916-789-0123",
     department: "Sales",
     position: "Sales Representative",
     employmentStatus: "Active",
@@ -168,7 +218,7 @@ export const mockTimeEntries: TimeEntry[] = [
   {
     id: "1",
     userId: "1",
-    employeeName: "John Smith",
+    employeeName: "Juan Santos",
     clockIn: "2024-01-15T08:00:00Z",
     clockOut: "2024-01-15T17:00:00Z",
     overtimeMinutes: 0,
@@ -177,7 +227,7 @@ export const mockTimeEntries: TimeEntry[] = [
   {
     id: "2",
     userId: "2",
-    employeeName: "Sarah Johnson",
+    employeeName: "Maria Garcia",
     clockIn: "2024-01-15T08:30:00Z",
     clockOut: "2024-01-15T17:30:00Z",
     overtimeMinutes: 30,
@@ -186,7 +236,7 @@ export const mockTimeEntries: TimeEntry[] = [
   {
     id: "3",
     userId: "3",
-    employeeName: "Michael Chen",
+    employeeName: "Ricardo Reyes",
     clockIn: "2024-01-15T09:00:00Z",
     clockOut: null,
     overtimeMinutes: 0,
@@ -195,7 +245,7 @@ export const mockTimeEntries: TimeEntry[] = [
   {
     id: "4",
     userId: "1",
-    employeeName: "John Smith",
+    employeeName: "Juan Santos",
     clockIn: "2024-01-14T08:00:00Z",
     clockOut: "2024-01-14T18:00:00Z",
     overtimeMinutes: 60,
@@ -204,7 +254,7 @@ export const mockTimeEntries: TimeEntry[] = [
   {
     id: "5",
     userId: "4",
-    employeeName: "Emily Davis",
+    employeeName: "Ana Dela Cruz",
     clockIn: "2024-01-15T08:15:00Z",
     clockOut: "2024-01-15T16:45:00Z",
     overtimeMinutes: 0,
@@ -217,7 +267,7 @@ export const mockSchedules: Schedule[] = [
   {
     id: "1",
     employeeId: "1",
-    employeeName: "John Smith",
+    employeeName: "Juan Santos",
     weekStart: "2024-01-15",
     shifts: [
       { id: "s1", day: "Monday", startTime: "08:00", endTime: "17:00", role: "Developer" },
@@ -230,7 +280,7 @@ export const mockSchedules: Schedule[] = [
   {
     id: "2",
     employeeId: "2",
-    employeeName: "Sarah Johnson",
+    employeeName: "Maria Garcia",
     weekStart: "2024-01-15",
     shifts: [
       { id: "s6", day: "Monday", startTime: "08:30", endTime: "17:30", role: "Designer" },
@@ -242,50 +292,249 @@ export const mockSchedules: Schedule[] = [
   },
 ];
 
-// Mock Payroll Entries
+// Mock Payroll Entries - Philippine Payroll Sample Data
 export const mockPayrollEntries: PayrollEntry[] = [
   {
     id: "1",
     userId: "1",
-    employeeName: "John Smith",
+    employeeName: "Juan Santos",
     periodStart: "2024-01-01",
     periodEnd: "2024-01-15",
+    periodType: "SEMI_MONTHLY",
     status: "RELEASED",
-    basicPay: 3000,
-    otPay: 200,
-    grossPay: 3200,
-    deductions: 450,
-    netPay: 2750,
+    rateType: "MONTHLY",
+    rate: 35000,
+    dailyRate: 1346.15,
+    hourlyRate: 168.27,
+    daysWorked: 11,
     hoursWorked: 88,
+    lateMinutes: 15,
+    undertimeMinutes: 0,
+    absenceDays: 0,
+    basicPay: 14807.69,
+    otPay: 1262.03,
+    nightDiffPay: 336.54,
+    holidayPay: 1346.15,
+    totalAllowances: 1500,
+    allowances: [
+      { name: "Transportation", amount: 1000 },
+      { name: "Meal", amount: 500 },
+    ],
+    lateDeduction: 42.07,
+    undertimeDeduction: 0,
+    absenceDeduction: 0,
+    sssEmployee: 787.50,
+    sssEmployer: 1662.50,
+    philhealthEmployee: 437.50,
+    philhealthEmployer: 437.50,
+    pagibigEmployee: 50,
+    pagibigEmployer: 350,
+    withholdingTax: 2083.33,
+    taxableIncome: 14341.62,
+    otherDeductions: [{ name: "Cash Advance", amount: 1000 }],
+    totalOtherDeductions: 1000,
+    grossPay: 19252.41,
+    totalDeductions: 4400.40,
+    netPay: 14852.01,
   },
   {
     id: "2",
     userId: "2",
-    employeeName: "Sarah Johnson",
+    employeeName: "Maria Garcia",
     periodStart: "2024-01-01",
     periodEnd: "2024-01-15",
+    periodType: "SEMI_MONTHLY",
     status: "APPROVED",
-    basicPay: 2800,
-    otPay: 150,
-    grossPay: 2950,
-    deductions: 420,
-    netPay: 2530,
-    hoursWorked: 86,
+    rateType: "MONTHLY",
+    rate: 28000,
+    dailyRate: 1076.92,
+    hourlyRate: 134.62,
+    daysWorked: 11,
+    hoursWorked: 88,
+    lateMinutes: 0,
+    undertimeMinutes: 30,
+    absenceDays: 0,
+    basicPay: 11846.15,
+    otPay: 504.82,
+    nightDiffPay: 0,
+    holidayPay: 1076.92,
+    totalAllowances: 1100,
+    allowances: [
+      { name: "Transportation", amount: 800 },
+      { name: "Rice Subsidy", amount: 300 },
+    ],
+    lateDeduction: 0,
+    undertimeDeduction: 67.31,
+    absenceDeduction: 0,
+    sssEmployee: 630,
+    sssEmployer: 1330,
+    philhealthEmployee: 350,
+    philhealthEmployer: 350,
+    pagibigEmployee: 50,
+    pagibigEmployer: 280,
+    withholdingTax: 1041.67,
+    taxableIncome: 10908.17,
+    otherDeductions: [],
+    totalOtherDeductions: 0,
+    grossPay: 14460.58,
+    totalDeductions: 2138.98,
+    netPay: 12321.60,
   },
   {
     id: "3",
     userId: "3",
-    employeeName: "Michael Chen",
+    employeeName: "Ricardo Reyes",
     periodStart: "2024-01-01",
     periodEnd: "2024-01-15",
+    periodType: "SEMI_MONTHLY",
     status: "DRAFT",
-    basicPay: 3500,
-    otPay: 0,
-    grossPay: 3500,
-    deductions: 520,
-    netPay: 2980,
-    hoursWorked: 80,
+    rateType: "DAILY",
+    rate: 650,
+    dailyRate: 650,
+    hourlyRate: 81.25,
+    daysWorked: 11,
+    hoursWorked: 88,
+    lateMinutes: 45,
+    undertimeMinutes: 0,
+    absenceDays: 0,
+    basicPay: 7150,
+    otPay: 812.50,
+    nightDiffPay: 162.50,
+    holidayPay: 0,
+    totalAllowances: 550,
+    allowances: [
+      { name: "Transportation", amount: 400 },
+      { name: "Meal", amount: 150 },
+    ],
+    lateDeduction: 60.94,
+    undertimeDeduction: 0,
+    absenceDeduction: 0,
+    sssEmployee: 450,
+    sssEmployer: 950,
+    philhealthEmployee: 250,
+    philhealthEmployer: 250,
+    pagibigEmployee: 50,
+    pagibigEmployer: 200,
+    withholdingTax: 0,
+    taxableIncome: 0,
+    otherDeductions: [{ name: "SSS Loan", amount: 500 }],
+    totalOtherDeductions: 500,
+    grossPay: 8614.06,
+    totalDeductions: 1260.94,
+    netPay: 7353.12,
   },
+  {
+    id: "4",
+    userId: "4",
+    employeeName: "Ana Dela Cruz",
+    periodStart: "2024-01-01",
+    periodEnd: "2024-01-15",
+    periodType: "SEMI_MONTHLY",
+    status: "RELEASED",
+    rateType: "MONTHLY",
+    rate: 45000,
+    dailyRate: 1730.77,
+    hourlyRate: 216.35,
+    daysWorked: 11,
+    hoursWorked: 88,
+    lateMinutes: 0,
+    undertimeMinutes: 0,
+    absenceDays: 0,
+    basicPay: 19038.46,
+    otPay: 2163.46,
+    nightDiffPay: 432.69,
+    holidayPay: 1730.77,
+    totalAllowances: 2000,
+    allowances: [
+      { name: "Transportation", amount: 1200 },
+      { name: "Communication", amount: 500 },
+      { name: "Meal", amount: 300 },
+    ],
+    lateDeduction: 0,
+    undertimeDeduction: 0,
+    absenceDeduction: 0,
+    sssEmployee: 1012.50,
+    sssEmployer: 2137.50,
+    philhealthEmployee: 562.50,
+    philhealthEmployer: 562.50,
+    pagibigEmployee: 50,
+    pagibigEmployer: 450,
+    withholdingTax: 3750,
+    taxableIncome: 19361.46,
+    otherDeductions: [{ name: "Pag-IBIG Loan", amount: 800 }],
+    totalOtherDeductions: 800,
+    grossPay: 25365.38,
+    totalDeductions: 6175,
+    netPay: 19190.38,
+  },
+  {
+    id: "5",
+    userId: "5",
+    employeeName: "Roberto Lim",
+    periodStart: "2024-01-01",
+    periodEnd: "2024-01-15",
+    periodType: "SEMI_MONTHLY",
+    status: "APPROVED",
+    rateType: "HOURLY",
+    rate: 95,
+    dailyRate: 760,
+    hourlyRate: 95,
+    daysWorked: 11,
+    hoursWorked: 88,
+    lateMinutes: 20,
+    undertimeMinutes: 0,
+    absenceDays: 0,
+    basicPay: 8360,
+    otPay: 1187.50,
+    nightDiffPay: 0,
+    holidayPay: 0,
+    totalAllowances: 660,
+    allowances: [
+      { name: "Transportation", amount: 440 },
+      { name: "Meal", amount: 220 },
+    ],
+    lateDeduction: 31.67,
+    undertimeDeduction: 0,
+    absenceDeduction: 0,
+    sssEmployee: 450,
+    sssEmployer: 950,
+    philhealthEmployee: 250,
+    philhealthEmployer: 250,
+    pagibigEmployee: 50,
+    pagibigEmployer: 200,
+    withholdingTax: 0,
+    taxableIncome: 0,
+    otherDeductions: [],
+    totalOtherDeductions: 0,
+    grossPay: 10175.83,
+    totalDeductions: 731.67,
+    netPay: 9444.16,
+  },
+];
+
+// Mock Holidays (Philippine)
+export interface Holiday {
+  id: string;
+  name: string;
+  date: string;
+  type: "Regular" | "Special";
+}
+
+export const mockHolidays: Holiday[] = [
+  { id: "1", name: "New Year's Day", date: "2024-01-01", type: "Regular" },
+  { id: "2", name: "Chinese New Year", date: "2024-02-10", type: "Special" },
+  { id: "3", name: "Araw ng Kagitingan", date: "2024-04-09", type: "Regular" },
+  { id: "4", name: "Maundy Thursday", date: "2024-03-28", type: "Regular" },
+  { id: "5", name: "Good Friday", date: "2024-03-29", type: "Regular" },
+  { id: "6", name: "Black Saturday", date: "2024-03-30", type: "Special" },
+  { id: "7", name: "Labor Day", date: "2024-05-01", type: "Regular" },
+  { id: "8", name: "Independence Day", date: "2024-06-12", type: "Regular" },
+  { id: "9", name: "Ninoy Aquino Day", date: "2024-08-21", type: "Special" },
+  { id: "10", name: "National Heroes Day", date: "2024-08-26", type: "Regular" },
+  { id: "11", name: "All Saints' Day", date: "2024-11-01", type: "Special" },
+  { id: "12", name: "Bonifacio Day", date: "2024-11-30", type: "Regular" },
+  { id: "13", name: "Christmas Day", date: "2024-12-25", type: "Regular" },
+  { id: "14", name: "Rizal Day", date: "2024-12-30", type: "Regular" },
 ];
 
 // Mock Notifications
@@ -370,7 +619,7 @@ export const mockAssetAssignments: AssetAssignment[] = [
     assetId: "1",
     assetName: "MacBook Pro 16",
     employeeId: "1",
-    employeeName: "John Smith",
+    employeeName: "Juan Santos",
     dateAssigned: "2023-06-15",
     conditionOnAssign: "Good",
     isActive: true,
@@ -380,7 +629,7 @@ export const mockAssetAssignments: AssetAssignment[] = [
     assetId: "3",
     assetName: "iPhone 15 Pro",
     employeeId: "2",
-    employeeName: "Sarah Johnson",
+    employeeName: "Maria Garcia",
     dateAssigned: "2023-08-20",
     conditionOnAssign: "Excellent",
     isActive: true,
@@ -392,7 +641,7 @@ export const mockLeaveRequests: LeaveRequest[] = [
   {
     id: "1",
     employeeId: "1",
-    employeeName: "John Smith",
+    employeeName: "Juan Santos",
     type: "Vacation",
     startDate: "2024-02-10",
     endDate: "2024-02-14",
@@ -403,7 +652,7 @@ export const mockLeaveRequests: LeaveRequest[] = [
   {
     id: "2",
     employeeId: "3",
-    employeeName: "Michael Chen",
+    employeeName: "Ricardo Reyes",
     type: "Sick Leave",
     startDate: "2024-01-16",
     endDate: "2024-01-16",
@@ -414,7 +663,7 @@ export const mockLeaveRequests: LeaveRequest[] = [
   {
     id: "3",
     employeeId: "4",
-    employeeName: "Emily Davis",
+    employeeName: "Ana Dela Cruz",
     type: "Personal",
     startDate: "2024-01-20",
     endDate: "2024-01-20",
