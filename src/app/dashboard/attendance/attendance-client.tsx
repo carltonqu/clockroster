@@ -891,7 +891,7 @@ export function AttendanceClient({ entries, employees }: AttendanceClientProps) 
 
       {/* Message Dialog */}
       <Dialog open={isMessageDialogOpen} onOpenChange={setIsMessageDialogOpen}>
-        <DialogContent className="w-[90vw] max-w-[500px] rounded-2xl p-0">
+        <DialogContent className="w-[90vw] max-w-4xl rounded-2xl p-0">
           <DialogHeader className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">

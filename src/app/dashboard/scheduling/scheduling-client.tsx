@@ -314,7 +314,7 @@ export function SchedulingClient({ schedules, employees }: SchedulingClientProps
                 Add Shift
               </Button>
             </DialogTrigger>
-            <DialogContent className="w-[90vw] max-w-[700px] max-h-[90vh] overflow-y-auto rounded-2xl p-0">
+            <DialogContent className="w-[90vw] max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl p-0">
               <DialogHeader className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">

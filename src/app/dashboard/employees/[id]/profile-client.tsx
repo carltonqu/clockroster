@@ -350,7 +350,7 @@ export function ProfileClient({
                       Send Message
                     </DropdownMenuItem>
                   </DialogTrigger>
-                  <DialogContent className="rounded-2xl">
+                  <DialogContent className="max-w-4xl rounded-2xl">
                     <DialogHeader>
                       <DialogTitle>Send Message to {employee.fullName}</DialogTitle>
                     </DialogHeader>
