@@ -23,30 +23,34 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
-// Interactive Grid Background Component
+// Interactive Grid Background Component - Hero only
 function InteractiveGridBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
   const animationRef = useRef<number>();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const rect = container.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
     };
     resize();
     window.addEventListener("resize", resize);
 
     const handleMouseMove = (e: MouseEvent) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY };
+      const rect = container.getBoundingClientRect();
+      mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     };
-    window.addEventListener("mousemove", handleMouseMove);
+    container.addEventListener("mousemove", handleMouseMove);
 
     const gridSize = 40;
     const dots: { x: number; y: number; baseX: number; baseY: number }[] = [];
@@ -116,17 +120,19 @@ function InteractiveGridBackground() {
 
     return () => {
       window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", handleMouseMove);
+      container.removeEventListener("mousemove", handleMouseMove);
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0"
-      style={{ background: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0f9ff 100%)" }}
-    />
+    <div ref={containerRef} className="absolute inset-0 overflow-hidden">
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 pointer-events-auto"
+        style={{ background: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0f9ff 100%)" }}
+      />
+    </div>
   );
 }
 
@@ -258,10 +264,7 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   return (
-    <div className="min-h-screen relative">
-      {/* Interactive Background */}
-      <InteractiveGridBackground />
-
+    <div className="min-h-screen relative bg-gradient-to-b from-blue-50/50 via-white to-white">
       {/* Content */}
       <div className="relative z-10">
         {/* Navigation */}
@@ -321,6 +324,11 @@ export default function LandingPage() {
 
         {/* Hero Section */}
         <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">
+              {/* Interactive Background - Hero only */}
+          <div className="absolute inset-0 z-0">
+            <InteractiveGridBackground />
+          </div>
+          
           <GradientOrb className="top-20 left-10 w-96 h-96" />
           <GradientOrb className="bottom-20 right-10 w-80 h-80" />
           <GradientOrb className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-20" />
