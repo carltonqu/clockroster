@@ -555,4 +555,88 @@ export default function LandingPage() {
                     ))}
                   </ul>
                   <Link href="/auth/signup">
-                    <Button className={`w-full rounded-full ${plan.highlight ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}`} variant={plan.highlight ? "default" : "outline
+                    <Button className={`w-full rounded-full ${plan.highlight ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}`} variant={plan.highlight ? "default" : "outline"}>
+                      {plan.highlight ? "Start Pro Trial" : "Get Started"}
+                    </Button>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section id="faq" className="py-20 lg:py-32 relative">
+          <GradientOrb className="bottom-0 left-0 w-[500px] h-[500px]" />
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="text-center mb-16">
+              <Badge className="mb-4 bg-blue-50 text-blue-700 border-blue-200">FAQ</Badge>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Questions? Answered.</h2>
+              <p className="text-lg text-gray-600">Everything you need to know about ClockRoster.</p>
+            </div>
+
+            <div className="space-y-4">
+              {faqs.map((faq, index) => (
+                <div key={index} className="bg-white/80 backdrop-blur-sm rounded-xl border border-blue-100 overflow-hidden">
+                  <button className="w-full flex items-center justify-between p-5 text-left" onClick={() => setOpenFaq(openFaq === index ? null : index)}>
+                    <span className="font-semibold text-gray-900">{faq.question}</span>
+                    {openFaq === index ? <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0" /> : <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />}
+                  </button>
+                  {openFaq === index && (
+                    <div className="px-5 pb-5">
+                      <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-20 lg:py-32">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="relative bg-gradient-to-br from-blue-600 to-cyan-600 rounded-3xl p-8 sm:p-12 lg:p-16 text-center overflow-hidden">
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl" />
+                <div className="absolute bottom-0 right-0 w-96 h-96 bg-cyan-300 rounded-full blur-3xl" />
+              </div>
+              <div className="relative">
+                <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Ready to streamline your workforce?</h2>
+                <p className="text-lg text-blue-100 max-w-2xl mx-auto mb-8">Join thousands of teams already saving hours every week with ClockRoster. Start your free trial today.</p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link href="/auth/signup">
+                    <Button className="h-12 px-8 rounded-full bg-white text-blue-600 hover:bg-blue-50 shadow-lg">Get Started Free<ArrowRight className="w-4 h-4 ml-2" /></Button>
+                  </Link>
+                  <Link href="/auth/signin">
+                    <Button variant="outline" className="h-12 px-8 rounded-full border-white text-white hover:bg-white/10">View Demo</Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="bg-white/80 backdrop-blur-sm border-t border-blue-100 py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-bold text-gray-900">ClockRoster</span>
+              </div>
+              <p className="text-sm text-gray-500">© {new Date().getFullYear()} ClockRoster. Built with Next.js & Tailwind CSS.</p>
+              <div className="flex items-center gap-6">
+                <Link href="#" className="text-sm text-gray-500 hover:text-gray-900">Privacy</Link>
+                <Link href="#" className="text-sm text-gray-500 hover:text-gray-900">Terms</Link>
+                <Link href="#" className="text-sm text-gray-500 hover:text-gray-900">Support</Link>
+              </div>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+  );
+}
