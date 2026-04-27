@@ -33,6 +33,8 @@ import {
   FolderOpen,
   History,
   Wallet,
+  Save,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,6 +42,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -177,7 +181,24 @@ export function ProfileClient({
   const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false);
   const [messageText, setMessageText] = useState("");
   const [profilePhoto, setProfilePhoto] = useState(employee.profilePhoto);
+  const [isEditing, setIsEditing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Editable form state
+  const [formData, setFormData] = useState({
+    fullName: employee.fullName,
+    email: employee.email,
+    phoneNumber: employee.phoneNumber || "",
+    department: employee.department,
+    position: employee.position,
+    employmentType: employee.employmentType,
+    employmentStatus: employee.employmentStatus,
+    workLocation: employee.workLocation || "",
+    workSchedule: employee.workSchedule || "",
+    manager: employee.manager || "",
+    salary: employee.salary || 0,
+    payFrequency: employee.payFrequency || "Monthly",
+  });
 
   const statusConfig = STATUS_CONFIG[employee.employmentStatus] || STATUS_CONFIG.Active;
   const StatusIcon = statusConfig.icon;
@@ -214,6 +235,46 @@ export function ProfileClient({
 
   const handleDeleteDocument = (docId: string) => {
     toast.success("Document deleted!");
+  };
+
+  const handleSave = () => {
+    updateEmployee(employee.id, {
+      fullName: formData.fullName,
+      email: formData.email,
+      phoneNumber: formData.phoneNumber,
+      department: formData.department,
+      position: formData.position,
+      employmentType: formData.employmentType,
+      employmentStatus: formData.employmentStatus,
+      workLocation: formData.workLocation,
+      workSchedule: formData.workSchedule,
+      manager: formData.manager,
+      salary: formData.salary,
+      payFrequency: formData.payFrequency,
+      profilePhoto: profilePhoto,
+    });
+    setIsEditing(false);
+    toast.success("Profile updated successfully!");
+  };
+
+  const handleCancel = () => {
+    // Reset form data to original
+    setFormData({
+      fullName: employee.fullName,
+      email: employee.email,
+      phoneNumber: employee.phoneNumber || "",
+      department: employee.department,
+      position: employee.position,
+      employmentType: employee.employmentType,
+      employmentStatus: employee.employmentStatus,
+      workLocation: employee.workLocation || "",
+      workSchedule: employee.workSchedule || "",
+      manager: employee.manager || "",
+      salary: employee.salary || 0,
+      payFrequency: employee.payFrequency || "Monthly",
+    });
+    setProfilePhoto(employee.profilePhoto);
+    setIsEditing(false);
   };
 
   return (
@@ -264,20 +325,22 @@ export function ProfileClient({
             <div className="relative group">
               <Avatar 
                 className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-white shadow-2xl cursor-pointer transition-transform group-hover:scale-105"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => isEditing && fileInputRef.current?.click()}
               >
                 <AvatarImage src={profilePhoto} />
                 <AvatarFallback className={`bg-gradient-to-br ${avatarGradient} text-white text-2xl sm:text-3xl font-bold`}>
-                  {getInitials(employee.fullName)}
+                  {getInitials(formData.fullName)}
                 </AvatarFallback>
               </Avatar>
-              {/* Upload Overlay */}
-              <div 
-                className="absolute inset-0 w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer border-4 border-white"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Upload className="w-8 h-8 text-white" />
-              </div>
+              {/* Upload Overlay - only show when editing */}
+              {isEditing && (
+                <div 
+                  className="absolute inset-0 w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-black/40 flex items-center justify-center cursor-pointer border-4 border-white"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="w-8 h-8 text-white" />
+                </div>
+              )}
               <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-r ${statusConfig.gradient} flex items-center justify-center border-2 border-white shadow-lg`}>
                 <StatusIcon className="w-4 h-4 text-white" />
               </div>
@@ -292,7 +355,7 @@ export function ProfileClient({
                     const reader = new FileReader();
                     reader.onloadend = () => {
                       setProfilePhoto(reader.result as string);
-                      toast.success("Profile photo updated!");
+                      toast.success("Profile photo updated! Click Save to confirm.");
                     };
                     reader.readAsDataURL(file);
                   }
@@ -302,82 +365,152 @@ export function ProfileClient({
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <h1 className="text-2xl sm:text-3xl font-bold text-white">{employee.fullName}</h1>
-                <Badge className={`${statusConfig.bg} ${statusConfig.text} ${statusConfig.border} border`}>
-                  <StatusIcon className="w-3 h-3 mr-1" />
-                  {employee.employmentStatus}
-                </Badge>
-              </div>
-              <p className="text-blue-100 text-lg mb-3">{employee.position}</p>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-blue-50">
-                <span className="flex items-center gap-1.5">
-                  <Building2 className="w-4 h-4" />
-                  {employee.department}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Briefcase className="w-4 h-4" />
-                  {employee.employmentType}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4" />
-                  Hired {formatDate(employee.hireDate)}
-                </span>
-              </div>
+              {isEditing ? (
+                <div className="space-y-3">
+                  <Input
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    className="text-xl font-bold bg-white/20 border-white/30 text-white placeholder:text-white/70"
+                    placeholder="Full Name"
+                  />
+                  <Input
+                    value={formData.position}
+                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                    className="bg-white/20 border-white/30 text-white placeholder:text-white/70"
+                    placeholder="Position"
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    <Input
+                      value={formData.department}
+                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                      className="w-auto bg-white/20 border-white/30 text-white placeholder:text-white/70"
+                      placeholder="Department"
+                    />
+                    <select
+                      value={formData.employmentType}
+                      onChange={(e) => setFormData({ ...formData, employmentType: e.target.value })}
+                      className="bg-white/20 border-white/30 text-white rounded-md px-3 py-1"
+                    >
+                      <option value="Full-time" className="text-gray-900">Full-time</option>
+                      <option value="Part-time" className="text-gray-900">Part-time</option>
+                      <option value="Contract" className="text-gray-900">Contract</option>
+                      <option value="Intern" className="text-gray-900">Intern</option>
+                    </select>
+                    <select
+                      value={formData.employmentStatus}
+                      onChange={(e) => setFormData({ ...formData, employmentStatus: e.target.value })}
+                      className="bg-white/20 border-white/30 text-white rounded-md px-3 py-1"
+                    >
+                      <option value="Active" className="text-gray-900">Active</option>
+                      <option value="Inactive" className="text-gray-900">Inactive</option>
+                      <option value="On Leave" className="text-gray-900">On Leave</option>
+                    </select>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white">{formData.fullName}</h1>
+                    <Badge className={`${statusConfig.bg} ${statusConfig.text} ${statusConfig.border} border`}>
+                      <StatusIcon className="w-3 h-3 mr-1" />
+                      {formData.employmentStatus}
+                    </Badge>
+                  </div>
+                  <p className="text-blue-100 text-lg mb-3">{formData.position}</p>
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-blue-50">
+                    <span className="flex items-center gap-1.5">
+                      <Building2 className="w-4 h-4" />
+                      {formData.department}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Briefcase className="w-4 h-4" />
+                      {formData.employmentType}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4" />
+                      Hired {formatDate(employee.hireDate)}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
 
-            {/* Quick Actions Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="bg-white/20 text-white hover:bg-white/30 border-0 backdrop-blur-sm"
-                >
-                  <MoreHorizontal className="w-4 h-4 mr-2" />
-                  Actions
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 rounded-xl">
-                <DropdownMenuItem onClick={() => toast.info("Edit mode coming soon!")}>
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Profile
-                </DropdownMenuItem>
-                <Dialog open={isMessageDialogOpen} onOpenChange={setIsMessageDialogOpen}>
-                  <DialogTrigger asChild>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                      <MessageSquare className="w-4 h-4 mr-2" />
-                      Send Message
+            {/* Quick Actions */}
+            <div className="flex items-center gap-2">
+              {isEditing ? (
+                <>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleCancel}
+                    className="bg-white/20 text-white hover:bg-white/30 border-0 backdrop-blur-sm"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSave}
+                    className="bg-white text-blue-600 hover:bg-white/90"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </Button>
+                </>
+              ) : (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="bg-white/20 text-white hover:bg-white/30 border-0 backdrop-blur-sm"
+                    >
+                      <MoreHorizontal className="w-4 h-4 mr-2" />
+                      Actions
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 rounded-xl">
+                    <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Profile
                     </DropdownMenuItem>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-[1440px] rounded-2xl">
-                    <DialogHeader>
-                      <DialogTitle>Send Message to {employee.fullName}</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 pt-4">
-                      <textarea
-                        value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
-                        placeholder="Type your message here..."
-                        className="w-full min-h-[120px] p-3 border border-gray-200 dark:border-gray-700 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => setIsMessageDialogOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button onClick={handleSendMessage} className="bg-gradient-to-r from-blue-600 to-cyan-500">
+                    <Dialog open={isMessageDialogOpen} onOpenChange={setIsMessageDialogOpen}>
+                      <DialogTrigger asChild>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          <MessageSquare className="w-4 h-4 mr-2" />
                           Send Message
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                <DropdownMenuItem onClick={handleDownloadProfile}>
-                  <FileDown className="w-4 h-4 mr-2" />
-                  Download PDF
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                        </DropdownMenuItem>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-[1440px] rounded-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Send Message to {employee.fullName}</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 pt-4">
+                          <textarea
+                            value={messageText}
+                            onChange={(e) => setMessageText(e.target.value)}
+                            placeholder="Type your message here..."
+                            className="w-full min-h-[120px] p-3 border border-gray-200 dark:border-gray-700 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <div className="flex justify-end gap-2">
+                            <Button variant="outline" onClick={() => setIsMessageDialogOpen(false)}>
+                              Cancel
+                            </Button>
+                            <Button onClick={handleSendMessage} className="bg-gradient-to-r from-blue-600 to-cyan-500">
+                              Send Message
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    <DropdownMenuItem onClick={handleDownloadProfile}>
+                      <FileDown className="w-4 h-4 mr-2" />
+                      Download PDF
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -419,30 +552,62 @@ export function ProfileClient({
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Full Name</p>
-                    <p className="font-medium text-gray-900 dark:text-white">{employee.fullName}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Employee ID</p>
-                    <p className="font-medium text-gray-900 dark:text-white">{employee.employeeId}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Email</p>
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-gray-400" />
-                      <p className="font-medium text-gray-900 dark:text-white">{employee.email}</p>
+                {isEditing ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label className="text-xs text-gray-500 uppercase">Full Name</Label>
+                      <Input
+                        value={formData.fullName}
+                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-gray-500 uppercase">Employee ID</Label>
+                      <Input value={employee.employeeId} disabled className="bg-gray-100" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-gray-500 uppercase">Email</Label>
+                      <Input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-gray-500 uppercase">Phone</Label>
+                      <Input
+                        value={formData.phoneNumber}
+                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                        placeholder="Enter phone number"
+                      />
                     </div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Phone</p>
-                    <div className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-gray-400" />
-                      <p className="font-medium text-gray-900 dark:text-white">{employee.phoneNumber || "—"}</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Full Name</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{formData.fullName}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Employee ID</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{employee.employeeId}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Email</p>
+                      <div className="flex items-center gap-2">
+                        <Mail className="w-4 h-4 text-gray-400" />
+                        <p className="font-medium text-gray-900 dark:text-white">{formData.email}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Phone</p>
+                      <div className="flex items-center gap-2">
+                        <Phone className="w-4 h-4 text-gray-400" />
+                        <p className="font-medium text-gray-900 dark:text-white">{formData.phoneNumber || "—"}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
                 <Separator />
                 <div className="space-y-1">
                   <p className="text-xs text-gray-500 uppercase tracking-wide">Hire Date</p>
@@ -493,9 +658,9 @@ export function ProfileClient({
                   <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
                     <p className="text-xs text-gray-500 mb-1">Department</p>
                     <p className="text-lg font-bold text-gray-900 dark:text-white truncate">
-                      {employee.department}
+                      {formData.department}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">{employee.position}</p>
+                    <p className="text-xs text-gray-400 mt-1">{formData.position}</p>
                   </div>
                 </div>
               </CardContent>
@@ -567,63 +732,105 @@ export function ProfileClient({
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Department</p>
-                    <div className="flex items-center gap-2">
-                      <Building2 className="w-4 h-4 text-gray-400" />
-                      <p className="font-medium text-gray-900 dark:text-white">{employee.department}</p>
+                {isEditing ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label className="text-xs text-gray-500 uppercase">Department</Label>
+                      <Input
+                        value={formData.department}
+                        onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-gray-500 uppercase">Position</Label>
+                      <Input
+                        value={formData.position}
+                        onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-gray-500 uppercase">Work Location</Label>
+                      <Input
+                        value={formData.workLocation}
+                        onChange={(e) => setFormData({ ...formData, workLocation: e.target.value })}
+                        placeholder="Office / Remote / Hybrid"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-gray-500 uppercase">Work Schedule</Label>
+                      <Input
+                        value={formData.workSchedule}
+                        onChange={(e) => setFormData({ ...formData, workSchedule: e.target.value })}
+                        placeholder="e.g. 9AM - 5PM"
+                      />
+                    </div>
+                    <div className="space-y-1 sm:col-span-2">
+                      <Label className="text-xs text-gray-500 uppercase">Manager / Supervisor</Label>
+                      <Input
+                        value={formData.manager}
+                        onChange={(e) => setFormData({ ...formData, manager: e.target.value })}
+                        placeholder="Manager name"
+                      />
                     </div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Position / Role</p>
-                    <div className="flex items-center gap-2">
-                      <UserCheck className="w-4 h-4 text-gray-400" />
-                      <p className="font-medium text-gray-900 dark:text-white">{employee.position}</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Department</p>
+                      <div className="flex items-center gap-2">
+                        <Building2 className="w-4 h-4 text-gray-400" />
+                        <p className="font-medium text-gray-900 dark:text-white">{formData.department}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Position / Role</p>
+                      <div className="flex items-center gap-2">
+                        <UserCheck className="w-4 h-4 text-gray-400" />
+                        <p className="font-medium text-gray-900 dark:text-white">{formData.position}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Employment Type</p>
+                      <Badge variant="outline" className="font-medium">
+                        {formData.employmentType}
+                      </Badge>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Employment Status</p>
+                      <Badge className={`${statusConfig.bg} ${statusConfig.text} ${statusConfig.border} border font-medium`}>
+                        <StatusIcon className="w-3 h-3 mr-1" />
+                        {formData.employmentStatus}
+                      </Badge>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Work Location</p>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-gray-400" />
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          {formData.workLocation || "Office"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Work Schedule</p>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-gray-400" />
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          {formData.workSchedule || "Standard (9AM - 5PM)"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="space-y-1 sm:col-span-2">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Manager / Supervisor</p>
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-gray-400" />
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          {formData.manager || "Not Assigned"}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Employment Type</p>
-                    <Badge variant="outline" className="font-medium">
-                      {employee.employmentType}
-                    </Badge>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Employment Status</p>
-                    <Badge className={`${statusConfig.bg} ${statusConfig.text} ${statusConfig.border} border font-medium`}>
-                      <StatusIcon className="w-3 h-3 mr-1" />
-                      {employee.employmentStatus}
-                    </Badge>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Work Location</p>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <p className="font-medium text-gray-900 dark:text-white">
-                        {employee.workLocation || "Office"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Work Schedule</p>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-gray-400" />
-                      <p className="font-medium text-gray-900 dark:text-white">
-                        {employee.workSchedule || "Standard (9AM - 5PM)"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <Separator />
-                <div className="space-y-1">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">Manager / Supervisor</p>
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-gray-400" />
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {employee.manager || "Not Assigned"}
-                    </p>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
@@ -636,15 +843,52 @@ export function ProfileClient({
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
-                {employee.salary ? (
+                {isEditing ? (
+                  <>
+                    <div className="p-6 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl text-white">
+                      <p className="text-sm text-emerald-100 mb-1">Current Salary</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">$</span>
+                        <Input
+                          type="number"
+                          value={formData.salary}
+                          onChange={(e) => setFormData({ ...formData, salary: Number(e.target.value) })}
+                          className="bg-white/20 border-white/30 text-white placeholder:text-white/70 text-2xl font-bold"
+                        />
+                      </div>
+                      <p className="text-sm text-emerald-100 mt-1">
+                        per {formData.payFrequency.toLowerCase()}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label className="text-xs text-gray-500 uppercase">Pay Frequency</Label>
+                        <select
+                          value={formData.payFrequency}
+                          onChange={(e) => setFormData({ ...formData, payFrequency: e.target.value })}
+                          className="w-full border border-gray-200 rounded-md px-3 py-2"
+                        >
+                          <option value="Monthly">Monthly</option>
+                          <option value="Bi-weekly">Bi-weekly</option>
+                          <option value="Weekly">Weekly</option>
+                          <option value="Annually">Annually</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs text-gray-500 uppercase">Currency</Label>
+                        <Input value="USD" disabled className="bg-gray-100" />
+                      </div>
+                    </div>
+                  </>
+                ) : formData.salary ? (
                   <>
                     <div className="p-6 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl text-white">
                       <p className="text-sm text-emerald-100 mb-1">Current Salary</p>
                       <p className="text-4xl font-bold">
-                        ${employee.salary.toLocaleString()}
+                        ${formData.salary.toLocaleString()}
                       </p>
                       <p className="text-sm text-emerald-100 mt-1">
-                        per {employee.payFrequency?.toLowerCase() || "year"}
+                        per {formData.payFrequency.toLowerCase()}
                       </p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -653,7 +897,7 @@ export function ProfileClient({
                         <div className="flex items-center gap-2">
                           <CreditCard className="w-4 h-4 text-gray-400" />
                           <p className="font-medium text-gray-900 dark:text-white">
-                            {employee.payFrequency || "Monthly"}
+                            {formData.payFrequency}
                           </p>
                         </div>
                       </div>
@@ -665,21 +909,16 @@ export function ProfileClient({
                         </div>
                       </div>
                     </div>
-                    <Separator />
-                    <div className="space-y-1">
-                      <p className="text-xs text-gray-500 uppercase tracking-wide">Last Raise / Promotion</p>
-                      <p className="font-medium text-gray-900 dark:text-white">
-                        Not tracked
-                      </p>
-                    </div>
                   </>
                 ) : (
                   <div className="text-center py-8 text-gray-400">
                     <DollarSign className="w-12 h-12 mx-auto mb-3 opacity-50" />
                     <p>No salary information available</p>
-                    <Button variant="outline" size="sm" className="mt-4">
-                      Add Salary Info
-                    </Button>
+                    {isEditing && (
+                      <Button variant="outline" size="sm" className="mt-4" onClick={() => setFormData({ ...formData, salary: 0 })}>
+                        Add Salary Info
+                      </Button>
+                    )}
                   </div>
                 )}
               </CardContent>
