@@ -1,15 +1,38 @@
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { AssetsClient } from "./assets-client";
-import { mockAssets, mockAssetAssignments, mockEmployees } from "@/lib/mock-data";
+import { redirect } from "next/navigation"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/db"
+import { DashboardLayout } from "@/components/layout/dashboard-layout"
+import { AssetsClient } from "./assets-client"
 
-export default function AssetsPage() {
+export default async function AssetsPage() {
+  const session = await getServerSession(authOptions)
+
+  if (!session) {
+    redirect("/auth/signin")
+  }
+
+  const organizationId = session.user.organizationId
+
+  // Fetch real data from database - filtered by organization
+  const [assets, employees] = await Promise.all([
+    prisma.asset.findMany({
+      where: { organizationId },
+      include: { assignedTo: true },
+      orderBy: { createdAt: 'desc' }
+    }),
+    prisma.employee.findMany({
+      where: { organizationId },
+      select: { id: true, fullName: true, employeeId: true }
+    })
+  ])
+
   return (
     <DashboardLayout title="Assets">
       <AssetsClient
-        assets={mockAssets}
-        assignments={mockAssetAssignments}
-        employees={mockEmployees}
+        assets={assets}
+        employees={employees}
       />
     </DashboardLayout>
-  );
+  )
 }
