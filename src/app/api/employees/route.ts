@@ -56,7 +56,29 @@ export async function POST(request: NextRequest) {
     }
     const employeeId = `EMP${String(nextNumber).padStart(3, "0")}`;
 
-    // Create the employee
+    // Map employment type to enum
+    const employmentTypeMap: Record<string, string> = {
+      "Full-time": "FULL_TIME",
+      "Part-time": "PART_TIME",
+      "Contract": "CONTRACT",
+      "Intern": "INTERN",
+    };
+
+    // Map employment status to enum
+    const employmentStatusMap: Record<string, string> = {
+      "Active": "ACTIVE",
+      "Inactive": "INACTIVE",
+      "On Leave": "ON_LEAVE",
+    };
+
+    // Map pay frequency to rate type
+    const rateTypeMap: Record<string, string> = {
+      "Monthly": "MONTHLY",
+      "Bi-weekly": "MONTHLY",
+      "Weekly": "DAILY",
+    };
+
+    // Create the employee with correct schema fields
     const employee = await prisma.employee.create({
       data: {
         employeeId,
@@ -66,14 +88,13 @@ export async function POST(request: NextRequest) {
         phoneNumber: body.phoneNumber,
         department: body.department,
         position: body.position,
-        employmentType: body.employmentType,
-        employmentStatus: body.employmentStatus || "ACTIVE",
-        hireDate: body.hireDate || new Date().toISOString().split("T")[0],
-        workLocation: body.workLocation,
-        workSchedule: body.workSchedule,
-        manager: body.manager,
-        salary: body.salary ? parseFloat(body.salary) : null,
-        payFrequency: body.payFrequency,
+        employmentType: (employmentTypeMap[body.employmentType] || "FULL_TIME") as any,
+        employmentStatus: (employmentStatusMap[body.employmentStatus] || "ACTIVE") as any,
+        hireDate: body.hireDate ? new Date(body.hireDate) : new Date(),
+        address: body.workLocation ? `Location: ${body.workLocation}` : undefined,
+        emergencyContact: body.manager ? `Manager: ${body.manager}` : undefined,
+        rate: body.salary ? parseFloat(body.salary) : 0,
+        rateType: (rateTypeMap[body.payFrequency] || "MONTHLY") as any,
         profilePhoto: body.profilePhoto,
       },
     });
@@ -82,7 +103,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Error creating employee:", error);
     return NextResponse.json(
-      { error: "Failed to create employee" },
+      { error: "Failed to create employee", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
