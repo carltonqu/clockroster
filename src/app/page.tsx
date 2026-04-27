@@ -616,61 +616,145 @@ export default function LandingPage() {
         {/* Small Business Owners Section */}
         <section className="py-20 lg:py-32 relative overflow-hidden bg-gradient-to-b from-white via-slate-50/50 to-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Image Grid - Full Width Bento Style */}
-            <div className="grid grid-cols-12 gap-3 md:gap-4 mb-12 w-full">
-              {/* Left tall image */}
-              <div className="col-span-3 row-span-3 rounded-2xl overflow-hidden shadow-lg h-[400px]">
-                <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=800&fit=crop" alt="Small business owner" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+            {/* Bento Grid Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+              {/* Card 1 - Track Progress */}
+              <div className="group bg-gradient-to-br from-blue-50/80 to-cyan-50/50 rounded-3xl p-8 border border-blue-100 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-1">
+                {/* Top icons row */}
+                <div className="flex items-center justify-center gap-6 mb-6">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center border border-blue-100 group-hover:scale-110 transition-transform">
+                      <Clock className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <span className="text-xs text-gray-500">Clock In</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center border border-blue-100 group-hover:scale-110 transition-transform">
+                      <Calendar className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <span className="text-xs text-gray-500">Schedule</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center border border-blue-100 group-hover:scale-110 transition-transform">
+                      <Users className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <span className="text-xs text-gray-500">Team</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center border border-blue-100 group-hover:scale-110 transition-transform">
+                      <BarChart3 className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <span className="text-xs text-gray-500">Reports</span>
+                  </div>
+                </div>
+                {/* Avatar */}
+                <div className="flex justify-center mb-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white text-xl font-semibold shadow-lg shadow-blue-500/25">
+                    JD
+                  </div>
+                </div>
+                {/* Content */}
+                <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">Track the progress</h3>
+                <p className="text-gray-600 text-sm text-center">Monitor employee attendance and work hours conducted by your team leads in real-time.</p>
               </div>
-              
-              {/* Top middle - woman portrait */}
-              <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-lg h-[260px]">
-                <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&h=500&fit=crop" alt="Team meeting" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+
+              {/* Card 2 - Manage Documents */}
+              <div className="group bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-3xl p-8 border border-slate-200 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-1">
+                {/* Floating UI elements */}
+                <div className="relative h-32 mb-4">
+                  <div className="absolute top-0 right-0 bg-white rounded-xl shadow-lg p-3 border border-slate-100 w-48">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <Check className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <span className="text-xs font-medium text-gray-700">Timesheet</span>
+                    </div>
+                    <div className="text-xs text-gray-500">Approved by Manager</div>
+                  </div>
+                  <div className="absolute bottom-0 left-0 bg-white rounded-xl shadow-lg p-3 border border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center">
+                        <Clock className="w-4 h-4 text-cyan-600" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-medium text-gray-700">40 hours</div>
+                        <div className="text-[10px] text-gray-500">This week</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* Content */}
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Manage the process</h3>
+                <p className="text-gray-600 text-sm">Handle timesheets and payroll documents independently with automated workflows.</p>
               </div>
-              
-              {/* Top middle - high five */}
-              <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-lg h-[260px]">
-                <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400&h=500&fit=crop" alt="Office collaboration" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+
+              {/* Card 3 - Collaborate */}
+              <div className="group bg-gradient-to-br from-cyan-50/50 to-blue-50/30 rounded-3xl p-8 border border-cyan-100 hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300 hover:-translate-y-1">
+                {/* Chat bubbles */}
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white text-sm font-semibold">
+                      SM
+                    </div>
+                    <div className="bg-white rounded-2xl rounded-tl-none p-3 shadow-sm border border-slate-100 flex-1">
+                      <p className="text-xs text-gray-600">Can you approve my time off request for next week?</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 flex-row-reverse">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center text-white text-sm font-semibold">
+                      JD
+                    </div>
+                    <div className="bg-blue-600 rounded-2xl rounded-tr-none p-3 shadow-sm flex-1">
+                      <p className="text-xs text-white">Approved! Enjoy your vacation 🎉</p>
+                    </div>
+                  </div>
+                </div>
+                {/* Content */}
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Collaborate with team</h3>
+                <p className="text-gray-600 text-sm">Communicate with your managers and colleagues directly within the platform.</p>
               </div>
-              
-              {/* Top right - dashboard */}
-              <div className="col-span-3 row-span-2 rounded-2xl overflow-hidden shadow-lg h-[260px]">
-                <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&h=400&fit=crop" alt="Working on laptop" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
-              </div>
-              
-              {/* Far right top */}
-              <div className="col-span-2 row-span-1 rounded-xl overflow-hidden shadow-md h-[120px]">
-                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=200&fit=crop" alt="Team working" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
-              </div>
-              
-              {/* Far right bottom */}
-              <div className="col-span-2 row-span-1 rounded-xl overflow-hidden shadow-md h-[120px]">
-                <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=200&fit=crop" alt="Retail shop" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
-              </div>
-              
-              {/* Bottom row - left */}
-              <div className="col-span-2 row-span-1 rounded-xl overflow-hidden shadow-md h-[120px]">
-                <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=200&fit=crop" alt="Cafe owner" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
-              </div>
-              
-              {/* Bottom middle - meeting room */}
-              <div className="col-span-3 row-span-1 rounded-xl overflow-hidden shadow-md h-[120px]">
-                <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&h=300&fit=crop" alt="Business meeting" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
-              </div>
-              
-              {/* Right tall image */}
-              <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-lg h-[260px]">
-                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=600&fit=crop" alt="Modern office" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
-              </div>
-              
-              {/* Bottom right small */}
-              <div className="col-span-2 row-span-1 rounded-xl overflow-hidden shadow-md h-[120px]">
-                <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=400&h=200&fit=crop" alt="Video call" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
-              </div>
-              
-              {/* Bottom right - team */}
-              <div className="col-span-3 row-span-1 rounded-xl overflow-hidden shadow-md h-[120px]">
-                <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&h=300&fit=crop" alt="Team collaboration" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+
+              {/* Card 4 - Analytics */}
+              <div className="group bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 border border-slate-700 hover:shadow-xl hover:shadow-slate-900/20 transition-all duration-300 hover:-translate-y-1">
+                {/* Chart */}
+                <div className="mb-6">
+                  <div className="flex items-end gap-2 h-24">
+                    <div className="flex-1 bg-blue-500/30 rounded-t-lg h-[40%] group-hover:bg-blue-500/50 transition-colors"></div>
+                    <div className="flex-1 bg-blue-500/40 rounded-t-lg h-[60%] group-hover:bg-blue-500/60 transition-colors"></div>
+                    <div className="flex-1 bg-blue-500/50 rounded-t-lg h-[45%] group-hover:bg-blue-500/70 transition-colors"></div>
+                    <div className="flex-1 bg-blue-500/60 rounded-t-lg h-[80%] group-hover:bg-blue-500/80 transition-colors"></div>
+                    <div className="flex-1 bg-blue-500/70 rounded-t-lg h-[65%] group-hover:bg-blue-500/90 transition-colors"></div>
+                    <div className="flex-1 bg-cyan-500 rounded-t-lg h-[90%] group-hover:bg-cyan-400 transition-colors shadow-lg shadow-cyan-500/30"></div>
+                  </div>
+                  <div className="flex justify-between mt-2 text-[10px] text-slate-400">
+                    <span>Mon</span>
+                    <span>Tue</span>
+                    <span>Wed</span>
+                    <span>Thu</span>
+                    <span>Fri</span>
+                    <span className="text-cyan-400 font-medium">Sat</span>
+                  </div>
+                </div>
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700">
+                    <div className="text-xs text-slate-400 mb-1">Attendance</div>
+                    <div className="text-lg font-bold text-white">98%</div>
+                    <div className="w-full bg-slate-700 rounded-full h-1.5 mt-2">
+                      <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: '98%' }}></div>
+                    </div>
+                  </div>
+                  <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700">
+                    <div className="text-xs text-slate-400 mb-1">Punctuality</div>
+                    <div className="text-lg font-bold text-white">95%</div>
+                    <div className="w-full bg-slate-700 rounded-full h-1.5 mt-2">
+                      <div className="bg-cyan-500 h-1.5 rounded-full" style={{ width: '95%' }}></div>
+                    </div>
+                  </div>
+                </div>
+                {/* Content */}
+                <h3 className="text-xl font-bold text-white mb-2">Automatically collect insights</h3>
+                <p className="text-slate-400 text-sm">Get real-time analytics and reports on your team's performance and attendance patterns.</p>
               </div>
             </div>
 
