@@ -372,48 +372,123 @@ export default function LandingPage() {
 
             {/* Dashboard Preview */}
             <div className="relative max-w-5xl mx-auto">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-blue-900/10 border border-blue-100 bg-white/90 backdrop-blur-sm">
-                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 border-b border-blue-100">
-                  <div className="flex items-center gap-2">
+              {/* Floating notification badges */}
+              <div className="absolute -top-4 -left-4 bg-white rounded-xl shadow-xl shadow-blue-900/10 p-3 border border-blue-100 hidden lg:block z-20 animate-bounce" style={{ animationDuration: '3s' }}>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                    <Users className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-900">+12 New</p>
+                    <p className="text-[10px] text-gray-500">Employees</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="absolute -bottom-4 -right-4 bg-white rounded-xl shadow-xl shadow-blue-900/10 p-3 border border-blue-100 hidden lg:block z-20">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
+                    <DollarSign className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-900">$24,850</p>
+                    <p className="text-[10px] text-gray-500">Payroll Saved</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-blue-900/20 border border-blue-200/50 bg-white">
+                {/* Browser chrome */}
+                <div className="bg-gradient-to-r from-slate-50 to-slate-100 p-3 border-b border-slate-200">
+                  <div className="flex items-center gap-3">
                     <div className="flex gap-1.5">
                       <div className="w-3 h-3 rounded-full bg-red-400" />
                       <div className="w-3 h-3 rounded-full bg-yellow-400" />
                       <div className="w-3 h-3 rounded-full bg-green-400" />
                     </div>
-                    <div className="flex-1 text-center">
-                      <span className="text-xs text-gray-400">clockroster.com/dashboard</span>
+                    <div className="flex-1 max-w-md mx-auto">
+                      <div className="bg-white rounded-lg px-3 py-1.5 flex items-center gap-2 border border-slate-200 shadow-sm">
+                        <div className="w-3 h-3 rounded-full bg-green-500" />
+                        <span className="text-xs text-gray-500">clockroster.com/dashboard</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="p-6 lg:p-8">
+
+                <div className="p-6 lg:p-8 bg-gradient-to-br from-slate-50/50 via-white to-blue-50/30">
+                  {/* Stats Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl p-4 text-white shadow-lg">
-                      <p className="text-sm opacity-80">Total Hours Today</p>
-                      <p className="text-2xl font-bold">248.5</p>
+                    <div className="relative group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl blur opacity-20 group-hover:opacity-30 transition-opacity" />
+                      <div className="relative bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl p-4 text-white shadow-lg shadow-blue-500/25">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-sm opacity-90">Total Hours Today</p>
+                          <Clock className="w-4 h-4 opacity-70" />
+                        </div>
+                        <p className="text-3xl font-bold">248.5</p>
+                        <p className="text-xs opacity-70 mt-1">+12% from yesterday</p>
+                      </div>
                     </div>
-                    <div className="bg-white/80 border border-blue-100 rounded-xl p-4 backdrop-blur-sm">
-                      <p className="text-sm text-gray-500">Active Now</p>
-                      <p className="text-2xl font-bold text-gray-900">42</p>
+                    <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm text-gray-500">Active Now</p>
+                        <div className="flex items-center gap-1">
+                          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                          <Users className="w-4 h-4 text-gray-400" />
+                        </div>
+                      </div>
+                      <p className="text-3xl font-bold text-gray-900">42</p>
+                      <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                        <span className="inline-block w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-b-4 border-b-green-500" />
+                        8 online
+                      </p>
                     </div>
-                    <div className="bg-white/80 border border-blue-100 rounded-xl p-4 backdrop-blur-sm">
-                      <p className="text-sm text-gray-500">On Leave</p>
-                      <p className="text-2xl font-bold text-gray-900">5</p>
+                    <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm text-gray-500">On Leave</p>
+                        <Calendar className="w-4 h-4 text-gray-400" />
+                      </div>
+                      <p className="text-3xl font-bold text-gray-900">5</p>
+                      <p className="text-xs text-orange-500 mt-1">2 pending approval</p>
                     </div>
                   </div>
-                  <div className="bg-gradient-to-br from-blue-50/50 to-cyan-50/50 rounded-xl p-4 border border-blue-100">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="h-4 w-32 bg-blue-200 rounded" />
-                      <div className="h-8 w-24 bg-blue-600 rounded-lg" />
+
+                  {/* Employee List */}
+                  <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="flex items-center justify-between p-4 border-b border-slate-100">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Team Members</h4>
+                        <p className="text-xs text-gray-500">8 employees on shift</p>
+                      </div>
+                      <button className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                        + Add Employee
+                      </button>
                     </div>
-                    <div className="space-y-2">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="flex items-center gap-4 p-3 bg-white/80 rounded-lg border border-blue-50">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-full" />
-                          <div className="flex-1">
-                            <div className="h-3 w-24 bg-blue-200 rounded mb-2" />
-                            <div className="h-2 w-16 bg-blue-100 rounded" />
+                    <div className="divide-y divide-slate-100">
+                      {[
+                        { name: "Sarah Chen", role: "Manager", status: "Active", statusColor: "green", avatar: "SC" },
+                        { name: "Mike Johnson", role: "Developer", status: "On Break", statusColor: "yellow", avatar: "MJ" },
+                        { name: "Emma Davis", role: "Designer", status: "Active", statusColor: "green", avatar: "ED" },
+                        { name: "Alex Kim", role: "Analyst", status: "Offline", statusColor: "gray", avatar: "AK" },
+                      ].map((employee, i) => (
+                        <div key={i} className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-full flex items-center justify-center text-sm font-semibold text-blue-700">
+                            {employee.avatar}
                           </div>
-                          <div className="h-6 w-16 bg-green-100 rounded-full" />
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900 text-sm">{employee.name}</p>
+                            <p className="text-xs text-gray-500">{employee.role}</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs text-gray-500">{8 + i}:00 AM</span>
+                            <span className={`px-2 py-1 text-[10px] font-medium rounded-full ${
+                              employee.statusColor === 'green' ? 'bg-green-100 text-green-700' :
+                              employee.statusColor === 'yellow' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {employee.status}
+                            </span>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -421,14 +496,15 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="absolute -top-6 -right-6 bg-white/90 backdrop-blur-sm rounded-xl shadow-xl shadow-blue-900/10 p-4 border border-blue-100 hidden lg:block">
+              {/* Payroll notification */}
+              <div className="absolute -top-6 -right-6 bg-white rounded-xl shadow-xl shadow-blue-900/10 p-4 border border-blue-100 hidden lg:block z-20">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <Check className="w-5 h-5 text-green-600" />
+                  <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/25">
+                    <Check className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Payroll Generated</p>
-                    <p className="text-xs text-gray-500">Just now</p>
+                    <p className="text-sm font-semibold text-gray-900">Payroll Generated</p>
+                    <p className="text-xs text-gray-500">Just now • $12,450</p>
                   </div>
                 </div>
               </div>
