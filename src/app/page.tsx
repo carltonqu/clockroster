@@ -613,7 +613,117 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Testimonials Section */}
+        {/* Small Business Owners Section */}
+        <section className="py-20 lg:py-32 relative overflow-hidden bg-gradient-to-b from-white via-slate-50/50 to-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Image Grid - Bento Style */}
+            <div className="grid grid-cols-4 md:grid-cols-8 gap-3 md:gap-4 mb-12 max-w-5xl mx-auto">
+              {/* Row 1 */}
+              <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-lg">
+                <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=400&fit=crop" alt="Small business owner" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+              <div className="col-span-1 row-span-1 rounded-xl overflow-hidden shadow-md">
+                <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&h=200&fit=crop" alt="Team meeting" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+              <div className="col-span-1 row-span-2 rounded-2xl overflow-hidden shadow-lg">
+                <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=300&h=500&fit=crop" alt="Office collaboration" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+              <div className="col-span-2 row-span-1 rounded-xl overflow-hidden shadow-md">
+                <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400&h=200&fit=crop" alt="Working on laptop" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+              <div className="col-span-1 row-span-1 rounded-xl overflow-hidden shadow-md">
+                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=200&h=200&fit=crop" alt="Team working" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+              <div className="col-span-1 row-span-1 rounded-xl overflow-hidden shadow-md">
+                <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=200&h=200&fit=crop" alt="Retail shop" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+              
+              {/* Row 2 */}
+              <div className="col-span-1 row-span-1 rounded-xl overflow-hidden shadow-md">
+                <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=200&h=200&fit=crop" alt="Cafe owner" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+              <div className="col-span-2 row-span-1 rounded-xl overflow-hidden shadow-md">
+                <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=200&fit=crop" alt="Business meeting" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+              <div className="col-span-1 row-span-2 rounded-2xl overflow-hidden shadow-lg">
+                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=300&h=500&fit=crop" alt="Modern office" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+              <div className="col-span-1 row-span-1 rounded-xl overflow-hidden shadow-md">
+                <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=200&h=200&fit=crop" alt="Video call" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+              <div className="col-span-2 row-span-1 rounded-xl overflow-hidden shadow-md">
+                <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=200&fit=crop" alt="Team collaboration" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+            </div>
+
+            {/* Title */}
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100/50 border border-blue-200 mb-6">
+                <Users className="w-4 h-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-700">Small Business Owners</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+                Trusted by <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">small business owners</span>
+                <br className="hidden sm:block" /> managing their teams
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                From cafes to retail shops, see how small business owners simplify employee management with ClockRoster.
+              </p>
+            </div>
+
+            {/* Testimonials Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {[
+                { 
+                  name: "Maria Santos", 
+                  role: "Cafe Owner", 
+                  content: "ClockRoster transformed how I manage my cafe staff. Scheduling used to take hours, now it's done in minutes. My employees love the easy clock-in feature!",
+                  avatar: "MS",
+                  rating: 5
+                },
+                { 
+                  name: "David Chen", 
+                  role: "Retail Store Manager", 
+                  content: "As a small retail owner, I needed something simple but powerful. ClockRoster gives me everything I need without the enterprise complexity. Highly recommend!",
+                  avatar: "DC",
+                  rating: 5
+                },
+                { 
+                  name: "Sarah Johnson", 
+                  role: "Boutique Owner", 
+                  content: "Finally, a workforce tool that understands small business needs. The payroll automation alone saves me 5 hours every week. Best investment for my shop.",
+                  avatar: "SJ",
+                  rating: 5
+                },
+              ].map((testimonial, index) => (
+                <div key={index} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-lg hover:border-blue-200 transition-all duration-300">
+                  {/* Stars */}
+                  <div className="flex gap-1 mb-4">
+                    {Array.from({ length: testimonial.rating }).map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  
+                  {/* Quote */}
+                  <p className="text-gray-700 mb-6 leading-relaxed text-sm">"{testimonial.content}"</p>
+                  
+                  {/* Author */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                      {testimonial.avatar}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 text-sm">{testimonial.name}</p>
+                      <p className="text-xs text-gray-500">{testimonial.role}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Original Testimonials Section */}
         <section className="py-20 lg:py-32 relative">
           <GradientOrb className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-20" />
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
