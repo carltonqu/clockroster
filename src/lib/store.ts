@@ -18,14 +18,14 @@ import {
   Holiday,
 } from "./mock-data";
 
-// Global store (singleton pattern for demo)
-let globalEmployees = [...mockEmployees];
-let globalPayrollEntries = [...mockPayrollEntries];
-let globalAssets = [...mockAssets];
-let globalAssetAssignments = [...mockAssetAssignments];
-let globalLeaveRequests = [...mockLeaveRequests];
-let globalNotifications = [...mockNotifications];
-let globalHolidays = [...mockHolidays];
+// Global store (empty for production - no mock data)
+let globalEmployees: Employee[] = [];
+let globalPayrollEntries: PayrollEntry[] = [];
+let globalAssets: Asset[] = [];
+let globalAssetAssignments: AssetAssignment[] = [];
+let globalLeaveRequests: LeaveRequest[] = [];
+let globalNotifications: Notification[] = [];
+let globalHolidays: Holiday[] = [];
 
 // Hook to use the store
 export function useStore() {
