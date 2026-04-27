@@ -616,43 +616,61 @@ export default function LandingPage() {
         {/* Small Business Owners Section */}
         <section className="py-20 lg:py-32 relative overflow-hidden bg-gradient-to-b from-white via-slate-50/50 to-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Image Grid - Bento Style */}
-            <div className="grid grid-cols-4 md:grid-cols-8 gap-3 md:gap-4 mb-12 max-w-5xl mx-auto">
-              {/* Row 1 */}
-              <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-lg">
-                <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=400&fit=crop" alt="Small business owner" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
-              </div>
-              <div className="col-span-1 row-span-1 rounded-xl overflow-hidden shadow-md">
-                <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&h=200&fit=crop" alt="Team meeting" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
-              </div>
-              <div className="col-span-1 row-span-2 rounded-2xl overflow-hidden shadow-lg">
-                <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=300&h=500&fit=crop" alt="Office collaboration" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
-              </div>
-              <div className="col-span-2 row-span-1 rounded-xl overflow-hidden shadow-md">
-                <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400&h=200&fit=crop" alt="Working on laptop" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
-              </div>
-              <div className="col-span-1 row-span-1 rounded-xl overflow-hidden shadow-md">
-                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=200&h=200&fit=crop" alt="Team working" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
-              </div>
-              <div className="col-span-1 row-span-1 rounded-xl overflow-hidden shadow-md">
-                <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=200&h=200&fit=crop" alt="Retail shop" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+            {/* Image Grid - Full Width Bento Style */}
+            <div className="grid grid-cols-12 gap-3 md:gap-4 mb-12 w-full">
+              {/* Left tall image */}
+              <div className="col-span-3 row-span-3 rounded-2xl overflow-hidden shadow-lg h-[400px]">
+                <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=800&fit=crop" alt="Small business owner" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
               </div>
               
-              {/* Row 2 */}
-              <div className="col-span-1 row-span-1 rounded-xl overflow-hidden shadow-md">
-                <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=200&h=200&fit=crop" alt="Cafe owner" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              {/* Top middle - woman portrait */}
+              <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-lg h-[260px]">
+                <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&h=500&fit=crop" alt="Team meeting" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
               </div>
-              <div className="col-span-2 row-span-1 rounded-xl overflow-hidden shadow-md">
-                <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=200&fit=crop" alt="Business meeting" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              
+              {/* Top middle - high five */}
+              <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-lg h-[260px]">
+                <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400&h=500&fit=crop" alt="Office collaboration" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
               </div>
-              <div className="col-span-1 row-span-2 rounded-2xl overflow-hidden shadow-lg">
-                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=300&h=500&fit=crop" alt="Modern office" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              
+              {/* Top right - dashboard */}
+              <div className="col-span-3 row-span-2 rounded-2xl overflow-hidden shadow-lg h-[260px]">
+                <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&h=400&fit=crop" alt="Working on laptop" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
               </div>
-              <div className="col-span-1 row-span-1 rounded-xl overflow-hidden shadow-md">
-                <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=200&h=200&fit=crop" alt="Video call" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              
+              {/* Far right top */}
+              <div className="col-span-2 row-span-1 rounded-xl overflow-hidden shadow-md h-[120px]">
+                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=200&fit=crop" alt="Team working" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
               </div>
-              <div className="col-span-2 row-span-1 rounded-xl overflow-hidden shadow-md">
-                <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=200&fit=crop" alt="Team collaboration" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              
+              {/* Far right bottom */}
+              <div className="col-span-2 row-span-1 rounded-xl overflow-hidden shadow-md h-[120px]">
+                <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=200&fit=crop" alt="Retail shop" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+              
+              {/* Bottom row - left */}
+              <div className="col-span-2 row-span-1 rounded-xl overflow-hidden shadow-md h-[120px]">
+                <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=200&fit=crop" alt="Cafe owner" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+              
+              {/* Bottom middle - meeting room */}
+              <div className="col-span-3 row-span-1 rounded-xl overflow-hidden shadow-md h-[120px]">
+                <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&h=300&fit=crop" alt="Business meeting" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+              
+              {/* Right tall image */}
+              <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-lg h-[260px]">
+                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=600&fit=crop" alt="Modern office" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+              
+              {/* Bottom right small */}
+              <div className="col-span-2 row-span-1 rounded-xl overflow-hidden shadow-md h-[120px]">
+                <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=400&h=200&fit=crop" alt="Video call" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+              </div>
+              
+              {/* Bottom right - team */}
+              <div className="col-span-3 row-span-1 rounded-xl overflow-hidden shadow-md h-[120px]">
+                <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&h=300&fit=crop" alt="Team collaboration" className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
               </div>
             </div>
 
