@@ -1,51 +1,19 @@
-import { redirect } from "next/navigation";
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { DashboardClient } from "./dashboard-client";
-import {
-  mockCurrentUser,
-  mockDashboardStats,
-  mockTimeEntries,
-  mockNotifications,
-  mockPayrollEntries,
-} from "@/lib/mock-data";
+import { redirect } from "next/navigation"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/db"
 
-export default function DashboardPage() {
-  // DEMO MODE: Redirect all users to admin dashboard
-  // (Login/authentication is disabled for demo purposes)
-  redirect("/dashboard/admin");
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions)
+  
+  if (!session) {
+    redirect("/auth/signin")
+  }
 
-  // Get recent entries (last 5)
-  const recentEntries = mockTimeEntries.slice(0, 5).map((e) => ({
-    ...e,
-    clockIn: e.clockIn,
-    clockOut: e.clockOut,
-  }));
+  // Redirect based on user role
+  if (session.user.role === "EMPLOYEE") {
+    redirect("/dashboard/employee")
+  }
 
-  // Get notifications
-  const notifications = mockNotifications.map((n) => ({
-    ...n,
-    createdAt: n.createdAt,
-  }));
-
-  // Get last payroll
-  const lastPayroll = mockPayrollEntries[0]?.netPay ?? null;
-
-  const stats = {
-    totalHours: mockDashboardStats.totalHoursThisMonth,
-    overtimeHours: mockDashboardStats.overtimeHours,
-    unreadNotifications: mockDashboardStats.unreadNotifications,
-    lastPayroll,
-  };
-
-  return (
-    <DashboardLayout title="Dashboard">
-      <DashboardClient
-        user={mockCurrentUser}
-        stats={stats}
-        recentEntries={recentEntries}
-        notifications={notifications}
-        isCurrentlyClockedIn={false}
-      />
-    </DashboardLayout>
-  );
+  redirect("/dashboard/admin")
 }

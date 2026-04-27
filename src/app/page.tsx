@@ -171,10 +171,10 @@ export default function LandingPage() {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/dashboard/admin">
+            <Link href="/auth/signin">
               <Button variant="ghost">Sign in</Button>
             </Link>
-            <Link href="/dashboard/admin">
+            <Link href="/auth/signup">
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                 Get Started
               </Button>
@@ -198,7 +198,7 @@ export default function LandingPage() {
           real-time analytics — everything your team needs in one place.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/dashboard/admin">
+          <Link href="/auth/signup">
             <Button
               size="lg"
               className="bg-blue-600 hover:bg-blue-700 text-white px-8"
@@ -207,7 +207,7 @@ export default function LandingPage() {
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Link>
-          <Link href="/dashboard/admin">
+          <Link href="/auth/signin">
             <Button size="lg" variant="outline" className="px-8">
               <Users className="w-4 h-4 mr-2" />
               View Demo
@@ -245,11 +245,11 @@ export default function LandingPage() {
                 <CardDescription>{exp.description}</CardDescription>
               </CardHeader>
               <CardContent>
-                <Link href="/dashboard/admin">
+                <Link href="/auth/signup">
                   <Button
                     className={`w-full bg-gradient-to-r ${exp.color} text-white hover:opacity-90`}
                   >
-                    Experience as {exp.role}
+                    Get Started
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
@@ -351,7 +351,7 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/dashboard/admin">
+              <Link href="/auth/signup">
                 <Button
                   className={`w-full ${
                     plan.highlight

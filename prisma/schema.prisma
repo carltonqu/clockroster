@@ -1,0 +1,381 @@
+// Prisma schema for ClockRoster - Multi-tenant workforce management
+// Each user (organization) has isolated data via organizationId
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Organizations (tenants) - each user owns one
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  users     User[]
+  employees Employee[]
+  schedules Schedule[]
+  payrolls  Payroll[]
+  leaveRequests LeaveRequest[]
+  assets    Asset[]
+  announcements Announcement[]
+  timeEntries TimeEntry[]
+  notifications Notification[]
+  
+  @@index([slug])
+}
+
+// Users (authenticated) - linked to an organization
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String?   // Hashed, nullable for OAuth
+  role          UserRole  @default(EMPLOYEE)
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Organization relation
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  // Optional: link to employee record
+  employeeId String? @unique
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  
+  @@index([organizationId])
+  @@index([email])
+}
+
+enum UserRole {
+  EMPLOYEE
+  MANAGER
+  HR
+  ADMIN
+}
+
+model Employee {
+  id                String   @id @default(cuid())
+  employeeId        String   // Display ID (e.g., EMP-001)
+  fullName          String
+  email             String
+  phoneNumber       String?
+  department        String
+  position          String
+  employmentStatus  EmploymentStatus @default(ACTIVE)
+  employmentType    EmploymentType @default(FULL_TIME)
+  hireDate          DateTime
+  dateOfBirth       DateTime?
+  address           String?
+  emergencyContact  String?
+  profilePhoto      String?
+  
+  // Rates for payroll
+  rateType          RateType @default(MONTHLY)
+  rate              Float    @default(0)
+  dailyRate         Float    @default(0)
+  hourlyRate        Float    @default(0)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // Organization relation
+  organizationId    String
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  user              User?
+  timeEntries       TimeEntry[]
+  schedules         Schedule[]
+  payrolls          Payroll[]
+  leaveRequests     LeaveRequest[]
+  assignedAssets    Asset[]
+  
+  @@unique([organizationId, employeeId])
+  @@index([organizationId])
+  @@index([organizationId, department])
+}
+
+enum EmploymentStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+  TERMINATED
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERN
+}
+
+enum RateType {
+  MONTHLY
+  DAILY
+  HOURLY
+}
+
+model TimeEntry {
+  id              String   @id @default(cuid())
+  clockIn         DateTime
+  clockOut        DateTime?
+  overtimeMinutes Int      @default(0)
+  date            DateTime
+  notes           String?
+  createdAt       DateTime @default(now())
+  
+  // Relations
+  employeeId      String
+  employee        Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  @@index([organizationId])
+  @@index([employeeId])
+  @@index([date])
+}
+
+model Schedule {
+  id         String   @id @default(cuid())
+  weekStart  DateTime
+  weekEnd    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  // Relations
+  employeeId     String
+  employee       Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  shifts         Shift[]
+  
+  @@index([organizationId])
+  @@index([employeeId])
+  @@index([weekStart])
+}
+
+model Shift {
+  id        String   @id @default(cuid())
+  day       String   // MONDAY, TUESDAY, etc.
+  startTime String   // "09:00"
+  endTime   String   // "17:00"
+  role      String   // "Cashier", "Manager", etc.
+  
+  // Relations
+  scheduleId String
+  schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  
+  @@index([scheduleId])
+}
+
+model Payroll {
+  id             String       @id @default(cuid())
+  periodStart    DateTime
+  periodEnd      DateTime
+  periodType     PeriodType   @default(SEMI_MONTHLY)
+  status         PayrollStatus @default(DRAFT)
+  
+  // Attendance
+  daysWorked     Int          @default(0)
+  hoursWorked    Float        @default(0)
+  lateMinutes    Int          @default(0)
+  undertimeMinutes Int        @default(0)
+  absenceDays    Int          @default(0)
+  
+  // Earnings
+  basicPay       Float        @default(0)
+  otPay          Float        @default(0)
+  nightDiffPay   Float        @default(0)
+  holidayPay     Float        @default(0)
+  totalAllowances Float       @default(0)
+  
+  // Deductions
+  lateDeduction      Float @default(0)
+  undertimeDeduction Float @default(0)
+  absenceDeduction   Float @default(0)
+  
+  // Government deductions (Philippine system)
+  sssEmployee        Float @default(0)
+  sssEmployer        Float @default(0)
+  philhealthEmployee Float @default(0)
+  philhealthEmployer Float @default(0)
+  pagibigEmployee    Float @default(0)
+  pagibigEmployer    Float @default(0)
+  withholdingTax     Float @default(0)
+  taxableIncome      Float @default(0)
+  totalOtherDeductions Float @default(0)
+  
+  // Totals
+  grossPay       Float @default(0)
+  netPay         Float @default(0)
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Relations
+  employeeId     String
+  employee       Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  allowances     PayrollAllowance[]
+  otherDeductions PayrollDeduction[]
+  
+  @@index([organizationId])
+  @@index([employeeId])
+  @@index([periodStart])
+}
+
+enum PeriodType {
+  WEEKLY
+  SEMI_MONTHLY
+  MONTHLY
+}
+
+enum PayrollStatus {
+  DRAFT
+  APPROVED
+  RELEASED
+}
+
+model PayrollAllowance {
+  id     String @id @default(cuid())
+  name   String
+  amount Float
+  
+  payrollId String
+  payroll   Payroll @relation(fields: [payrollId], references: [id], onDelete: Cascade)
+  
+  @@index([payrollId])
+}
+
+model PayrollDeduction {
+  id     String @id @default(cuid())
+  name   String
+  amount Float
+  
+  payrollId String
+  payroll   Payroll @relation(fields: [payrollId], references: [id], onDelete: Cascade)
+  
+  @@index([payrollId])
+}
+
+model LeaveRequest {
+  id          String      @id @default(cuid())
+  type        LeaveType
+  startDate   DateTime
+  endDate     DateTime
+  reason      String?
+  status      LeaveStatus @default(PENDING)
+  days        Float       @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relations
+  employeeId     String
+  employee       Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  @@index([organizationId])
+  @@index([employeeId])
+}
+
+enum LeaveType {
+  VACATION
+  SICK
+  PERSONAL
+  MATERNITY
+  PATERNITY
+  EMERGENCY
+  UNPAID
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model Asset {
+  id          String       @id @default(cuid())
+  name        String
+  type        String
+  serialNumber String?
+  purchaseDate DateTime?
+  value       Float?
+  status      AssetStatus  @default(AVAILABLE)
+  condition   String?
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  // Relations
+  assignedToId   String?
+  assignedTo     Employee? @relation(fields: [assignedToId], references: [id])
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  @@index([organizationId])
+  @@index([assignedToId])
+}
+
+enum AssetStatus {
+  AVAILABLE
+  ASSIGNED
+  MAINTENANCE
+  RETIRED
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  priority  Priority @default(NORMAL)
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  authorId       String // User who created it
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  @@index([organizationId])
+  @@index([priority])
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      String   // "LEAVE", "PAYROLL", "SCHEDULE", etc.
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  // Relations
+  userId         String // Target user
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  @@index([organizationId])
+  @@index([userId])
+  @@index([read])
+}

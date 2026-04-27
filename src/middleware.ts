@@ -1,106 +1,69 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { withAuth } from "next-auth/middleware"
+import { NextResponse } from "next/server"
 
-// Mock user role - in production this would come from session/token
-// For demo purposes, we're using the mock data role
-// NOTE: Update this to match mockCurrentUser.role in mock-data.ts
-const MOCK_USER_ROLE = "ADMIN"; // Demo mode: all users are admins
+export default withAuth(
+  function middleware(req) {
+    const token = req.nextauth.token
+    const pathname = req.nextUrl.pathname
 
-// Define role hierarchy
-const ROLE_HIERARCHY = {
-  EMPLOYEE: 1,
-  MANAGER: 2,
-  HR: 3,
-  ADMIN: 4,
-};
+    // If no token, redirect to signin (handled by withAuth)
+    if (!token) {
+      return NextResponse.next()
+    }
 
-type UserRole = keyof typeof ROLE_HIERARCHY;
+    // Role-based access control
+    const userRole = token.role as string
+    
+    // Define restricted routes by role
+    const adminOnlyRoutes = [
+      "/dashboard/admin",
+      "/dashboard/employees",
+      "/dashboard/payroll",
+      "/dashboard/finance",
+      "/dashboard/ai-insights",
+      "/dashboard/scheduling",
+      "/dashboard/supervisor-assignments",
+    ]
 
-// Routes that are restricted to specific roles
-const RESTRICTED_ROUTES: Record<string, UserRole[]> = {
-  // Admin/Manager only routes
-  "/dashboard/employees": ["MANAGER", "HR", "ADMIN"],
-  "/dashboard/scheduling": ["MANAGER", "HR", "ADMIN"],
-  "/dashboard/payroll": ["MANAGER", "HR", "ADMIN"],
-  "/dashboard/finance": ["MANAGER", "HR", "ADMIN"],
-  "/dashboard/ai-insights": ["MANAGER", "HR", "ADMIN"],
-  "/dashboard/supervisor-assignments": ["MANAGER", "HR", "ADMIN"],
-  "/dashboard/admin": ["MANAGER", "HR", "ADMIN"],
-  // Employee routes - accessible by all
-  "/dashboard/attendance": ["EMPLOYEE", "MANAGER", "HR", "ADMIN"],
-  "/dashboard/assets": ["EMPLOYEE", "MANAGER", "HR", "ADMIN"],
-  "/dashboard/leave": ["EMPLOYEE", "MANAGER", "HR", "ADMIN"],
-  "/dashboard/notifications": ["EMPLOYEE", "MANAGER", "HR", "ADMIN"],
-  "/dashboard/settings": ["EMPLOYEE", "MANAGER", "HR", "ADMIN"],
-  "/dashboard/announcements": ["EMPLOYEE", "MANAGER", "HR", "ADMIN"],
-};
-
-// Routes that should redirect employees to their dashboard
-const ADMIN_ONLY_ROUTES = [
-  "/dashboard/employees",
-  "/dashboard/scheduling",
-  "/dashboard/payroll",
-  "/dashboard/finance",
-  "/dashboard/ai-insights",
-  "/dashboard/supervisor-assignments",
-  "/dashboard/admin",
-];
-
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // Only protect dashboard routes
-  if (!pathname.startsWith("/dashboard")) {
-    return NextResponse.next();
-  }
-
-  // Get user role from cookie or header (in production)
-  // For demo, we'll use the mock role - in real app this would come from auth token
-  const userRole = (request.cookies.get("user-role")?.value || MOCK_USER_ROLE) as UserRole;
-
-  // Check if accessing root dashboard
-  if (pathname === "/dashboard") {
-    // Employees should be redirected to their specific dashboard
+    // Check if user is trying to access admin-only routes
     if (userRole === "EMPLOYEE") {
-      return NextResponse.redirect(new URL("/dashboard/employee", request.url));
-    }
-    return NextResponse.next();
-  }
-
-  // Check if employee is trying to access admin-only routes
-  if (userRole === "EMPLOYEE") {
-    const isAdminOnlyRoute = ADMIN_ONLY_ROUTES.some(
-      (route) => pathname === route || pathname.startsWith(`${route}/`)
-    );
-
-    if (isAdminOnlyRoute) {
-      // Redirect employee to their dashboard
-      return NextResponse.redirect(new URL("/dashboard/employee", request.url));
-    }
-  }
-
-  // Check specific route permissions
-  for (const [route, allowedRoles] of Object.entries(RESTRICTED_ROUTES)) {
-    if (pathname === route || pathname.startsWith(`${route}/`)) {
-      if (!allowedRoles.includes(userRole)) {
-        // User doesn't have permission - redirect to appropriate dashboard
-        const redirectUrl = userRole === "EMPLOYEE" ? "/dashboard/employee" : "/dashboard";
-        return NextResponse.redirect(new URL(redirectUrl, request.url));
+      const isAdminOnly = adminOnlyRoutes.some(route => 
+        pathname === route || pathname.startsWith(`${route}/`)
+      )
+      
+      if (isAdminOnly) {
+        return NextResponse.redirect(new URL("/dashboard/employee", req.url))
       }
     }
-  }
 
-  return NextResponse.next();
-}
+    // Handle root dashboard redirect based on role
+    if (pathname === "/dashboard") {
+      if (userRole === "EMPLOYEE") {
+        return NextResponse.redirect(new URL("/dashboard/employee", req.url))
+      }
+      return NextResponse.redirect(new URL("/dashboard/admin", req.url))
+    }
+
+    return NextResponse.next()
+  },
+  {
+    callbacks: {
+      authorized({ req, token }) {
+        // Protect all dashboard routes
+        if (req.nextUrl.pathname.startsWith("/dashboard")) {
+          return token !== null
+        }
+        return true
+      }
+    },
+    pages: {
+      signIn: "/auth/signin",
+    }
+  }
+)
 
 export const config = {
   matcher: [
-    /*
-     * Match all dashboard routes except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
     "/dashboard/:path*",
-  ],
-};
+  ]
+}
