@@ -13,10 +13,8 @@ import {
   Plane,
   CheckSquare,
   RefreshCw,
-  ArrowRight,
   Activity,
   Crown,
-  Briefcase,
   Calendar,
   BarChart3,
   Settings,
@@ -26,12 +24,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import {
-  mockEmployees,
-  mockTimeEntries,
-  mockPayrollEntries,
-  mockLeaveRequests,
-} from "@/lib/mock-data";
+
+interface Employee {
+  id: string;
+  fullName: string;
+  employmentStatus: string;
+  department: string;
+}
+
+interface AdminDashboardClientProps {
+  employees: Employee[];
+  totalEmployees: number;
+  activeEmployees: number;
+  totalHours: number;
+  pendingLeaveRequests: number;
+  unreadNotifications: number;
+}
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
@@ -107,82 +115,24 @@ function StatCard({
   return content;
 }
 
-export function AdminDashboardClient() {
+export function AdminDashboardClient({
+  employees,
+  totalEmployees,
+  activeEmployees,
+  totalHours,
+  pendingLeaveRequests,
+  unreadNotifications,
+}: AdminDashboardClientProps) {
   const [loading, setLoading] = useState(false);
 
-  // Calculate stats from mock data
-  const totalEmployees = mockEmployees.length;
-  const activeEmployees = mockEmployees.filter(
-    (e) => e.employmentStatus === "Active"
-  ).length;
-  const onLeaveEmployees = mockLeaveRequests.filter(
-    (r) => r.status === "Approved"
-  ).length;
-  const clockedInNow = mockTimeEntries.filter((e) => !e.clockOut).length;
-  const pendingApprovals = mockLeaveRequests.filter(
-    (r) => r.status === "Pending"
-  ).length;
+  // Calculate stats from real data
+  const onLeaveEmployees = 0; // Will be fetched from leave requests
+  const clockedInNow = 0; // Will be fetched from time entries
 
-  // Financial summary
-  const totalGross = mockPayrollEntries.reduce((acc, e) => acc + e.grossPay, 0);
-  const totalNet = mockPayrollEntries.reduce((acc, e) => acc + e.netPay, 0);
-  const totalReleased = mockPayrollEntries.filter(
-    (e) => e.status === "RELEASED"
-  ).length;
-  const totalApproved = mockPayrollEntries.filter(
-    (e) => e.status === "APPROVED"
-  ).length;
-
-  // Today's attendance
-  const today = new Date().toISOString().split("T")[0];
-  const todayAttendance = mockTimeEntries
-    .filter((e) => e.date === today)
-    .map((e) => ({
-      id: e.id,
-      employeeName: e.employeeName,
-      department: "Engineering",
-      status: e.clockOut ? "Completed" : "Clocked In",
-      actualIn: e.clockIn,
-      actualOut: e.clockOut,
-    }));
-
-  // Pending approvals
-  const pendingApprovalsList = mockLeaveRequests
-    .filter((r) => r.status === "Pending")
-    .map((r) => ({
-      id: r.id,
-      employeeName: r.employeeName,
-      requestType: r.type,
-      createdAt: r.requestedAt,
-    }));
-
-  // Recent activity
-  const recentActivity = [
-    {
-      id: "1",
-      employeeName: "John Smith",
-      action: "clocked in",
-      time: "2 mins ago",
-    },
-    {
-      id: "2",
-      employeeName: "Sarah Johnson",
-      action: "submitted leave request",
-      time: "15 mins ago",
-    },
-    {
-      id: "3",
-      employeeName: "Michael Chen",
-      action: "approved payroll",
-      time: "1 hour ago",
-    },
-    {
-      id: "4",
-      employeeName: "Emily Davis",
-      action: "updated schedule",
-      time: "2 hours ago",
-    },
-  ];
+  // Empty data for new organizations
+  const todayAttendance: any[] = [];
+  const pendingApprovalsList: any[] = [];
+  const recentActivity: any[] = [];
 
   const handleApproval = (id: string, status: "Approved" | "Rejected") => {
     toast.success(`Leave request ${status.toLowerCase()}!`);
@@ -223,7 +173,7 @@ export function AdminDashboardClient() {
         </div>
       </div>
 
-      {/* Financial Card */}
+      {/* Financial Card - Empty for new orgs */}
       <Card className="bg-gradient-to-br from-purple-600 to-indigo-600 text-white border-0">
         <CardContent className="p-6">
           <div className="flex items-start justify-between">
@@ -241,10 +191,10 @@ export function AdminDashboardClient() {
                 Total Payroll
               </p>
               <p className="text-3xl font-bold">
-                ${totalGross.toLocaleString()}
+                $0
               </p>
               <p className="text-xs text-purple-200 mt-1">
-                Net: ${totalNet.toLocaleString()}
+                Net: $0
               </p>
             </div>
             <div className="p-3 bg-white/20 rounded-xl">
@@ -253,16 +203,9 @@ export function AdminDashboardClient() {
           </div>
 
           <div className="flex gap-2 mt-4">
-            {totalReleased > 0 && (
-              <span className="text-xs bg-green-500/30 text-green-100 px-2 py-1 rounded-full">
-                {totalReleased} Released
-              </span>
-            )}
-            {totalApproved > 0 && (
-              <span className="text-xs bg-yellow-500/30 text-yellow-100 px-2 py-1 rounded-full">
-                {totalApproved} Approved
-              </span>
-            )}
+            <span className="text-xs bg-white/20 text-white px-2 py-1 rounded-full">
+              Add employees to get started
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -286,7 +229,7 @@ export function AdminDashboardClient() {
         />
         <StatCard
           label="Pending"
-          value={pendingApprovals}
+          value={pendingLeaveRequests}
           sub="need action"
           icon={ClipboardList}
           href="/dashboard/leave"
@@ -308,7 +251,7 @@ export function AdminDashboardClient() {
             <AlertTriangle className="w-5 h-5 text-red-500" />
             <div>
               <p className="text-xs text-red-600 font-medium">Late Today</p>
-              <p className="text-lg font-bold text-gray-900">1</p>
+              <p className="text-lg font-bold text-gray-900">0</p>
             </div>
           </CardContent>
         </Card>
@@ -328,7 +271,7 @@ export function AdminDashboardClient() {
               <p className="text-xs text-yellow-600 font-medium">
                 Payroll Alerts
               </p>
-              <p className="text-lg font-bold text-gray-900">2</p>
+              <p className="text-lg font-bold text-gray-900">0</p>
             </div>
           </CardContent>
         </Card>
@@ -446,39 +389,15 @@ export function AdminDashboardClient() {
                 Today&apos;s Attendance
               </CardTitle>
               <Badge variant="outline" className="text-xs">
-                {todayAttendance.length}
+                0
               </Badge>
             </div>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="space-y-2 max-h-64 overflow-y-auto">
-              {todayAttendance.length === 0 ? (
-                <p className="text-center py-6 text-gray-400 text-sm">
-                  No attendance records
-                </p>
-              ) : (
-                todayAttendance.map((record) => (
-                  <div
-                    key={record.id}
-                    className="flex items-center justify-between p-2 rounded-lg bg-gray-50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">
-                        {record.employeeName.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {record.employeeName}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {record.department}
-                        </p>
-                      </div>
-                    </div>
-                    <StatusBadge status={record.status} />
-                  </div>
-                ))
-              )}
+              <p className="text-center py-6 text-gray-400 text-sm">
+                No attendance records yet. Add employees and have them clock in.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -492,50 +411,15 @@ export function AdminDashboardClient() {
                 Pending Approvals
               </CardTitle>
               <Badge variant="outline" className="text-xs">
-                {pendingApprovalsList.length}
+                0
               </Badge>
             </div>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="space-y-2 max-h-64 overflow-y-auto">
-              {pendingApprovalsList.length === 0 ? (
-                <p className="text-center py-6 text-gray-400 text-sm">
-                  No pending approvals
-                </p>
-              ) : (
-                pendingApprovalsList.map((item) => (
-                  <div key={item.id} className="p-2 rounded-lg bg-gray-50">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {item.employeeName}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {item.requestType}
-                        </p>
-                        <p className="text-xs text-gray-300">Just now</p>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button
-                          size="sm"
-                          className="h-7 px-2 bg-green-500 hover:bg-green-600 text-white"
-                          onClick={() => handleApproval(item.id, "Approved")}
-                        >
-                          <CheckSquare className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 px-2 border-red-200 text-red-600 hover:bg-red-50"
-                          onClick={() => handleApproval(item.id, "Rejected")}
-                        >
-                          <UserX className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
+              <p className="text-center py-6 text-gray-400 text-sm">
+                No pending approvals
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -551,27 +435,9 @@ export function AdminDashboardClient() {
         </CardHeader>
         <CardContent className="pt-0">
           <div className="space-y-2">
-            {recentActivity.length === 0 ? (
-              <p className="text-center py-6 text-gray-400 text-sm">
-                No recent activity
-              </p>
-            ) : (
-              recentActivity.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-center gap-3 p-2 rounded-lg bg-gray-50"
-                >
-                  <div className="w-2 h-2 rounded-full bg-blue-500" />
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-900">
-                      <span className="font-medium">{activity.employeeName}</span>{" "}
-                      {activity.action}
-                    </p>
-                  </div>
-                  <p className="text-xs text-gray-400">{activity.time}</p>
-                </div>
-              ))
-            )}
+            <p className="text-center py-6 text-gray-400 text-sm">
+              No recent activity. Start by adding your first employee!
+            </p>
           </div>
         </CardContent>
       </Card>
