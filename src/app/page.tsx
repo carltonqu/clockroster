@@ -513,32 +513,67 @@ export default function LandingPage() {
         </section>
 
         {/* How It Works Section */}
-        <section id="how-it-works" className="py-20 lg:py-32 relative">
-          <GradientOrb className="top-0 right-0 w-[500px] h-[500px]" />
+        <section id="how-it-works" className="py-20 lg:py-32 relative overflow-hidden">
+          {/* Background decorations */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white via-blue-50/30 to-white" />
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-200/20 rounded-full blur-3xl" />
+          
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-16">
-              <Badge className="mb-4 bg-blue-50 text-blue-700 border-blue-200">Simple & Intuitive</Badge>
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">How ClockRoster Works</h2>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100/50 border border-blue-200 mb-6">
+                <Zap className="w-4 h-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-700">Simple & Intuitive</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+                How ClockRoster <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Works</span>
+              </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 Get started in minutes, not days. Our streamlined setup gets your team productive immediately.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
               {howItWorks.map((item, index) => (
                 <div key={item.step} className="relative group">
-                  <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-blue-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} text-white font-bold text-lg mb-6 shadow-lg`}>
-                      {item.step}
+                  {/* Card with enhanced styling */}
+                  <div className="relative bg-white rounded-3xl p-8 border border-slate-200/60 shadow-lg shadow-slate-200/50 hover:shadow-2xl hover:shadow-blue-500/10 hover:border-blue-300/50 transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+                    {/* Gradient background on hover */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
+                    
+                    {/* Step number badge */}
+                    <div className="relative mb-6">
+                      <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${item.color} text-white font-bold text-xl shadow-lg shadow-blue-500/25 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                        {item.step}
+                      </div>
+                      {/* Glow effect */}
+                      <div className={`absolute inset-0 w-14 h-14 rounded-2xl bg-gradient-to-br ${item.color} blur-xl opacity-0 group-hover:opacity-40 transition-opacity duration-300`} />
                     </div>
-                    <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-100 transition-colors">
-                      <item.icon className="w-7 h-7 text-blue-600" />
+                    
+                    {/* Icon with background */}
+                    <div className="relative w-16 h-16 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl flex items-center justify-center mb-6 group-hover:from-blue-50 group-hover:to-cyan-50 group-hover:scale-105 transition-all duration-300 border border-slate-200/50 group-hover:border-blue-200">
+                      <item.icon className="w-8 h-8 text-slate-600 group-hover:text-blue-600 transition-colors duration-300" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
-                    <p className="text-gray-600 leading-relaxed">{item.description}</p>
+                    
+                    {/* Content */}
+                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-700 transition-colors">{item.title}</h3>
+                    <p className="text-gray-600 leading-relaxed text-sm">{item.description}</p>
+                    
+                    {/* Arrow indicator */}
+                    <div className="mt-6 flex items-center gap-2 text-blue-600 opacity-0 group-hover:opacity-100 transform translate-x-[-10px] group-hover:translate-x-0 transition-all duration-300">
+                      <span className="text-sm font-medium">Learn more</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
                   </div>
+                  
+                  {/* Connector line between cards */}
                   {index < howItWorks.length - 1 && (
-                    <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gradient-to-r from-blue-300 to-transparent" />
+                    <div className="hidden md:block absolute top-1/2 -right-4 lg:-right-6 w-8 lg:w-12">
+                      <div className="relative h-0.5 bg-gradient-to-r from-blue-300 via-cyan-300 to-blue-300">
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-cyan-400" />
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-blue-400" />
+                      </div>
+                    </div>
                   )}
                 </div>
               ))}
