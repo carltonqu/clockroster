@@ -1,7 +1,7 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
   "/api/auth/signup/route": "app/api/auth/signup/route.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
   "/auth/signin/page": "app/auth/signin/page.js",
   "/auth/signup/page": "app/auth/signup/page.js",
   "/dashboard/admin/page": "app/dashboard/admin/page.js",
@@ -16,16 +16,16 @@
   "/dashboard/employees/page": "app/dashboard/employees/page.js",
   "/dashboard/finance/page": "app/dashboard/finance/page.js",
   "/dashboard/leave/new/page": "app/dashboard/leave/new/page.js",
+  "/dashboard/leave/page": "app/dashboard/leave/page.js",
   "/dashboard/notifications/page": "app/dashboard/notifications/page.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/leave/page": "app/dashboard/leave/page.js",
   "/dashboard/payroll/page": "app/dashboard/payroll/page.js",
   "/dashboard/scheduling/new/page": "app/dashboard/scheduling/new/page.js",
   "/dashboard/scheduling/page": "app/dashboard/scheduling/page.js",
   "/dashboard/settings/page": "app/dashboard/settings/page.js",
   "/dashboard/supervisor-assignments/page": "app/dashboard/supervisor-assignments/page.js",
   "/dashboard/supervisor/page": "app/dashboard/supervisor/page.js",
-  "/page": "app/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/page": "app/page.js",
   "/dashboard/employees/[id]/page": "app/dashboard/employees/[id]/page.js"
 }
