@@ -63,6 +63,8 @@ export function NewEmployeeClient({ departments }: NewEmployeeClientProps) {
   const { employees, addEmployee } = useStore();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCreatingDept, setIsCreatingDept] = useState(false);
+  const [newDepartment, setNewDepartment] = useState("");
   
   const [formData, setFormData] = useState({
     // Personal Details
@@ -393,19 +395,69 @@ export function NewEmployeeClient({ departments }: NewEmployeeClientProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="department">Department *</Label>
-                <select
-                  id="department"
-                  value={formData.department}
-                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
-                >
-                  <option value="">Select Department</option>
-                  {departments.map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                </select>
+                {!isCreatingDept ? (
+                  <>
+                    <select
+                      id="department"
+                      value={formData.department}
+                      onChange={(e) => {
+                        if (e.target.value === "__create_new__") {
+                          setIsCreatingDept(true);
+                          setFormData({ ...formData, department: "" });
+                        } else {
+                          setFormData({ ...formData, department: e.target.value });
+                        }
+                      }}
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-gray-800"
+                    >
+                      <option value="">Select Department</option>
+                      {departments.map((dept) => (
+                        <option key={dept} value={dept}>
+                          {dept}
+                        </option>
+                      ))}
+                      <option value="__create_new__">+ Create New Department</option>
+                    </select>
+                  </>
+                ) : (
+                  <div className="flex gap-2">
+                    <Input
+                      value={newDepartment}
+                      onChange={(e) => setNewDepartment(e.target.value)}
+                      placeholder="Enter new department name"
+                      className="rounded-xl flex-1"
+                      autoFocus
+                    />
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        if (newDepartment.trim()) {
+                          setFormData({ ...formData, department: newDepartment.trim() });
+                          setIsCreatingDept(false);
+                          setNewDepartment("");
+                        }
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Add
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setIsCreatingDept(false);
+                        setNewDepartment("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+                {formData.department && !isCreatingDept && (
+                  <p className="text-sm text-gray-500">
+                    Selected: <span className="font-medium text-gray-700">{formData.department}</span>
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="position">Position *</Label>
