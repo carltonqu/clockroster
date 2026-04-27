@@ -138,34 +138,49 @@ export function NewEmployeeClient({ departments }: NewEmployeeClientProps) {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     
-    const docs: Document[] = uploadedFiles.map((file, index) => ({
-      id: `doc-${Date.now()}-${index}`,
-      name: file.name,
-      type: file.type || "application/pdf",
-      size: `${(file.size / 1024).toFixed(1)} KB`,
-      uploadedAt: new Date().toISOString(),
-    }));
+    try {
+      const response = await fetch("/api/employees", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          department: formData.department,
+          position: formData.position,
+          employmentStatus: formData.employmentStatus,
+          employmentType: formData.employmentType,
+          hireDate: formData.hireDate,
+          salary: Number(formData.salary) || 0,
+          payFrequency: formData.payFrequency,
+          workLocation: formData.workLocation,
+          manager: formData.manager,
+          workSchedule: formData.workSchedule,
+        }),
+      });
 
-    addEmployee({
-      fullName: formData.fullName,
-      email: formData.email,
-      phoneNumber: formData.phoneNumber,
-      employeeId: formData.employeeId || `EMP${String(employees.length + 1).padStart(3, '0')}`,
-      department: formData.department,
-      position: formData.position,
-      employmentStatus: formData.employmentStatus,
-      employmentType: formData.employmentType,
-      hireDate: formData.hireDate,
-      salary: Number(formData.salary) || 0,
-      payFrequency: formData.payFrequency,
-      workLocation: formData.workLocation,
-      manager: formData.manager,
-      workSchedule: formData.workSchedule,
-      documents: docs,
-    });
-    
-    toast.success(`Employee ${formData.fullName} added successfully!`);
-    router.push("/dashboard/employees");
+      if (!response.ok) {
+        throw new Error("Failed to create employee");
+      }
+
+      const newEmployee = await response.json();
+      
+      // Also add to local store for immediate UI update
+      addEmployee({
+        ...newEmployee,
+        documents: [],
+      });
+      
+      toast.success(`Employee ${formData.fullName} added successfully!`);
+      router.push("/dashboard/employees");
+    } catch (error) {
+      console.error("Error creating employee:", error);
+      toast.error("Failed to create employee. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const CurrentStepIcon = STEPS[currentStep - 1].icon;

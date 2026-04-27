@@ -457,12 +457,31 @@ export function EmployeesClient() {
     setFreezeConfirmOpen(true);
   };
 
-  const confirmFreeze = () => {
+  const confirmFreeze = async () => {
     if (selectedEmployee) {
-      updateEmployee(selectedEmployee.id, { employmentStatus: "Inactive" });
-      toast.success(`${selectedEmployee.fullName}'s account has been frozen`);
-      setFreezeConfirmOpen(false);
-      setSelectedEmployee(null);
+      try {
+        const response = await fetch(`/api/employees/${selectedEmployee.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            employmentStatus: "Inactive",
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to freeze account");
+        }
+
+        updateEmployee(selectedEmployee.id, { employmentStatus: "Inactive" });
+        toast.success(`${selectedEmployee.fullName}'s account has been frozen`);
+        setFreezeConfirmOpen(false);
+        setSelectedEmployee(null);
+      } catch (error) {
+        console.error("Error freezing account:", error);
+        toast.error("Failed to freeze account. Please try again.");
+      }
     }
   };
 
@@ -471,12 +490,25 @@ export function EmployeesClient() {
     setDeleteConfirmOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (selectedEmployee) {
-      deleteEmployee(selectedEmployee.id);
-      toast.success(`${selectedEmployee.fullName} has been deleted`);
-      setDeleteConfirmOpen(false);
-      setSelectedEmployee(null);
+      try {
+        const response = await fetch(`/api/employees/${selectedEmployee.id}`, {
+          method: "DELETE",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to delete employee");
+        }
+
+        deleteEmployee(selectedEmployee.id);
+        toast.success(`${selectedEmployee.fullName} has been deleted`);
+        setDeleteConfirmOpen(false);
+        setSelectedEmployee(null);
+      } catch (error) {
+        console.error("Error deleting employee:", error);
+        toast.error("Failed to delete employee. Please try again.");
+      }
     }
   };
 
@@ -505,27 +537,59 @@ export function EmployeesClient() {
     }
   };
 
-  const handleEditSubmit = () => {
+  const handleEditSubmit = async () => {
     if (selectedEmployee) {
-      updateEmployee(selectedEmployee.id, {
-        fullName: editFormData.fullName,
-        email: editFormData.email,
-        phoneNumber: editFormData.phoneNumber,
-        employeeId: editFormData.employeeId,
-        salary: Number(editFormData.salary) || 0,
-        payFrequency: editFormData.payFrequency,
-        department: editFormData.department,
-        position: editFormData.position,
-        manager: editFormData.manager,
-        employmentType: editFormData.employmentType,
-        workLocation: editFormData.workLocation,
-        workSchedule: editFormData.workSchedule,
-        hireDate: editFormData.hireDate,
-        employmentStatus: editFormData.employmentStatus,
-      });
-      toast.success(`${editFormData.fullName} updated successfully!`);
-      setEditEmployeeOpen(false);
-      setEditStep(1);
+      try {
+        const response = await fetch(`/api/employees/${selectedEmployee.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fullName: editFormData.fullName,
+            email: editFormData.email,
+            phoneNumber: editFormData.phoneNumber,
+            salary: Number(editFormData.salary) || 0,
+            payFrequency: editFormData.payFrequency,
+            department: editFormData.department,
+            position: editFormData.position,
+            manager: editFormData.manager,
+            employmentType: editFormData.employmentType,
+            workLocation: editFormData.workLocation,
+            workSchedule: editFormData.workSchedule,
+            hireDate: editFormData.hireDate,
+            employmentStatus: editFormData.employmentStatus,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to update employee");
+        }
+
+        // Update local store
+        updateEmployee(selectedEmployee.id, {
+          fullName: editFormData.fullName,
+          email: editFormData.email,
+          phoneNumber: editFormData.phoneNumber,
+          salary: Number(editFormData.salary) || 0,
+          payFrequency: editFormData.payFrequency,
+          department: editFormData.department,
+          position: editFormData.position,
+          manager: editFormData.manager,
+          employmentType: editFormData.employmentType,
+          workLocation: editFormData.workLocation,
+          workSchedule: editFormData.workSchedule,
+          hireDate: editFormData.hireDate,
+          employmentStatus: editFormData.employmentStatus,
+        });
+
+        toast.success(`${editFormData.fullName} updated successfully!`);
+        setEditEmployeeOpen(false);
+        setEditStep(1);
+      } catch (error) {
+        console.error("Error updating employee:", error);
+        toast.error("Failed to update employee. Please try again.");
+      }
     }
   };
 
