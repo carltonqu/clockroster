@@ -10,13 +10,9 @@ import {
 } from "@/lib/mock-data";
 
 export default function DashboardPage() {
-  // Check user role and redirect employees to their dashboard
-  const userRole = mockCurrentUser.role;
-  
-  // If user is an EMPLOYEE, redirect to the employee dashboard
-  if (userRole === "EMPLOYEE") {
-    redirect("/dashboard/employee");
-  }
+  // DEMO MODE: Redirect all users to admin dashboard
+  // (Login/authentication is disabled for demo purposes)
+  redirect("/dashboard/admin");
 
   // Get recent entries (last 5)
   const recentEntries = mockTimeEntries.slice(0, 5).map((e) => ({

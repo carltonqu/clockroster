@@ -678,11 +678,12 @@ export const mockLeaveRequests: LeaveRequest[] = [
 // To test MANAGER role: change role to "MANAGER"
 // To test HR role: change role to "HR"
 // To test different roles: change role to "EMPLOYEE", "MANAGER", "HR", or "ADMIN"
+// DEMO MODE: Currently set to ADMIN for demo access without login
 export const mockCurrentUser = {
-  id: "3",
-  name: "Ricardo Reyes",
-  email: "ricardo.reyes@company.com",
-  role: "EMPLOYEE",
+  id: "1",
+  name: "Admin User",
+  email: "admin@clockroster.com",
+  role: "ADMIN",
   tier: "Advanced",
   orgId: "org-1",
   image: null,
