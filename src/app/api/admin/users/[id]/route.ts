@@ -27,11 +27,11 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     return NextResponse.json({ error: "Validation failed", details: parsed.error.flatten() }, { status: 400 });
   }
 
-  const data: { name?: string; email?: string; passwordHash?: string; role?: Role } = {};
+  const data: { name?: string; email?: string; password?: string; role?: Role } = {};
   if (parsed.data.name) data.name = parsed.data.name;
   if (parsed.data.email) data.email = parsed.data.email.toLowerCase();
   if (parsed.data.role) data.role = parsed.data.role;
-  if (parsed.data.password) data.passwordHash = await hash(parsed.data.password, 12);
+  if (parsed.data.password) data.password = await hash(parsed.data.password, 10);
 
   try {
     const user = await prisma.user.update({

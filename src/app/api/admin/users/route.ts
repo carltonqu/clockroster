@@ -38,15 +38,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Validation failed", details: parsed.error.flatten() }, { status: 400 });
   }
 
-  const passwordHash = await hash(parsed.data.password, 12);
+  const password = await hash(parsed.data.password, 10);
 
   try {
     const user = await prisma.user.create({
       data: {
         name: parsed.data.name,
         email: parsed.data.email.toLowerCase(),
-        passwordHash,
+        password,
         role: parsed.data.role,
+        status: "ACTIVE",
       },
       select: { id: true, name: true, email: true, role: true, createdAt: true },
     });
