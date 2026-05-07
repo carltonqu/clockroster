@@ -1,7 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,11 +10,17 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Clock, Loader2 } from "lucide-react"
 
 export default function SignInPage() {
-  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [redirecting, setRedirecting] = useState(false)
+
+  useEffect(() => {
+    if (redirecting) {
+      window.location.href = "/dashboard"
+    }
+  }, [redirecting])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,8 +30,21 @@ export default function SignInPage() {
     // Demo mode - any credentials work
     setTimeout(() => {
       setLoading(false)
-      router.push("/dashboard")
+      setRedirecting(true)
     }, 500)
+  }
+
+  if (redirecting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6 text-center">
+            <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600" />
+            <p className="mt-4 text-gray-600">Redirecting to dashboard...</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
