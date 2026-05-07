@@ -1,9 +1,8 @@
 import { hash } from "bcryptjs";
-import { Role } from "@prisma/client";
 import { prisma } from "../src/lib/prisma";
 
 async function main() {
-  const passwordHash = await hash("admin123", 12);
+  const password = await hash("admin123", 10);
 
   await prisma.user.upsert({
     where: { email: "admin@clockroster.com" },
@@ -11,8 +10,9 @@ async function main() {
     create: {
       name: "System Admin",
       email: "admin@clockroster.com",
-      passwordHash,
-      role: Role.ADMIN,
+      password,
+      role: "ADMIN",
+      status: "ACTIVE",
     },
   });
 
