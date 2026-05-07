@@ -28,22 +28,16 @@ function SignInForm() {
     setErrorMessage("")
 
     try {
-      const result = await signIn("credentials", {
-        email,
+      // Use redirect: true for server-side redirect handling
+      await signIn("credentials", {
+        email: email.toLowerCase(),
         password,
-        redirect: false,
+        redirect: true,
         callbackUrl,
       })
-
-      if (result?.error) {
-        setErrorMessage("Invalid email or password")
-      } else {
-        router.push(callbackUrl)
-        router.refresh()
-      }
-    } catch {
+    } catch (err) {
+      console.error("Sign in error:", err)
       setErrorMessage("Something went wrong. Please try again.")
-    } finally {
       setLoading(false)
     }
   }
