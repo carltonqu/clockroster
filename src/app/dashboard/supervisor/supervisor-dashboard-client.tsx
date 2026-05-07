@@ -1,405 +1,331 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
+import Link from "next/link"
 import {
-  Activity,
-  TrendingUp,
-  Plane,
-  Calendar,
-  Package,
-  Megaphone,
-  Briefcase,
   Users,
   Clock,
+  ClipboardList,
+  Briefcase,
+  Calendar,
   CheckSquare,
-  AlertCircle,
-  ArrowRight,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import {
-  mockEmployees,
-  mockTimeEntries,
-  mockLeaveRequests,
-  mockSchedules,
-} from "@/lib/mock-data";
+  RefreshCw,
+  Activity,
+  TrendingUp,
+  UserCheck,
+  UserX,
+  AlertTriangle,
+} from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { toast } from "sonner"
 
-const MODULES = [
-  {
-    href: "/dashboard/attendance",
-    label: "Attendance Monitoring",
-    icon: Activity,
-    desc: "Track attendance and punctuality.",
-    color: "from-blue-500 to-cyan-500",
-  },
-  {
-    href: "/dashboard/leave",
-    label: "Leave Approvals",
-    icon: Plane,
-    desc: "Review and approve leave requests.",
-    color: "from-green-500 to-emerald-500",
-  },
-  {
-    href: "/dashboard/scheduling",
-    label: "Scheduling",
-    icon: Calendar,
-    desc: "Plan and manage shifts.",
-    color: "from-purple-500 to-violet-500",
-  },
-  {
-    href: "/dashboard/assets",
-    label: "Assets",
-    icon: Package,
-    desc: "Manage team assets and assignments.",
-    color: "from-orange-500 to-amber-500",
-  },
-  {
-    href: "/dashboard/announcements",
-    label: "Announcements",
-    icon: Megaphone,
-    desc: "View and post team updates.",
-    color: "from-pink-500 to-rose-500",
-  },
-  {
-    href: "/dashboard/employees",
-    label: "Team Members",
-    icon: Users,
-    desc: "View and manage your team.",
-    color: "from-indigo-500 to-blue-500",
-  },
-];
+interface Employee {
+  id: string
+  name: string
+  email: string
+  role: string
+  status: string
+  department: string | null
+  position: string | null
+  lastLoginAt: string | null
+}
+
+function StatCard({
+  label,
+  value,
+  sub,
+  icon: Icon,
+  color = "blue",
+}: {
+  label: string
+  value: number
+  sub: string
+  icon: any
+  color?: "blue" | "green" | "purple" | "orange" | "red"
+}) {
+  const colorMap = {
+    blue: "bg-blue-50 text-blue-600",
+    green: "bg-green-50 text-green-600",
+    purple: "bg-purple-50 text-purple-600",
+    orange: "bg-orange-50 text-orange-600",
+    red: "bg-red-50 text-red-600",
+  }
+
+  return (
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-xs text-gray-500 font-medium uppercase">{label}</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
+          </div>
+          <div className={`p-2 rounded-lg ${colorMap[color]}`}>
+            <Icon className="w-5 h-5" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 export function SupervisorDashboardClient() {
-  // Calculate stats
-  const teamSize = mockEmployees.length;
-  const clockedInNow = mockTimeEntries.filter((e) => !e.clockOut).length;
-  const pendingApprovals = mockLeaveRequests.filter(
-    (r) => r.status === "Pending"
-  ).length;
-  const onLeaveToday = mockLeaveRequests.filter(
-    (r) => r.status === "Approved"
-  ).length;
+  const { data: session } = useSession()
+  const [employees, setEmployees] = useState<Employee[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Today's team attendance
-  const today = new Date().toISOString().split("T")[0];
-  const todayAttendance = mockTimeEntries
-    .filter((e) => e.date === today)
-    .slice(0, 5);
+  const fetchEmployees = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch("/api/users?role=EMPLOYEE")
+      if (!response.ok) throw new Error("Failed to fetch employees")
+      const data = await response.json()
+      setEmployees(data)
+    } catch (error) {
+      toast.error("Failed to load team data")
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  // Pending leave requests
-  const pendingLeaves = mockLeaveRequests
-    .filter((r) => r.status === "Pending")
-    .slice(0, 3);
+  useEffect(() => {
+    fetchEmployees()
+  }, [])
+
+  const activeEmployees = employees.filter((e) => e.status === "ACTIVE").length
+  const clockedInCount = 5 // Mock data - would come from attendance API
+  const onLeaveCount = 2 // Mock data
+  const pendingRequests = 3 // Mock data
+
+  const recentActivity = [
+    { id: "1", employeeName: "John Doe", action: "clocked in", time: "5 mins ago" },
+    { id: "2", employeeName: "Jane Smith", action: "submitted leave request", time: "15 mins ago" },
+    { id: "3", employeeName: "Mike Johnson", action: "completed task", time: "1 hour ago" },
+  ]
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
-            <Briefcase className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Supervisor Dashboard
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Team management without financial access
-            </p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Supervisor Dashboard</h1>
+          <p className="text-sm text-gray-500">
+            Manage your team and monitor performance
+          </p>
         </div>
-        <Badge
-          variant="outline"
-          className="bg-blue-50 text-blue-700 border-blue-200"
-        >
-          <Briefcase className="w-3 h-3 mr-1" />
-          Supervisor Access
-        </Badge>
+        <Button variant="outline" onClick={fetchEmployees} disabled={loading}>
+          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </Button>
       </div>
 
-      {/* Stats Overview */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs text-gray-500 font-medium uppercase">
-                  Team Size
-                </p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {teamSize}
-                </p>
-              </div>
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <Users className="w-5 h-5 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs text-gray-500 font-medium uppercase">
-                  Clocked In
-                </p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {clockedInNow}
-                </p>
-              </div>
-              <div className="p-2 bg-green-50 rounded-lg">
-                <Clock className="w-5 h-5 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs text-gray-500 font-medium uppercase">
-                  Pending Approvals
-                </p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {pendingApprovals}
-                </p>
-              </div>
-              <div className="p-2 bg-orange-50 rounded-lg">
-                <CheckSquare className="w-5 h-5 text-orange-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs text-gray-500 font-medium uppercase">
-                  On Leave
-                </p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {onLeaveToday}
-                </p>
-              </div>
-              <div className="p-2 bg-purple-50 rounded-lg">
-                <Plane className="w-5 h-5 text-purple-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Team Size"
+          value={employees.length}
+          sub={`${activeEmployees} active`}
+          icon={Users}
+          color="blue"
+        />
+        <StatCard
+          label="Clocked In"
+          value={clockedInCount}
+          sub="currently working"
+          icon={Clock}
+          color="green"
+        />
+        <StatCard
+          label="On Leave"
+          value={onLeaveCount}
+          sub="employees"
+          icon={Briefcase}
+          color="purple"
+        />
+        <StatCard
+          label="Pending"
+          value={pendingRequests}
+          sub="need action"
+          icon={ClipboardList}
+          color="orange"
+        />
       </div>
 
-      {/* Alert Banner */}
-      {pendingApprovals > 0 && (
-        <Card className="bg-orange-50 border-orange-200">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-              <AlertCircle className="w-5 h-5 text-orange-600" />
-            </div>
-            <div className="flex-1">
-              <p className="font-medium text-gray-900">
-                You have {pendingApprovals} pending approval
-                {pendingApprovals > 1 ? "s" : ""}
-              </p>
-              <p className="text-sm text-gray-500">
-                Review and respond to leave requests from your team
-              </p>
-            </div>
-            <Link href="/dashboard/leave">
-              <Button size="sm" className="bg-orange-600 hover:bg-orange-700">
-                Review
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Management Modules */}
+      {/* Quick Actions */}
       <div>
-        <h3 className="text-lg font-semibold mb-4">Management Modules</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {MODULES.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link key={item.href} href={item.href}>
-                <Card className="h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2 border-transparent hover:border-blue-200">
-                  <CardContent className="p-5 space-y-3">
-                    <div
-                      className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg`}
-                    >
-                      <Icon className="w-6 h-6 text-white" />
-                    </div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                      {item.label}
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {item.desc}
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
+        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+          Quick Actions
+        </h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Link href="/dashboard/attendance">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4 flex flex-col items-center text-center">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-2">
+                  <Clock className="h-5 w-5 text-blue-600" />
+                </div>
+                <span className="text-sm font-medium">Attendance</span>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/employees">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4 flex flex-col items-center text-center">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-2">
+                  <Users className="h-5 w-5 text-green-600" />
+                </div>
+                <span className="text-sm font-medium">My Team</span>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/scheduling">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4 flex flex-col items-center text-center">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-2">
+                  <Calendar className="h-5 w-5 text-purple-600" />
+                </div>
+                <span className="text-sm font-medium">Scheduling</span>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/leave">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4 flex flex-col items-center text-center">
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-2">
+                  <ClipboardList className="h-5 w-5 text-orange-600" />
+                </div>
+                <span className="text-sm font-medium">Leave Requests</span>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
       </div>
 
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Today's Team Attendance */}
+        {/* My Team */}
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <Activity className="w-4 h-4 text-blue-500" />
-                Today&apos;s Team Attendance
+                <Users className="w-4 h-4 text-blue-500" />
+                My Team
               </CardTitle>
               <Badge variant="outline" className="text-xs">
-                {todayAttendance.length}
+                {employees.length}
               </Badge>
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="space-y-2">
-              {todayAttendance.length === 0 ? (
-                <p className="text-center py-6 text-gray-400 text-sm">
-                  No attendance records yet
-                </p>
-              ) : (
-                todayAttendance.map((entry) => (
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
+              </div>
+            ) : employees.length === 0 ? (
+              <p className="text-center py-6 text-gray-400 text-sm">
+                No team members assigned yet
+              </p>
+            ) : (
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {employees.slice(0, 5).map((employee) => (
                   <div
-                    key={entry.id}
+                    key={employee.id}
                     className="flex items-center justify-between p-2 rounded-lg bg-gray-50"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-medium text-blue-600">
-                        {entry.employeeName.charAt(0)}
+                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">
+                        {employee.name.charAt(0)}
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900">
-                          {entry.employeeName}
+                          {employee.name}
                         </p>
                         <p className="text-xs text-gray-400">
-                          {entry.clockOut ? "Completed" : "Active"}
+                          {employee.position || "Employee"}
                         </p>
                       </div>
                     </div>
                     <Badge
                       className={
-                        entry.clockOut
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-green-100 text-green-700"
+                        employee.status === "ACTIVE"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
                       }
                     >
-                      {entry.clockOut ? "Done" : "Working"}
+                      {employee.status}
                     </Badge>
                   </div>
-                ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
+            <Link href="/dashboard/employees">
+              <Button variant="ghost" className="w-full mt-4 text-sm">
+                View All Team Members
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 
-        {/* Pending Leave Requests */}
+        {/* Today's Status */}
         <Card>
           <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <Plane className="w-4 h-4 text-orange-500" />
-                Pending Leave Requests
-              </CardTitle>
-              <Badge variant="outline" className="text-xs">
-                {pendingLeaves.length}
-              </Badge>
-            </div>
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <Activity className="w-4 h-4 text-green-500" />
+              Today&apos;s Status
+            </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="space-y-2">
-              {pendingLeaves.length === 0 ? (
-                <p className="text-center py-6 text-gray-400 text-sm">
-                  No pending leave requests
-                </p>
-              ) : (
-                pendingLeaves.map((request) => (
-                  <div key={request.id} className="p-3 rounded-lg bg-gray-50">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {request.employeeName}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {request.type} • {request.startDate} to{" "}
-                          {request.endDate}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Reason: {request.reason}
-                        </p>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button
-                          size="sm"
-                          className="h-7 px-2 bg-green-500 hover:bg-green-600 text-white"
-                          onClick={() =>
-                            toast.success(
-                              `Approved leave for ${request.employeeName}`
-                            )
-                          }
-                        >
-                          <CheckSquare className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="text-center p-3 bg-green-50 rounded-lg">
+                <UserCheck className="w-6 h-6 mx-auto mb-1 text-green-600" />
+                <p className="text-lg font-bold text-green-700">{clockedInCount}</p>
+                <p className="text-xs text-green-600">Present</p>
+              </div>
+              <div className="text-center p-3 bg-yellow-50 rounded-lg">
+                <AlertTriangle className="w-6 h-6 mx-auto mb-1 text-yellow-600" />
+                <p className="text-lg font-bold text-yellow-700">0</p>
+                <p className="text-xs text-yellow-600">Late</p>
+              </div>
+              <div className="text-center p-3 bg-red-50 rounded-lg">
+                <UserX className="w-6 h-6 mx-auto mb-1 text-red-600" />
+                <p className="text-lg font-bold text-red-700">{onLeaveCount}</p>
+                <p className="text-xs text-red-600">On Leave</p>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Weekly Schedule Preview */}
+      {/* Recent Activity */}
       <Card>
         <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-purple-500" />
-              This Week&apos;s Schedule
-            </CardTitle>
-            <Link href="/dashboard/scheduling">
-              <Button variant="ghost" size="sm">
-                View Full Schedule
-                <ArrowRight className="w-3 h-3 ml-1" />
-              </Button>
-            </Link>
-          </div>
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <Activity className="w-4 h-4 text-purple-500" />
+            Recent Activity
+          </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="grid grid-cols-7 gap-2">
-            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
-              (day, index) => (
-                <div key={day} className="text-center">
-                  <p className="text-xs text-gray-500 mb-2">{day}</p>
-                  <div className="space-y-1">
-                    {mockSchedules.slice(0, 2).map((schedule) => {
-                      const shift = schedule.shifts[index];
-                      return shift ? (
-                        <div
-                          key={`${schedule.id}-${index}`}
-                          className="text-[10px] p-1 bg-blue-50 rounded text-blue-700 truncate"
-                        >
-                          {schedule.employeeName.split(" ")[0]}
-                        </div>
-                      ) : null;
-                    })}
-                  </div>
+          <div className="space-y-2">
+            {recentActivity.map((activity) => (
+              <div
+                key={activity.id}
+                className="flex items-center gap-3 p-2 rounded-lg bg-gray-50"
+              >
+                <div className="w-2 h-2 rounded-full bg-blue-500" />
+                <div className="flex-1">
+                  <p className="text-sm text-gray-900">
+                    <span className="font-medium">{activity.employeeName}</span>{" "}
+                    {activity.action}
+                  </p>
                 </div>
-              )
-            )}
+                <p className="text-xs text-gray-400">{activity.time}</p>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

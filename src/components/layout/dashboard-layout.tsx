@@ -33,7 +33,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { mockNotifications, mockCurrentUser } from "@/lib/mock-data";
+import { mockNotifications } from "@/lib/mock-data";
+import { useSession, signOut } from "next-auth/react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -41,14 +42,13 @@ interface DashboardLayoutProps {
 }
 
 // Role type
-type UserRole = "EMPLOYEE" | "MANAGER" | "HR" | "ADMIN";
+type UserRole = "EMPLOYEE" | "SUPERVISOR" | "ADMIN";
 
 // Check if user is an employee (limited access)
 const isEmployee = (role: string): boolean => role === "EMPLOYEE";
 
 // Check if user has full access
-const hasFullAccess = (role: string): boolean => 
-  role === "MANAGER" || role === "HR" || role === "ADMIN";
+const hasFullAccess = (role: string): boolean => role === "SUPERVISOR" || role === "ADMIN";
 
 // Employee navigation (limited access)
 const employeeNavigation = [
@@ -76,6 +76,7 @@ const managerNavigation = [
 
 // Admin-only navigation items
 const adminNavigation = [
+  { name: "User Management", href: "/dashboard/users", icon: Users },
   { name: "Finance", href: "/dashboard/finance", icon: TrendingUp },
   { name: "AI Insights", href: "/dashboard/ai-insights", icon: Brain },
   { name: "Supervisor Assignments", href: "/dashboard/supervisor-assignments", icon: Crown },
@@ -84,7 +85,10 @@ const adminNavigation = [
 export function DashboardLayout({ children, title }: DashboardLayoutProps) {
   const pathname = usePathname();
   const unreadCount = mockNotifications.filter((n) => !n.read).length;
-  const userRole = mockCurrentUser.role as UserRole;
+  const { data: session } = useSession();
+  const userRole = (session?.user?.role || "EMPLOYEE") as UserRole;
+  const userName = session?.user?.name || "User";
+  const userId = session?.user?.id || "me";
   const userIsEmployee = isEmployee(userRole);
   const userHasFullAccess = hasFullAccess(userRole);
 
@@ -214,7 +218,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                         className={`group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 ${
                           isActive
                             ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-blue-600 dark:text-gray-300 dark:hover:bg-gray-800`
+                            : "text-gray-700 hover:bg-gray-50 hover:text-blue-600 dark:text-gray-300 dark:hover:bg-gray-800"
                         }`}
                       >
                         <item.icon
@@ -312,7 +316,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                     <UserCircle className="h-5 w-5 text-blue-600" />
                   </div>
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {mockCurrentUser.name}
+                    {userName}
                   </span>
                   <ChevronDown className="h-4 w-4 text-gray-400" />
                 </Button>
@@ -320,7 +324,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <Link href={`/dashboard/employees/${mockCurrentUser.id}`}>
+                <Link href={`/dashboard/employees/${userId}`}>
                   <DropdownMenuItem>
                     <UserCircle className="mr-2 h-4 w-4" />
                     Profile
@@ -333,12 +337,10 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                   </DropdownMenuItem>
                 </Link>
                 <DropdownMenuSeparator />
-                <Link href="/">
-                  <DropdownMenuItem>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Back to Home
-                  </DropdownMenuItem>
-                </Link>
+                <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/auth/signin" })}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
