@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { z } from "zod";
-import { Role } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -10,7 +9,7 @@ const updateUserSchema = z.object({
   name: z.string().min(2).optional(),
   email: z.string().email().optional(),
   password: z.string().min(6).optional(),
-  role: z.nativeEnum(Role).optional(),
+  role: z.enum(["ADMIN", "SUPERVISOR", "EMPLOYEE"]).optional(),
 });
 
 async function isAdmin() {
@@ -27,7 +26,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     return NextResponse.json({ error: "Validation failed", details: parsed.error.flatten() }, { status: 400 });
   }
 
-  const data: { name?: string; email?: string; password?: string; role?: Role } = {};
+  const data: { name?: string; email?: string; password?: string; role?: "ADMIN" | "SUPERVISOR" | "EMPLOYEE" } = {};
   if (parsed.data.name) data.name = parsed.data.name;
   if (parsed.data.email) data.email = parsed.data.email.toLowerCase();
   if (parsed.data.role) data.role = parsed.data.role;
