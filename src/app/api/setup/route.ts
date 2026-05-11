@@ -12,8 +12,8 @@ export async function POST() {
     
     // Create default organization first
     await prisma.$executeRaw`
-      INSERT INTO "Organization" (id, name, "createdAt", "updatedAt")
-      VALUES ('default-org', 'Default Organization', NOW(), NOW())
+      INSERT INTO "Organization" (id, name, slug, "createdAt", "updatedAt")
+      VALUES ('default-org', 'Default Organization', 'default-org', NOW(), NOW())
       ON CONFLICT (id) DO NOTHING
     `;
     
