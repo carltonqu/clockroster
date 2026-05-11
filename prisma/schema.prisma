@@ -7,50 +7,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  ADMIN
-  SUPERVISOR
-  EMPLOYEE
-}
-
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-}
-
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  password  String
-  role      UserRole @default(EMPLOYEE)
-  status    UserStatus @default(ACTIVE)
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String?
+  password       String?
+  role           UserRole
+  emailVerified  DateTime?
+  image          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  organizationId String
+  employeeId     String?
   
-  // For supervisors - which employees they manage
-  supervisorId String?
-  supervisor   User?   @relation("SupervisorEmployees", fields: [supervisorId], references: [id])
-  employees    User[]  @relation("SupervisorEmployees")
-  
-  // Profile information
-  phone     String?
-  department String?
-  position  String?
-  
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  lastLoginAt DateTime?
-  
-  // Account management
-  createdBy String?
-  
-  // NextAuth relations
-  accounts     Account[]
-  sessions     Session[]
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  accounts       Account[]
+  sessions       Session[]
   
   @@index([email])
-  @@index([role])
-  @@index([supervisorId])
+  @@index([organizationId])
+}
+
+model Organization {
+  id        String   @id
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  users     User[]
 }
 
 model Account {
@@ -59,12 +44,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -89,4 +74,10 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+enum UserRole {
+  ADMIN
+  SUPERVISOR
+  EMPLOYEE
 }
