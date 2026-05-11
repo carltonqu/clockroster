@@ -10,23 +10,18 @@ export async function POST() {
     // First, delete any existing admin
     await prisma.$executeRaw`DELETE FROM "User" WHERE role = 'ADMIN'`;
     
-    // Create new admin user - provide values for all columns to avoid NOT NULL constraints
+    // Create new admin user - match production database schema
     await prisma.$executeRaw`
-      INSERT INTO "User" (id, email, name, password, role, status, phone, department, position, "createdAt", "updatedAt", "lastLoginAt", "createdBy")
+      INSERT INTO "User" (id, email, name, password, role, "createdAt", "updatedAt", "organizationId")
       VALUES (
         gen_random_uuid()::text, 
         'admin@clockroster.com', 
         'Admin User', 
         ${hashedPassword}, 
         'ADMIN', 
-        'ACTIVE',
-        NULL,
-        NULL,
-        NULL,
         NOW(), 
         NOW(),
-        NULL,
-        NULL
+        'default-org'
       )
     `;
 
