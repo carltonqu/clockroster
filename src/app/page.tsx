@@ -319,15 +319,425 @@ const solutions = [
 ]
 
 const industries = [
-  { icon: UtensilsCrossed, name: "Restaurants & Cafes" },
-  { icon: Store, name: "Retail Stores" },
-  { icon: Package, name: "Warehouses" },
-  { icon: Building, name: "Franchises" },
-  { icon: Briefcase, name: "Corporate Teams" },
-  { icon: Users, name: "Agencies" },
-  { icon: Building2, name: "Service Businesses" },
-  { icon: Globe, name: "Remote & Hybrid Teams" },
+  { 
+    id: "restaurants",
+    icon: UtensilsCrossed, 
+    name: "Restaurants & Cafes",
+    description: "Manage shift-based schedules, track hours across multiple locations, and handle tips and overtime calculations.",
+    preview: "restaurants"
+  },
+  { 
+    id: "retail",
+    icon: Store, 
+    name: "Retail Stores",
+    description: "Handle seasonal staffing, part-time workers, and complex scheduling across multiple store locations.",
+    preview: "retail"
+  },
+  { 
+    id: "warehouses",
+    icon: Package, 
+    name: "Warehouses",
+    description: "Track attendance for shift workers, manage overtime, and ensure compliance with labor regulations.",
+    preview: "warehouses"
+  },
+  { 
+    id: "franchises",
+    icon: Building, 
+    name: "Franchises",
+    description: "Centralized workforce management across multiple franchise locations with role-based access control.",
+    preview: "franchises"
+  },
+  { 
+    id: "corporate",
+    icon: Briefcase, 
+    name: "Corporate Teams",
+    description: "Streamline HR processes, track PTO, manage remote workers, and generate detailed workforce reports.",
+    preview: "corporate"
+  },
+  { 
+    id: "agencies",
+    icon: Users, 
+    name: "Agencies",
+    description: "Manage contractors and freelancers, track billable hours, and streamline client billing processes.",
+    preview: "agencies"
+  },
+  { 
+    id: "service",
+    icon: Building2, 
+    name: "Service Businesses",
+    description: "Schedule field workers, track job completion times, and manage on-call rotations efficiently.",
+    preview: "service"
+  },
+  { 
+    id: "remote",
+    icon: Globe, 
+    name: "Remote & Hybrid Teams",
+    description: "Track productivity across time zones, manage flexible schedules, and maintain team collaboration.",
+    preview: "remote"
+  },
 ]
+
+// Industry Preview Components
+function RestaurantPreview() {
+  return (
+    <div className="relative w-full h-full p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-4 max-w-xs mx-auto">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+            <UtensilsCrossed className="w-5 h-5 text-orange-600" />
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900">Bistro Central</div>
+            <div className="text-xs text-gray-500">3 locations</div>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between bg-orange-50 rounded-lg p-2">
+            <span className="text-sm text-gray-700">Morning Shift</span>
+            <span className="text-sm font-medium text-orange-600">6:00 AM</span>
+          </div>
+          <div className="flex items-center justify-between bg-orange-50 rounded-lg p-2">
+            <span className="text-sm text-gray-700">Evening Shift</span>
+            <span className="text-sm font-medium text-orange-600">4:00 PM</span>
+          </div>
+        </div>
+        <div className="mt-4 flex gap-2">
+          <div className="flex-1 bg-gray-100 rounded-lg p-2 text-center">
+            <div className="text-lg font-bold text-gray-900">12</div>
+            <div className="text-xs text-gray-500">Staff</div>
+          </div>
+          <div className="flex-1 bg-gray-100 rounded-lg p-2 text-center">
+            <div className="text-lg font-bold text-orange-600">$2.4k</div>
+            <div className="text-xs text-gray-500">Tips</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function RetailPreview() {
+  return (
+    <div className="relative w-full h-full p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-4 max-w-xs mx-auto">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+            <Store className="w-5 h-5 text-blue-600" />
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900">Fashion Store</div>
+            <div className="text-xs text-gray-500">5 branches</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-7 gap-1 mb-4">
+          {['M','T','W','T','F','S','S'].map((day, i) => (
+            <div key={i} className={`text-center text-xs py-1 rounded ${i < 5 ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500'}`}>
+              {day}
+            </div>
+          ))}
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full" />
+            <span className="text-sm text-gray-600">Weekend Staff: 8</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+            <span className="text-sm text-gray-600">Seasonal: 4</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function WarehousePreview() {
+  return (
+    <div className="relative w-full h-full p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-4 max-w-xs mx-auto">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+            <Package className="w-5 h-5 text-purple-600" />
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900">LogiHub Warehouse</div>
+            <div className="text-xs text-gray-500">24/7 Operations</div>
+          </div>
+        </div>
+        <div className="bg-purple-50 rounded-xl p-4 mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-600">Night Shift</span>
+            <span className="text-xs bg-purple-200 text-purple-700 px-2 py-1 rounded-full">Active</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex -space-x-2">
+              {[1,2,3,4].map((i) => (
+                <div key={i} className="w-8 h-8 bg-purple-300 rounded-full border-2 border-white" />
+              ))}
+            </div>
+            <span className="text-sm text-gray-500">+12 on duty</span>
+          </div>
+        </div>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-gray-600">Overtime Today</span>
+          <span className="font-semibold text-purple-600">4.5 hrs</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FranchisePreview() {
+  return (
+    <div className="relative w-full h-full p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-4 max-w-xs mx-auto">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+            <Building className="w-5 h-5 text-green-600" />
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900">Coffee Chain Co.</div>
+            <div className="text-xs text-gray-500">15 locations</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {['Downtown', 'Mall', 'Airport'].map((loc, i) => (
+            <div key={i} className="bg-green-50 rounded-lg p-2 text-center">
+              <div className="text-xs font-medium text-green-700">{loc}</div>
+              <div className="text-lg font-bold text-green-600">{8 + i * 2}</div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-gray-50 rounded-lg p-3">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600">Total Employees</span>
+            <span className="font-bold text-gray-900">127</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CorporatePreview() {
+  return (
+    <div className="relative w-full h-full p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-4 max-w-xs mx-auto">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+            <Briefcase className="w-5 h-5 text-indigo-600" />
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900">TechCorp HQ</div>
+            <div className="text-xs text-gray-500">350 employees</div>
+          </div>
+        </div>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                <Users className="w-4 h-4 text-green-600" />
+              </div>
+              <span className="text-sm text-gray-700">In Office</span>
+            </div>
+            <span className="text-sm font-semibold text-green-600">142</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Globe className="w-4 h-4 text-blue-600" />
+              </div>
+              <span className="text-sm text-gray-700">Remote</span>
+            </div>
+            <span className="text-sm font-semibold text-blue-600">208</span>
+          </div>
+        </div>
+        <div className="mt-4 pt-4 border-t">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-500">PTO Requests</span>
+            <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-xs font-medium">12 pending</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function AgencyPreview() {
+  return (
+    <div className="relative w-full h-full p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-4 max-w-xs mx-auto">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center">
+            <Users className="w-5 h-5 text-pink-600" />
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900">Creative Agency</div>
+            <div className="text-xs text-gray-500">25 contractors</div>
+          </div>
+        </div>
+        <div className="space-y-2 mb-4">
+          {['Design Team', 'Dev Team', 'Marketing'].map((team, i) => (
+            <div key={i} className="flex items-center justify-between bg-pink-50 rounded-lg p-2">
+              <span className="text-sm text-gray-700">{team}</span>
+              <span className="text-sm font-medium text-pink-600">{40 + i * 15}h</span>
+            </div>
+          ))}
+        </div>
+        <div className="bg-gray-900 text-white rounded-xl p-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm">Billable This Month</span>
+            <span className="font-bold">$18.5k</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ServicePreview() {
+  return (
+    <div className="relative w-full h-full p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-4 max-w-xs mx-auto">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-cyan-100 rounded-xl flex items-center justify-center">
+            <Building2 className="w-5 h-5 text-cyan-600" />
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900">Home Services Pro</div>
+            <div className="text-xs text-gray-500">12 field teams</div>
+          </div>
+        </div>
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <span className="text-sm text-gray-700">3 Teams On Job</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+            <span className="text-sm text-gray-700">2 Teams En Route</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-gray-300 rounded-full" />
+            <span className="text-sm text-gray-700">7 Teams Available</span>
+          </div>
+        </div>
+        <div className="bg-cyan-50 rounded-lg p-3">
+          <div className="text-xs text-cyan-700 font-medium mb-1">On-Call Tonight</div>
+          <div className="flex -space-x-2">
+            {[1,2,3].map((i) => (
+              <div key={i} className="w-8 h-8 bg-cyan-300 rounded-full border-2 border-white" />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function RemotePreview() {
+  return (
+    <div className="relative w-full h-full p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-4 max-w-xs mx-auto">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center">
+            <Globe className="w-5 h-5 text-teal-600" />
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900">Global Team</div>
+            <div className="text-xs text-gray-500">12 time zones</div>
+          </div>
+        </div>
+        <div className="flex items-center justify-center gap-1 mb-4">
+          {['SF','NY','LD','TK','SY'].map((city, i) => (
+            <div key={i} className="text-center">
+              <div className="w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center mb-1">
+                <span className="text-xs font-bold text-teal-600">{city}</span>
+              </div>
+              <span className="text-xs text-gray-500">{9 + i}:00</span>
+            </div>
+          ))}
+        </div>
+        <div className="bg-teal-50 rounded-xl p-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-teal-700">Team Online</span>
+            <span className="text-lg font-bold text-teal-600">24/42</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const industryPreviews: Record<string, React.FC> = {
+  restaurants: RestaurantPreview,
+  retail: RetailPreview,
+  warehouses: WarehousePreview,
+  franchises: FranchisePreview,
+  corporate: CorporatePreview,
+  agencies: AgencyPreview,
+  service: ServicePreview,
+  remote: RemotePreview,
+}
+
+// Industry Tabs Component
+function IndustryTabs() {
+  const [activeTab, setActiveTab] = useState("restaurants")
+  const activeIndustry = industries.find(i => i.id === activeTab)
+  const PreviewComponent = activeIndustry ? industryPreviews[activeIndustry.preview] : RestaurantPreview
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      {/* Left Side - Tab List */}
+      <div className="space-y-2">
+        {industries.map((industry) => (
+          <button
+            key={industry.id}
+            onClick={() => setActiveTab(industry.id)}
+            className={`w-full flex items-center gap-4 p-4 rounded-xl text-left transition-all duration-300 ${
+              activeTab === industry.id
+                ? "bg-blue-50 border-2 border-blue-200 shadow-md"
+                : "bg-white border-2 border-transparent hover:bg-gray-50"
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-300 ${
+              activeTab === industry.id ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600"
+            }`}>
+              <industry.icon className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <div className={`font-semibold transition-colors duration-300 ${
+                activeTab === industry.id ? "text-blue-900" : "text-gray-900"
+              }`}>
+                {industry.name}
+              </div>
+              {activeTab === industry.id && (
+                <div className="text-sm text-blue-600 mt-1 animate-fade-in">
+                  {industry.description}
+                </div>
+              )}
+            </div>
+            {activeTab === industry.id && (
+              <div className="w-2 h-2 bg-blue-500 rounded-full" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Right Side - Preview */}
+      <div className="relative">
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl p-2 shadow-inner min-h-[400px]">
+          <div className="bg-white rounded-2xl shadow-lg h-full min-h-[384px] overflow-hidden">
+            <PreviewComponent />
+          </div>
+        </div>
+        {/* Decorative elements */}
+        <div className="absolute -top-4 -right-4 w-24 h-24 bg-blue-100 rounded-full blur-2xl opacity-60" />
+        <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-purple-100 rounded-full blur-2xl opacity-60" />
+      </div>
+    </div>
+  )
+}
 
 const stats = [
   { value: "10K+", label: "Active Users" },
@@ -585,26 +995,18 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Industries Section - White BG */}
+      {/* Industries Section - Tabbed Layout */}
       <section id="industries" className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-6">
-          <AnimatedSection className="text-center mb-16">
+          <AnimatedSection className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Perfect For
             </h2>
           </AnimatedSection>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {industries.map((industry, index) => (
-              <AnimatedSection key={industry.name} delay={index * 50}>
-                <div className="flex flex-col items-center p-6 bg-gradient-to-b from-blue-50 to-white rounded-xl border border-blue-100 hover:border-blue-300 hover:shadow-lg transition-all duration-500 hover:-translate-y-2 group cursor-default">
-                  <industry.icon className="w-8 h-8 text-blue-600 mb-3 transition-all duration-500 group-hover:scale-125" />
-                  <span className="text-sm font-medium text-gray-700 text-center">
-                    {industry.name}
-                  </span>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
+          
+          <AnimatedSection delay={100}>
+            <IndustryTabs />
+          </AnimatedSection>
         </div>
       </section>
 
