@@ -4,10 +4,18 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   try {
     // Get column information for User table
-    const columns = await prisma.$queryRaw`
+    const userColumns = await prisma.$queryRaw`
       SELECT column_name, data_type, is_nullable 
       FROM information_schema.columns 
       WHERE table_name = 'User' 
+      ORDER BY ordinal_position
+    `;
+    
+    // Get column information for Organization table
+    const orgColumns = await prisma.$queryRaw`
+      SELECT column_name, data_type, is_nullable 
+      FROM information_schema.columns 
+      WHERE table_name = 'Organization' 
       ORDER BY ordinal_position
     `;
     
@@ -16,7 +24,8 @@ export async function GET() {
     const userCount = Number((userCountResult as any)[0].count);
     
     return NextResponse.json({
-      columns,
+      userColumns,
+      orgColumns,
       userCount,
       databaseUrl: process.env.DATABASE_URL ? "Set (hidden)" : "Not set"
     });
