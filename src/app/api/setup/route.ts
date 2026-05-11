@@ -40,7 +40,11 @@ export async function POST() {
   } catch (error) {
     console.error("Setup error:", error);
     return NextResponse.json(
-      { error: "Failed to create admin user" },
+      { 
+        error: "Failed to create admin user", 
+        details: error instanceof Error ? error.message : String(error),
+        code: error instanceof Error && 'code' in error ? (error as any).code : undefined
+      },
       { status: 500 }
     );
   }
