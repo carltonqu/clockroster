@@ -11,8 +11,9 @@ export async function GET() {
       ORDER BY ordinal_position
     `;
     
-    // Count users
-    const userCount = await prisma.$queryRaw`SELECT COUNT(*) as count FROM "User"`;
+    // Count users - cast BigInt to Number
+    const userCountResult = await prisma.$queryRaw`SELECT COUNT(*) as count FROM "User"`;
+    const userCount = Number((userCountResult as any)[0].count);
     
     return NextResponse.json({
       columns,
