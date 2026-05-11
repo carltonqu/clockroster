@@ -22,26 +22,6 @@ function SignInForm() {
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setErrorMessage("")
-
-    try {
-      // Use redirect: true for server-side redirect handling
-      await signIn("credentials", {
-        email: email.toLowerCase(),
-        password,
-        redirect: true,
-        callbackUrl,
-      })
-    } catch (err) {
-      console.error("Sign in error:", err)
-      setErrorMessage("Something went wrong. Please try again.")
-      setLoading(false)
-    }
-  }
-
   const getErrorMessage = (errorCode: string) => {
     switch (errorCode) {
       case "Configuration":
@@ -52,6 +32,35 @@ function SignInForm() {
         return "Invalid email or password."
       default:
         return "An unexpected error occurred."
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setErrorMessage("")
+
+    try {
+      // Use redirect: false to handle client-side
+      const result = await signIn("credentials", {
+        email: email.toLowerCase(),
+        password,
+        redirect: false,
+        callbackUrl,
+      })
+      
+      if (result?.error) {
+        setErrorMessage(getErrorMessage(result.error))
+        setLoading(false)
+      } else if (result?.ok) {
+        // Successful login - redirect to callback URL
+        router.push(callbackUrl)
+        router.refresh()
+      }
+    } catch (err) {
+      console.error("Sign in error:", err)
+      setErrorMessage("Something went wrong. Please try again.")
+      setLoading(false)
     }
   }
 
