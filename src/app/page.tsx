@@ -32,46 +32,246 @@ const features = [
   {
     tag: "TIME",
     title: "Time Tracking",
-    description: "Effortless clock in and clock out system with automatic overtime calculations, attendance monitoring, and real-time timesheets.",
+    description: "Effortless clock in and clock out system with automatic overtime calculations and real-time attendance monitoring.",
     icon: Clock,
     color: "bg-blue-100 text-blue-700",
+    preview: "time",
   },
   {
     tag: "SCHEDULE",
     title: "Smart Scheduling",
-    description: "Create and manage employee schedules with an intuitive drag-and-drop planner. Visual calendar view makes planning effortless.",
+    description: "Create and manage employee schedules with an intuitive drag-and-drop planner and visual calendar view.",
     icon: Calendar,
-    color: "bg-green-100 text-green-700",
+    color: "bg-emerald-100 text-emerald-700",
+    preview: "schedule",
   },
   {
     tag: "PAYROLL",
     title: "Payroll Automation",
-    description: "Sync worked hours directly to payroll with customizable salary structures, deductions, and automated calculations.",
+    description: "Sync worked hours directly to payroll with customizable salary structures and automated calculations.",
     icon: DollarSign,
-    color: "bg-purple-100 text-purple-700",
+    color: "bg-violet-100 text-violet-700",
+    preview: "payroll",
   },
   {
     tag: "ANALYTICS",
     title: "Workforce Analytics",
     description: "Get valuable insights into workforce performance, labor costs, and operational efficiency with detailed reports.",
     icon: BarChart3,
-    color: "bg-orange-100 text-orange-700",
+    color: "bg-amber-100 text-amber-700",
+    preview: "analytics",
   },
   {
     tag: "ALERTS",
-    title: "Notifications & Alerts",
-    description: "Keep your team informed with smart notifications for shifts, approvals, schedule changes, and attendance updates.",
+    title: "Smart Notifications",
+    description: "Keep your team informed with instant notifications for shifts, approvals, and schedule changes.",
     icon: Bell,
-    color: "bg-pink-100 text-pink-700",
+    color: "bg-rose-100 text-rose-700",
+    preview: "alerts",
   },
   {
     tag: "SECURITY",
     title: "Role-Based Access",
-    description: "Secure and organized access control for every level of your company. Admin, Supervisor, and Employee roles.",
+    description: "Secure access control for every level with Admin, Supervisor, and Employee permission levels.",
     icon: Shield,
     color: "bg-cyan-100 text-cyan-700",
+    preview: "security",
   },
 ]
+
+// Feature Preview Components
+function TimeTrackingPreview() {
+  return (
+    <div className="relative w-full h-full flex items-center justify-center">
+      {/* Main Clock Card */}
+      <div className="bg-white rounded-2xl shadow-lg p-4 w-40 transform -rotate-3">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+            <Clock className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-xs font-medium text-gray-700">Clock In</span>
+        </div>
+        <div className="text-2xl font-bold text-gray-900 mb-1">09:00</div>
+        <div className="text-xs text-green-500">On Time ✓</div>
+      </div>
+      {/* Floating Stats Card */}
+      <div className="absolute -right-2 top-2 bg-white rounded-xl shadow-md p-3 transform rotate-6">
+        <div className="text-xs text-gray-500 mb-1">Today</div>
+        <div className="text-lg font-bold text-blue-600">8h 30m</div>
+      </div>
+      {/* Decorative */}
+      <div className="absolute -left-4 bottom-4 w-12 h-12 bg-blue-100 rounded-full opacity-60" />
+      <div className="absolute right-8 -bottom-2 w-8 h-8 bg-yellow-200 rounded-full opacity-50" />
+    </div>
+  )
+}
+
+function SchedulePreview() {
+  return (
+    <div className="relative w-full h-full flex items-center justify-center">
+      {/* Calendar Card */}
+      <div className="bg-white rounded-2xl shadow-lg p-3 w-44">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-semibold text-gray-700">Mon</span>
+          <span className="text-xs text-gray-400">Tue</span>
+          <span className="text-xs text-gray-400">Wed</span>
+        </div>
+        <div className="space-y-2">
+          <div className="bg-emerald-100 rounded-lg p-2">
+            <div className="text-xs font-medium text-emerald-700">Morning Shift</div>
+            <div className="text-xs text-emerald-600">8:00 - 4:00</div>
+          </div>
+          <div className="bg-emerald-50 rounded-lg p-2 border border-emerald-100">
+            <div className="text-xs font-medium text-emerald-600">Evening Shift</div>
+            <div className="text-xs text-emerald-500">4:00 - 12:00</div>
+          </div>
+        </div>
+      </div>
+      {/* Floating Badge */}
+      <div className="absolute -right-4 top-4 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md transform rotate-12">
+        +3
+      </div>
+      {/* Decorative */}
+      <div className="absolute left-2 -top-2 w-10 h-10 bg-emerald-100 rounded-full opacity-50" />
+    </div>
+  )
+}
+
+function PayrollPreview() {
+  return (
+    <div className="relative w-full h-full flex items-center justify-center">
+      {/* Payroll Card */}
+      <div className="bg-white rounded-2xl shadow-lg p-4 w-40">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
+            <DollarSign className="w-4 h-4 text-violet-600" />
+          </div>
+          <span className="text-xs font-medium text-gray-700">Payroll</span>
+        </div>
+        <div className="text-xl font-bold text-gray-900 mb-2">$4,250</div>
+        <div className="flex gap-1">
+          <div className="h-1.5 w-8 bg-violet-500 rounded-full" />
+          <div className="h-1.5 w-6 bg-violet-300 rounded-full" />
+          <div className="h-1.5 w-4 bg-violet-200 rounded-full" />
+        </div>
+      </div>
+      {/* Stats Card */}
+      <div className="absolute -right-2 -top-2 bg-white rounded-xl shadow-md p-3 transform rotate-6">
+        <div className="text-xs text-gray-500">Tax</div>
+        <div className="text-sm font-bold text-violet-600">-$425</div>
+      </div>
+      {/* Decorative */}
+      <div className="absolute -left-4 bottom-4 w-12 h-12 bg-violet-100 rounded-full opacity-60" />
+      <div className="absolute right-4 -bottom-2 w-6 h-6 bg-yellow-300 rounded-full opacity-50" />
+    </div>
+  )
+}
+
+function AnalyticsPreview() {
+  return (
+    <div className="relative w-full h-full flex items-center justify-center">
+      {/* Chart Card */}
+      <div className="bg-white rounded-2xl shadow-lg p-4 w-44">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-medium text-gray-700">Productivity</span>
+          <span className="text-xs text-amber-500">+12%</span>
+        </div>
+        {/* Bar Chart */}
+        <div className="flex items-end gap-2 h-16">
+          <div className="w-4 bg-amber-200 rounded-t" style={{ height: '40%' }} />
+          <div className="w-4 bg-amber-300 rounded-t" style={{ height: '60%' }} />
+          <div className="w-4 bg-amber-400 rounded-t" style={{ height: '45%' }} />
+          <div className="w-4 bg-amber-500 rounded-t" style={{ height: '80%' }} />
+          <div className="w-4 bg-amber-600 rounded-t" style={{ height: '95%' }} />
+        </div>
+      </div>
+      {/* Floating Metric */}
+      <div className="absolute -right-4 top-6 bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md">
+        94%
+      </div>
+      {/* Decorative */}
+      <div className="absolute left-0 top-2 w-8 h-8 bg-amber-100 rounded-full opacity-50" />
+    </div>
+  )
+}
+
+function AlertsPreview() {
+  return (
+    <div className="relative w-full h-full flex items-center justify-center">
+      {/* Notification Stack */}
+      <div className="relative">
+        {/* Background Cards */}
+        <div className="absolute -top-2 left-2 bg-rose-50 rounded-xl p-3 w-36 opacity-50 transform -rotate-3" />
+        <div className="absolute -top-1 left-1 bg-rose-100 rounded-xl p-3 w-36 opacity-70 transform -rotate-1" />
+        {/* Main Card */}
+        <div className="bg-white rounded-2xl shadow-lg p-3 w-40 relative z-10">
+          <div className="flex items-start gap-2">
+            <div className="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <Bell className="w-4 h-4 text-rose-500" />
+            </div>
+            <div>
+              <div className="text-xs font-medium text-gray-800">Shift Alert</div>
+              <div className="text-xs text-gray-500">Tomorrow 9AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Badge */}
+      <div className="absolute -right-2 top-4 bg-rose-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shadow-md">
+        3
+      </div>
+      {/* Decorative */}
+      <div className="absolute -left-4 bottom-4 w-10 h-10 bg-rose-100 rounded-full opacity-60" />
+    </div>
+  )
+}
+
+function SecurityPreview() {
+  return (
+    <div className="relative w-full h-full flex items-center justify-center">
+      {/* Access Card */}
+      <div className="bg-white rounded-2xl shadow-lg p-4 w-40">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center">
+            <Shield className="w-4 h-4 text-cyan-600" />
+          </div>
+          <span className="text-xs font-medium text-gray-700">Access</span>
+        </div>
+        {/* Role Tags */}
+        <div className="space-y-2">
+          <div className="bg-cyan-500 text-white text-xs font-medium px-3 py-1.5 rounded-lg text-center">
+            Admin
+          </div>
+          <div className="flex gap-2">
+            <div className="bg-cyan-100 text-cyan-700 text-xs font-medium px-2 py-1 rounded flex-1 text-center">
+              Manager
+            </div>
+            <div className="bg-gray-100 text-gray-600 text-xs font-medium px-2 py-1 rounded flex-1 text-center">
+              Staff
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Lock Icon */}
+      <div className="absolute -right-4 bottom-4 bg-cyan-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      </div>
+      {/* Decorative */}
+      <div className="absolute left-2 -top-2 w-8 h-8 bg-cyan-100 rounded-full opacity-50" />
+    </div>
+  )
+}
+
+const previewComponents: Record<string, React.FC> = {
+  time: TimeTrackingPreview,
+  schedule: SchedulePreview,
+  payroll: PayrollPreview,
+  analytics: AnalyticsPreview,
+  alerts: AlertsPreview,
+  security: SecurityPreview,
+}
 
 const whyChoose = [
   {
@@ -311,51 +511,42 @@ export default function LandingPage() {
 
       {/* Features Section - Light BG */}
       <section id="features" className="py-20 bg-gray-50/50">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <AnimatedSection className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Powerful Features Designed for Modern Teams
             </h2>
           </AnimatedSection>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {features.map((feature, index) => (
-              <AnimatedSection key={feature.title} delay={index * 100}>
-                <div className="h-full bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 group border border-gray-100">
-                  {/* Tag */}
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4 ${feature.color}`}>
-                    {feature.tag}
-                  </span>
-                  
-                  {/* Title */}
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                    {feature.title}
-                  </h3>
-                  
-                  {/* Mockup Preview */}
-                  <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 mb-4 min-h-[140px] flex items-center justify-center overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5" />
-                    <div className="relative flex items-center gap-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <feature.icon className="w-8 h-8 text-white" />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <div className="w-24 h-2 bg-gray-200 rounded-full" />
-                        <div className="w-16 h-2 bg-gray-200 rounded-full" />
-                        <div className="w-20 h-2 bg-blue-200 rounded-full" />
-                      </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature, index) => {
+              const PreviewComponent = previewComponents[feature.preview]
+              return (
+                <AnimatedSection key={feature.title} delay={index * 100}>
+                  <div className="h-full bg-white rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 group border border-gray-100">
+                    {/* Tag */}
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3 ${feature.color}`}>
+                      {feature.tag}
+                    </span>
+                    
+                    {/* Title */}
+                    <h3 className="text-xl font-bold text-gray-900 mb-3">
+                      {feature.title}
+                    </h3>
+                    
+                    {/* Beautiful UI Mockup Preview */}
+                    <div className="relative bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl mb-4 h-36 overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5" />
+                      <PreviewComponent />
                     </div>
-                    {/* Decorative elements */}
-                    <div className="absolute top-2 right-2 w-8 h-8 bg-yellow-200 rounded-full opacity-50" />
-                    <div className="absolute bottom-2 left-2 w-6 h-6 bg-blue-200 rounded-full opacity-50" />
+                    
+                    {/* Description */}
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {feature.description}
+                    </p>
                   </div>
-                  
-                  {/* Description */}
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {feature.description}
-                  </p>
-                </div>
-              </AnimatedSection>
-            ))}
+                </AnimatedSection>
+              )
+            })}
           </div>
         </div>
       </section>
