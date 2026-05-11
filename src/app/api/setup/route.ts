@@ -10,6 +10,13 @@ export async function POST() {
     // First, delete any existing admin
     await prisma.$executeRaw`DELETE FROM "User" WHERE role = 'ADMIN'`;
     
+    // Create default organization first
+    await prisma.$executeRaw`
+      INSERT INTO "Organization" (id, name, "createdAt", "updatedAt")
+      VALUES ('default-org', 'Default Organization', NOW(), NOW())
+      ON CONFLICT (id) DO NOTHING
+    `;
+    
     // Create new admin user - match production database schema
     await prisma.$executeRaw`
       INSERT INTO "User" (id, email, name, password, role, "createdAt", "updatedAt", "organizationId")
