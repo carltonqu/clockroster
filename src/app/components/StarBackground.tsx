@@ -10,6 +10,8 @@ interface Star {
   opacity: number
   duration: number
   delay: number
+  moveX: number
+  moveY: number
 }
 
 export function StarBackground() {
@@ -18,7 +20,7 @@ export function StarBackground() {
   useEffect(() => {
     // Generate random stars - approximately 10% coverage
     const generateStars = () => {
-      const starCount = 150 // Adjust for density
+      const starCount = 150
       const newStars: Star[] = []
 
       for (let i = 0; i < starCount; i++) {
@@ -28,8 +30,10 @@ export function StarBackground() {
           y: Math.random() * 100,
           size: Math.random() * 2 + 1,
           opacity: Math.random() * 0.5 + 0.3,
-          duration: Math.random() * 3 + 2,
+          duration: Math.random() * 10 + 15, // 15-25 seconds for slow movement
           delay: Math.random() * 5,
+          moveX: (Math.random() - 0.5) * 20, // Move -10% to +10%
+          moveY: (Math.random() - 0.5) * 20, // Move -10% to +10%
         })
       }
       setStars(newStars)
@@ -43,28 +47,45 @@ export function StarBackground() {
       {stars.map((star) => (
         <div
           key={star.id}
-          className="absolute rounded-full bg-white animate-pulse"
+          className="absolute rounded-full bg-white"
           style={{
             left: `${star.x}%`,
             top: `${star.y}%`,
             width: `${star.size}px`,
             height: `${star.size}px`,
             opacity: star.opacity,
-            animation: `pulse ${star.duration}s ease-in-out ${star.delay}s infinite`,
-          }}
+            animation: `float ${star.duration}s ease-in-out ${star.delay}s infinite, twinkle ${star.duration / 3}s ease-in-out ${star.delay}s infinite`,
+            "--move-x": `${star.moveX}%`,
+            "--move-y": `${star.moveY}%`,
+          } as React.CSSProperties}
         />
       ))}
       
-      {/* CSS for custom animation */}
+      {/* CSS for floating and twinkling animation */}
       <style jsx>{`
-        @keyframes pulse {
+        @keyframes float {
+          0%, 100% {
+            transform: translate(0, 0);
+          }
+          25% {
+            transform: translate(var(--move-x), var(--move-y));
+          }
+          50% {
+            transform: translate(calc(var(--move-x) * -0.5), calc(var(--move-y) * -0.5));
+          }
+          75% {
+            transform: translate(calc(var(--move-x) * 0.5), calc(var(--move-y) * -0.5));
+          }
+        }
+        
+        @keyframes twinkle {
           0%, 100% {
             opacity: 0.3;
             transform: scale(1);
           }
           50% {
             opacity: 1;
-            transform: scale(1.2);
+            transform: scale(1.3);
           }
         }
       `}</style>
