@@ -4,21 +4,13 @@ import { hash } from "bcryptjs";
 
 export async function POST() {
   try {
-    // Check if admin already exists (using raw query to avoid schema issues)
-    const existingAdmins = await prisma.$queryRaw`
-      SELECT email FROM "User" WHERE role = 'ADMIN' LIMIT 1
-    `;
-
-    if (Array.isArray(existingAdmins) && existingAdmins.length > 0) {
-      return NextResponse.json(
-        { message: "Admin user already exists", email: existingAdmins[0].email },
-        { status: 200 }
-      );
-    }
-
-    // Create admin user using raw query to handle schema mismatches
+    // Delete existing admin and create new one with known password
     const hashedPassword = await hash("admin123", 10);
     
+    // First, delete any existing admin
+    await prisma.$executeRaw`DELETE FROM "User" WHERE role = 'ADMIN'`;
+    
+    // Create new admin user
     await prisma.$executeRaw`
       INSERT INTO "User" (id, email, name, password, role, "createdAt", "updatedAt")
       VALUES (gen_random_uuid()::text, 'admin@clockroster.com', 'Admin User', ${hashedPassword}, 'ADMIN', NOW(), NOW())
