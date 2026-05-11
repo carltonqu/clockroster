@@ -30,40 +30,46 @@ import { Badge } from "@/components/ui/badge"
 
 const features = [
   {
-    icon: Clock,
+    tag: "TIME",
     title: "Time Tracking",
     description: "Effortless clock in and clock out system with automatic overtime calculations, attendance monitoring, and real-time timesheets.",
-    benefits: ["Real-time attendance monitoring", "Automatic overtime computation", "Digital timesheets", "Late and absence tracking"],
+    icon: Clock,
+    color: "bg-blue-100 text-blue-700",
   },
   {
-    icon: Calendar,
+    tag: "SCHEDULE",
     title: "Smart Scheduling",
-    description: "Create and manage employee schedules with an intuitive drag-and-drop planner.",
-    benefits: ["Drag-and-drop shift management", "Group scheduling support", "Conflict and overlap detection", "Flexible shift adjustments"],
+    description: "Create and manage employee schedules with an intuitive drag-and-drop planner. Visual calendar view makes planning effortless.",
+    icon: Calendar,
+    color: "bg-green-100 text-green-700",
   },
   {
-    icon: DollarSign,
+    tag: "PAYROLL",
     title: "Payroll Automation",
-    description: "Sync worked hours directly to payroll with customizable salary structures and deductions.",
-    benefits: ["Automated payroll calculations", "Custom pay rates and deductions", "Overtime integration", "Payroll-ready reports"],
+    description: "Sync worked hours directly to payroll with customizable salary structures, deductions, and automated calculations.",
+    icon: DollarSign,
+    color: "bg-purple-100 text-purple-700",
   },
   {
-    icon: BarChart3,
+    tag: "ANALYTICS",
     title: "Workforce Analytics",
-    description: "Get valuable insights into workforce performance and operational costs.",
-    benefits: ["Labor cost monitoring", "Attendance trend analysis", "Performance insights", "Exportable reports and dashboards"],
+    description: "Get valuable insights into workforce performance, labor costs, and operational efficiency with detailed reports.",
+    icon: BarChart3,
+    color: "bg-orange-100 text-orange-700",
   },
   {
-    icon: Bell,
+    tag: "ALERTS",
     title: "Notifications & Alerts",
-    description: "Keep your team informed and connected with smart notifications.",
-    benefits: ["Shift reminders", "Approval notifications", "Schedule change alerts", "Attendance updates"],
+    description: "Keep your team informed with smart notifications for shifts, approvals, schedule changes, and attendance updates.",
+    icon: Bell,
+    color: "bg-pink-100 text-pink-700",
   },
   {
-    icon: Shield,
+    tag: "SECURITY",
     title: "Role-Based Access",
-    description: "Secure and organized access control for every level of your company.",
-    benefits: ["Admin dashboards", "Supervisor management panels", "Employee self-service access", "Permission-based security"],
+    description: "Secure and organized access control for every level of your company. Admin, Supervisor, and Employee roles.",
+    icon: Shield,
+    color: "bg-cyan-100 text-cyan-700",
   },
 ]
 
@@ -303,39 +309,50 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features Section - Light Blue Gradient BG */}
-      <section id="features" className="py-20 bg-gradient-to-b from-blue-50 via-blue-100/50 to-blue-50">
+      {/* Features Section - Light BG */}
+      <section id="features" className="py-20 bg-gray-50/50">
         <div className="max-w-6xl mx-auto px-6">
           <AnimatedSection className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Powerful Features Designed for Modern Teams
             </h2>
           </AnimatedSection>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {features.map((feature, index) => (
               <AnimatedSection key={feature.title} delay={index * 100}>
-                <div className="h-full p-8 bg-white rounded-2xl border border-blue-100 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 group">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-200 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
-                      <feature.icon className="w-6 h-6 text-white" />
+                <div className="h-full bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 group border border-gray-100">
+                  {/* Tag */}
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4 ${feature.color}`}>
+                    {feature.tag}
+                  </span>
+                  
+                  {/* Title */}
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                    {feature.title}
+                  </h3>
+                  
+                  {/* Mockup Preview */}
+                  <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 mb-4 min-h-[140px] flex items-center justify-center overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5" />
+                    <div className="relative flex items-center gap-4">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <feature.icon className="w-8 h-8 text-white" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <div className="w-24 h-2 bg-gray-200 rounded-full" />
+                        <div className="w-16 h-2 bg-gray-200 rounded-full" />
+                        <div className="w-20 h-2 bg-blue-200 rounded-full" />
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2 transition-colors duration-300 group-hover:text-blue-600">
-                        {feature.title}
-                      </h3>
-                      <p className="text-gray-600 mb-4">
-                        {feature.description}
-                      </p>
-                      <ul className="space-y-2">
-                        {feature.benefits.map((benefit) => (
-                          <li key={benefit} className="flex items-center gap-2 text-sm text-gray-600">
-                            <Check className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                            {benefit}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    {/* Decorative elements */}
+                    <div className="absolute top-2 right-2 w-8 h-8 bg-yellow-200 rounded-full opacity-50" />
+                    <div className="absolute bottom-2 left-2 w-6 h-6 bg-blue-200 rounded-full opacity-50" />
                   </div>
+                  
+                  {/* Description */}
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
               </AnimatedSection>
             ))}
