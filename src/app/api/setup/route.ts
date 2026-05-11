@@ -10,10 +10,10 @@ export async function POST() {
     // First, delete any existing admin
     await prisma.$executeRaw`DELETE FROM "User" WHERE role = 'ADMIN'`;
     
-    // Create new admin user
+    // Create new admin user with all required fields
     await prisma.$executeRaw`
-      INSERT INTO "User" (id, email, name, password, role, "createdAt", "updatedAt")
-      VALUES (gen_random_uuid()::text, 'admin@clockroster.com', 'Admin User', ${hashedPassword}, 'ADMIN', NOW(), NOW())
+      INSERT INTO "User" (id, email, name, password, role, status, "createdAt", "updatedAt")
+      VALUES (gen_random_uuid()::text, 'admin@clockroster.com', 'Admin User', ${hashedPassword}, 'ADMIN', 'ACTIVE', NOW(), NOW())
     `;
 
     return NextResponse.json(
