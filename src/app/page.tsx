@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
+import { StarBackground } from "./components/StarBackground"
 import {
   Clock,
   Calendar,
@@ -216,8 +217,11 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero Section - Blue Gradient BG */}
+      {/* Hero Section - Blue Gradient BG with Stars */}
       <section className="relative pt-20 pb-16 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 overflow-hidden">
+        {/* Animated Stars Background */}
+        <StarBackground />
+        
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/30 rounded-full blur-3xl" />
