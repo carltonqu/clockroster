@@ -184,34 +184,41 @@ function AnimatedSection({
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
-      {/* Gradient Background */}
-      <div className="fixed inset-0 bg-gradient-to-br from-blue-50/80 via-white to-blue-100/60 -z-10" />
+    <div className="min-h-screen bg-slate-950 overflow-x-hidden">
+      {/* Dark Gradient Background */}
+      <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 -z-10" />
+      
+      {/* Animated Gradient Orbs */}
+      <div className="fixed inset-0 overflow-hidden -z-10 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-3xl" />
+      </div>
       
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-blue-100/50">
+      <header className="sticky top-0 z-50 bg-slate-950/70 backdrop-blur-xl border-b border-slate-800/50">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+            <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
               <Clock className="w-5 h-5 text-white" />
             </div>
-            <span className="font-semibold text-xl text-gray-900 tracking-tight">
+            <span className="font-semibold text-xl text-white tracking-tight">
               ClockRoster
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="#features" className="text-sm text-gray-600 hover:text-blue-600 transition-all duration-300 hover:-translate-y-0.5">Features</Link>
-            <Link href="#solutions" className="text-sm text-gray-600 hover:text-blue-600 transition-all duration-300 hover:-translate-y-0.5">Solutions</Link>
-            <Link href="#industries" className="text-sm text-gray-600 hover:text-blue-600 transition-all duration-300 hover:-translate-y-0.5">Industries</Link>
+            <Link href="#features" className="text-sm text-slate-300 hover:text-blue-400 transition-all duration-300 hover:-translate-y-0.5">Features</Link>
+            <Link href="#solutions" className="text-sm text-slate-300 hover:text-blue-400 transition-all duration-300 hover:-translate-y-0.5">Solutions</Link>
+            <Link href="#industries" className="text-sm text-slate-300 hover:text-blue-400 transition-all duration-300 hover:-translate-y-0.5">Industries</Link>
           </nav>
           <div className="flex items-center gap-3">
             <Link href="/auth/signin">
-              <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300">
+              <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-300">
                 Sign in
               </Button>
             </Link>
             <Link href="/auth/signin">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 rounded-xl px-5 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-300">
+              <Button className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25 rounded-xl px-5 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/40">
                 Get Started
               </Button>
             </Link>
@@ -223,20 +230,20 @@ export default function LandingPage() {
       <section className="relative pt-20 pb-16">
         <div className="max-w-6xl mx-auto px-6">
           <AnimatedSection className="text-center max-w-4xl mx-auto">
-            <Badge className="mb-6 bg-blue-100/80 text-blue-700 border-0 rounded-full px-4 py-1.5 text-sm font-medium hover:bg-blue-200 transition-colors duration-300 cursor-default">
+            <Badge className="mb-6 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-full px-4 py-1.5 text-sm font-medium hover:bg-blue-500/30 transition-colors duration-300 cursor-default">
               <Sparkles className="w-3.5 h-3.5 mr-1.5" />
               Workforce Management Simplified
             </Badge>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 tracking-tight leading-[1.1]">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight leading-[1.1]">
               Manage Your Team{" "}
-              <span className="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                 Effortlessly
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-600 mb-6 leading-relaxed max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-slate-300 mb-6 leading-relaxed max-w-3xl mx-auto">
               Time tracking, scheduling, payroll, and workforce analytics — all in one beautiful, intuitive platform designed for modern businesses.
             </p>
-            <p className="text-gray-500 mb-10 max-w-2xl mx-auto">
+            <p className="text-slate-400 mb-10 max-w-2xl mx-auto">
               Reduce manual work, improve team productivity, and gain complete visibility over your workforce operations from a single dashboard.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -256,10 +263,10 @@ export default function LandingPage() {
           <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
             {stats.map((stat, index) => (
               <AnimatedSection key={stat.label} delay={index * 100} className="text-center group">
-                <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-1 transition-all duration-300 group-hover:scale-110 group-hover:text-blue-600">
+                <div className="text-3xl md:text-4xl font-bold text-white mb-1 transition-all duration-300 group-hover:scale-110 group-hover:text-blue-400">
                   {stat.value}
                 </div>
-                <div className="text-sm text-gray-500 transition-colors duration-300 group-hover:text-gray-700">
+                <div className="text-sm text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
                   {stat.label}
                 </div>
               </AnimatedSection>
@@ -272,21 +279,21 @@ export default function LandingPage() {
       <section className="py-20">
         <div className="max-w-6xl mx-auto px-6">
           <AnimatedSection className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Why Businesses Choose Our Platform
             </h2>
-            <p className="text-gray-600 text-lg max-w-3xl mx-auto">
+            <p className="text-slate-400 text-lg max-w-3xl mx-auto">
               Managing employees shouldn't be stressful, complicated, or time-consuming. Our system helps businesses simplify daily operations while improving accuracy, communication, and efficiency.
             </p>
           </AnimatedSection>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {whyChoose.map((item, index) => (
               <AnimatedSection key={item.title} delay={index * 100}>
-                <div className="h-full p-6 bg-white/70 backdrop-blur-sm rounded-2xl border border-blue-100/50 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-500 hover:-translate-y-2 group cursor-default">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3 transition-colors duration-300 group-hover:text-blue-600">
+                <div className="h-full p-6 bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-500 hover:-translate-y-2 group cursor-default">
+                  <h3 className="text-lg font-semibold text-white mb-3 transition-colors duration-300 group-hover:text-blue-400">
                     {item.title}
                   </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
+                  <p className="text-slate-400 text-sm leading-relaxed">
                     {item.description}
                   </p>
                 </div>
@@ -297,32 +304,32 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-gradient-to-b from-white to-blue-50/50">
+      <section id="features" className="py-20 bg-gradient-to-b from-slate-950 to-slate-900">
         <div className="max-w-6xl mx-auto px-6">
           <AnimatedSection className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Powerful Features Designed for Modern Teams
             </h2>
           </AnimatedSection>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {features.map((feature, index) => (
               <AnimatedSection key={feature.title} delay={index * 100}>
-                <div className="h-full p-8 bg-white rounded-2xl border border-blue-100/50 shadow-sm hover:shadow-2xl hover:shadow-blue-100/50 transition-all duration-500 hover:-translate-y-2 group">
+                <div className="h-full p-8 bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 hover:-translate-y-2 group">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-200 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-xl group-hover:shadow-blue-300">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/20 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-xl group-hover:shadow-blue-500/30">
                       <feature.icon className="w-6 h-6 text-white transition-transform duration-500 group-hover:scale-110" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2 transition-colors duration-300 group-hover:text-blue-600">
+                      <h3 className="text-xl font-semibold text-white mb-2 transition-colors duration-300 group-hover:text-blue-400">
                         {feature.title}
                       </h3>
-                      <p className="text-gray-600 mb-4">
+                      <p className="text-slate-400 mb-4">
                         {feature.description}
                       </p>
                       <ul className="space-y-2">
                         {feature.benefits.map((benefit, i) => (
-                          <li key={benefit} className="flex items-center gap-2 text-sm text-gray-600 transition-all duration-300 hover:translate-x-1">
-                            <Check className="w-4 h-4 text-blue-500 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                          <li key={benefit} className="flex items-center gap-2 text-sm text-slate-400 transition-all duration-300 hover:translate-x-1">
+                            <Check className="w-4 h-4 text-blue-400 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                             {benefit}
                           </li>
                         ))}
@@ -340,21 +347,21 @@ export default function LandingPage() {
       <section id="solutions" className="py-20">
         <div className="max-w-6xl mx-auto px-6">
           <AnimatedSection className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Solutions We Provide
             </h2>
           </AnimatedSection>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {solutions.map((solution, index) => (
               <AnimatedSection key={solution.title} delay={index * 150}>
-                <div className="h-full text-center p-8 bg-white/70 backdrop-blur-sm rounded-2xl border border-blue-100/50 hover:border-blue-300 hover:shadow-xl transition-all duration-500 hover:-translate-y-3 group cursor-default">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-200 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-xl group-hover:shadow-blue-300">
+                <div className="h-full text-center p-8 bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-500 hover:-translate-y-3 group cursor-default">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/20 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-xl group-hover:shadow-blue-500/30">
                     <solution.icon className="w-8 h-8 text-white transition-transform duration-500 group-hover:scale-110" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3 transition-colors duration-300 group-hover:text-blue-600">
+                  <h3 className="text-xl font-semibold text-white mb-3 transition-colors duration-300 group-hover:text-blue-400">
                     {solution.title}
                   </h3>
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-slate-400 leading-relaxed">
                     {solution.description}
                   </p>
                 </div>
@@ -365,19 +372,19 @@ export default function LandingPage() {
       </section>
 
       {/* Industries Section */}
-      <section id="industries" className="py-20 bg-gradient-to-b from-blue-50/50 to-white">
+      <section id="industries" className="py-20 bg-gradient-to-b from-slate-900 to-slate-950">
         <div className="max-w-6xl mx-auto px-6">
           <AnimatedSection className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Perfect For
             </h2>
           </AnimatedSection>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {industries.map((industry, index) => (
               <AnimatedSection key={industry.name} delay={index * 50}>
-                <div className="flex flex-col items-center p-6 bg-white rounded-xl border border-blue-100/50 hover:border-blue-300 hover:shadow-lg transition-all duration-500 hover:-translate-y-2 group cursor-default">
-                  <industry.icon className="w-8 h-8 text-blue-600 mb-3 transition-all duration-500 group-hover:scale-125 group-hover:rotate-6" />
-                  <span className="text-sm font-medium text-gray-700 text-center transition-colors duration-300 group-hover:text-blue-600">
+                <div className="flex flex-col items-center p-6 bg-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-800 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-500 hover:-translate-y-2 group cursor-default">
+                  <industry.icon className="w-8 h-8 text-blue-400 mb-3 transition-all duration-500 group-hover:scale-125 group-hover:rotate-6" />
+                  <span className="text-sm font-medium text-slate-300 text-center transition-colors duration-300 group-hover:text-blue-400">
                     {industry.name}
                   </span>
                 </div>
@@ -391,7 +398,7 @@ export default function LandingPage() {
       <section className="py-20">
         <div className="max-w-4xl mx-auto px-6">
           <AnimatedSection>
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-12 md:p-16 text-center text-white shadow-2xl shadow-blue-200 relative overflow-hidden group">
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-12 md:p-16 text-center text-white shadow-2xl shadow-blue-500/20 relative overflow-hidden group">
               {/* Animated background gradient */}
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-white/10 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out" />
               
@@ -421,18 +428,18 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-blue-100/50 py-12 bg-white/50">
+      <footer className="border-t border-slate-800 py-12 bg-slate-950/50">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
                 <Clock className="w-4 h-4 text-white" />
               </div>
-              <span className="font-semibold text-lg text-gray-900">
+              <span className="font-semibold text-lg text-white">
                 ClockRoster
               </span>
             </Link>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-slate-400">
               © {new Date().getFullYear()} ClockRoster. All rights reserved.
             </p>
           </div>
