@@ -39,12 +39,27 @@ export async function POST(req: Request) {
     // Hash password
     const hashedPassword = await hash(password, 10);
 
-    // Create user with raw SQL - works with any schema
-    const result = await prisma.$queryRaw`
-      INSERT INTO "User" (id, name, email, password, role, "createdAt", "updatedAt")
-      VALUES (gen_random_uuid(), ${name}, ${lowerEmail}, ${hashedPassword}, 'ADMIN', NOW(), NOW())
-      RETURNING id, name, email, role
-    `;
+    // Create user with raw SQL - handle schema variations
+    let result;
+    try {
+      // Try without organizationId first
+      result = await prisma.$queryRaw`
+        INSERT INTO "User" (id, name, email, password, role, "createdAt", "updatedAt")
+        VALUES (gen_random_uuid(), ${name}, ${lowerEmail}, ${hashedPassword}, 'ADMIN', NOW(), NOW())
+        RETURNING id, name, email, role
+      `;
+    } catch (insertError: any) {
+      // If column 'organizationId' is required, try with it
+      if (insertError.message?.includes('organizationId') || insertError.message?.includes('column') || insertError.code === 'P2011') {
+        result = await prisma.$queryRaw`
+          INSERT INTO "User" (id, name, email, password, role, "organizationId", "createdAt", "updatedAt")
+          VALUES (gen_random_uuid(), ${name}, ${lowerEmail}, ${hashedPassword}, 'ADMIN', gen_random_uuid(), NOW(), NOW())
+          RETURNING id, name, email, role
+        `;
+      } else {
+        throw insertError;
+      }
+    }
 
     const user = (result as any[])[0];
 
@@ -62,8 +77,15 @@ export async function POST(req: Request) {
     );
   } catch (error: any) {
     console.error("Registration error:", error);
+    console.error("Error code:", error.code);
+    console.error("Error meta:", error.meta);
     return NextResponse.json(
-      { error: "Failed to create account", details: error.message },
+      { 
+        error: "Failed to create account", 
+        details: error.message,
+        code: error.code,
+        meta: error.meta 
+      },
       { status: 500 }
     );
   }

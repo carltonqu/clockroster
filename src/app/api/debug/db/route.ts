@@ -18,8 +18,9 @@ export async function GET() {
       WHERE table_name = 'User'
     `;
 
-    // Try to count users
-    const userCount = await prisma.$queryRaw`SELECT COUNT(*) as count FROM "User"`;
+    // Try to count users (handle BigInt)
+    const userCountResult = await prisma.$queryRaw`SELECT COUNT(*) as count FROM "User"`;
+    const userCount = Number((userCountResult as any[])[0]?.count || 0);
 
     return NextResponse.json({
       columns,
