@@ -17,6 +17,29 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Allow public auth pages
+  if (
+    pathname.startsWith("/auth/signin") ||
+    pathname.startsWith("/auth/signup") ||
+    pathname.startsWith("/auth/forgot-password") ||
+    pathname.startsWith("/auth/reset-password") ||
+    pathname.startsWith("/auth/error")
+  ) {
+    // If already logged in, redirect to dashboard
+    const token = await getToken({ 
+      req, 
+      secret: process.env.NEXTAUTH_SECRET,
+    });
+    
+    if (token) {
+      const role = (token.role as "ADMIN" | "SUPERVISOR" | "EMPLOYEE") || "EMPLOYEE";
+      return NextResponse.redirect(new URL(ROLE_HOME[role], req.url));
+    }
+    
+    return NextResponse.next();
+  }
+
+  // Check authentication for protected routes
   const token = await getToken({ 
     req, 
     secret: process.env.NEXTAUTH_SECRET,
@@ -31,10 +54,12 @@ export async function middleware(req: NextRequest) {
 
   const role = (token.role as "ADMIN" | "SUPERVISOR" | "EMPLOYEE") || "EMPLOYEE";
 
+  // Redirect root dashboard to role-specific home
   if (pathname === "/dashboard") {
     return NextResponse.redirect(new URL(ROLE_HOME[role], req.url));
   }
 
+  // Check route access permissions
   const rule = ROUTE_ACCESS.find(
     (r) => pathname === r.prefix || pathname.startsWith(`${r.prefix}/`)
   );
@@ -43,9 +68,16 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL(ROLE_HOME[role], req.url));
   }
 
-  return NextResponse.next();
+  // Add security headers
+  const response = NextResponse.next();
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("X-XSS-Protection", "1; mode=block");
+  
+  return response;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

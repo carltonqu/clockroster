@@ -6,14 +6,30 @@ import { prisma } from "@/lib/prisma";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(1),
 });
 
 export const authOptions: NextAuthOptions = {
-  session: { strategy: "jwt" },
+  session: { 
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",
+  },
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === "production" 
+        ? "__Secure-next-auth.session-token" 
+        : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
   },
   providers: [
     CredentialsProvider({
@@ -26,14 +42,29 @@ export const authOptions: NextAuthOptions = {
         const parsed = credentialsSchema.safeParse(rawCredentials);
         if (!parsed.success) return null;
 
+        const { email, password } = parsed.data;
+        const lowerEmail = email.toLowerCase().trim();
+
         const user = await prisma.user.findUnique({
-          where: { email: parsed.data.email.toLowerCase() },
+          where: { email: lowerEmail },
         });
         
+        // Generic error - don't reveal if user exists
         if (!user || !user.password) return null;
 
-        const valid = await compare(parsed.data.password, user.password);
+        // Check if account is active
+        if (user.status !== "ACTIVE") {
+          throw new Error("Account is not active. Please verify your email or contact support.");
+        }
+
+        const valid = await compare(password, user.password);
         if (!valid) return null;
+
+        // Update last login time
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { lastLoginAt: new Date() },
+        });
 
         return {
           id: user.id,
@@ -45,16 +76,37 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) token.role = (user as { role?: string }).role;
+    async jwt({ token, user, trigger, session }) {
+      if (user) {
+        token.role = user.role;
+        token.id = user.id;
+      }
+      
+      // Handle session updates
+      if (trigger === "update" && session) {
+        token.name = session.name;
+      }
+      
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.sub ?? "";
-        session.user.role = (token.role as "ADMIN" | "SUPERVISOR" | "EMPLOYEE") ?? "EMPLOYEE";
+        session.user.id = token.id as string;
+        session.user.role = token.role as "ADMIN" | "SUPERVISOR" | "EMPLOYEE";
       }
       return session;
+    },
+    async signIn({ user, account, profile, email, credentials }) {
+      // Additional sign in validation can go here
+      return true;
+    },
+  },
+  events: {
+    async signIn({ user, account, profile, isNewUser }) {
+      console.log(`User ${user.email} signed in`);
+    },
+    async signOut({ token, session }) {
+      console.log(`User ${token.email} signed out`);
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
