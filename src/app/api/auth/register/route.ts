@@ -22,42 +22,28 @@ const registerSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    // Get client IP for rate limiting
     const forwarded = req.headers.get("x-forwarded-for");
     const ip = forwarded ? forwarded.split(",")[0].trim() : "unknown";
     
-    // Rate limiting: 3 attempts per 15 minutes per IP
     const rateLimitResult = rateLimit(`register:${ip}`, 3, 15 * 60 * 1000);
     if (!rateLimitResult.success) {
       return NextResponse.json(
         { error: "Too many attempts. Please try again later." },
-        { 
-          status: 429,
-          headers: {
-            "X-RateLimit-Limit": "3",
-            "X-RateLimit-Remaining": "0",
-            "X-RateLimit-Reset": String(rateLimitResult.resetTime),
-          }
-        }
+        { status: 429 }
       );
     }
 
     const body = await req.json();
     
-    // Validate input
     const parsed = registerSchema.safeParse(body);
     if (!parsed.success) {
       const errors = parsed.error.errors.map(e => e.message).join(", ");
-      return NextResponse.json(
-        { error: errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: errors }, { status: 400 });
     }
 
     const { name, email, password } = parsed.data;
     const lowerEmail = email.toLowerCase().trim();
 
-    // Check if email already exists using raw query
     const existingUsers = await prisma.$queryRaw`
       SELECT id FROM "User" WHERE email = ${lowerEmail} LIMIT 1
     `;
@@ -69,49 +55,24 @@ export async function POST(req: Request) {
       );
     }
 
-    // Hash password with bcrypt (cost factor 12 for security)
     const hashedPassword = await hash(password, 12);
 
-    // Try to create user - handle schema variations between local and production
-    let user;
-    try {
-      // Try WITH status column first (local DB has it)
-      const result = await prisma.$queryRaw`
-        INSERT INTO "User" (id, name, email, password, role, status, "createdAt", "updatedAt")
-        VALUES (
-          gen_random_uuid(), 
-          ${name.trim()}, 
-          ${lowerEmail}, 
-          ${hashedPassword}, 
-          'ADMIN'::"UserRole", 
-          'ACTIVE'::"UserStatus", 
-          NOW(), 
-          NOW()
-        )
-        RETURNING id, name, email, role
-      `;
-      user = (result as any[])[0];
-    } catch (insertError: any) {
-      // If status column doesn't exist (production), try WITHOUT it
-      if (insertError.message?.includes('status') && insertError.code === 'P2010') {
-        const result = await prisma.$queryRaw`
-          INSERT INTO "User" (id, name, email, password, role, "createdAt", "updatedAt")
-          VALUES (
-            gen_random_uuid(), 
-            ${name.trim()}, 
-            ${lowerEmail}, 
-            ${hashedPassword}, 
-            'ADMIN'::"UserRole", 
-            NOW(), 
-            NOW()
-          )
-          RETURNING id, name, email, role
-        `;
-        user = (result as any[])[0];
-      } else {
-        throw insertError;
-      }
-    }
+    // Production DB doesn't have status column - use only columns that exist
+    const result = await prisma.$queryRaw`
+      INSERT INTO "User" (id, name, email, password, role, "createdAt", "updatedAt")
+      VALUES (
+        gen_random_uuid(), 
+        ${name.trim()}, 
+        ${lowerEmail}, 
+        ${hashedPassword}, 
+        'ADMIN'::"UserRole", 
+        NOW(), 
+        NOW()
+      )
+      RETURNING id, name, email, role
+    `;
+    
+    const user = (result as any[])[0];
 
     return NextResponse.json(
       {
@@ -127,19 +88,8 @@ export async function POST(req: Request) {
     );
   } catch (error: any) {
     console.error("Registration error:", error);
-    console.error("Error message:", error.message);
-    console.error("Error code:", error.code);
-    
-    // Return detailed error for debugging (remove in production)
     return NextResponse.json(
-      { 
-        error: "Unable to create account. Please try again later.",
-        debug: {
-          message: error.message,
-          code: error.code,
-          meta: error.meta,
-        }
-      },
+      { error: "Unable to create account. Please try again later." },
       { status: 500 }
     );
   }
