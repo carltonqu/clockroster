@@ -11,10 +11,8 @@ import {
   Bell,
   Settings,
   Menu,
-  LogOut,
   Briefcase,
   FileText,
-  ChevronDown,
   UserCircle,
   TrendingUp,
   Brain,
@@ -33,24 +31,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { mockNotifications } from "@/lib/mock-data";
-import { useSession, signOut } from "next-auth/react";
+import { mockNotifications, mockCurrentUser } from "@/lib/mock-data";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   title?: string;
 }
 
-// Role type
-type UserRole = "EMPLOYEE" | "SUPERVISOR" | "ADMIN";
+// Use mock data for now - no auth
+const userRole = "ADMIN" as const;
+const userName = mockCurrentUser.name;
+const userId = mockCurrentUser.id;
 
-// Check if user is an employee (limited access)
 const isEmployee = (role: string): boolean => role === "EMPLOYEE";
-
-// Check if user has full access
 const hasFullAccess = (role: string): boolean => role === "SUPERVISOR" || role === "ADMIN";
 
-// Employee navigation (limited access)
 const employeeNavigation = [
   { name: "Dashboard", href: "/dashboard/employee", icon: LayoutDashboard },
   { name: "Attendance", href: "/dashboard/attendance", icon: Clock },
@@ -61,7 +56,6 @@ const employeeNavigation = [
   { name: "Profile", href: "/dashboard/employees/1", icon: User },
 ];
 
-// Manager/Admin navigation (full access)
 const managerNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Employees", href: "/dashboard/employees", icon: Users },
@@ -74,7 +68,6 @@ const managerNavigation = [
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
-// Admin-only navigation items
 const adminNavigation = [
   { name: "User Management", href: "/dashboard/users", icon: Users },
   { name: "Finance", href: "/dashboard/finance", icon: TrendingUp },
@@ -85,20 +78,8 @@ const adminNavigation = [
 export function DashboardLayout({ children, title }: DashboardLayoutProps) {
   const pathname = usePathname();
   const unreadCount = mockNotifications.filter((n) => !n.read).length;
-  const { data: session } = useSession();
-  const userRole = (session?.user?.role || "EMPLOYEE") as UserRole;
-  const userName = session?.user?.name || "User";
-  const userId = session?.user?.id || "me";
   const userIsEmployee = isEmployee(userRole);
   const userHasFullAccess = hasFullAccess(userRole);
-
-  // Check if current page is an admin-only page
-  const isAdminPage = pathname?.includes("/finance") || 
-                      pathname?.includes("/ai-insights") || 
-                      pathname?.includes("/supervisor-assignments") ||
-                      pathname?.includes("/admin");
-
-  // Get navigation based on user role
   const navigation = userIsEmployee ? employeeNavigation : managerNavigation;
 
   return (
@@ -141,7 +122,6 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                 );
               })}
               
-              {/* Admin-only section - only show for managers/admins */}
               {userHasFullAccess && (
                 <>
                   <li className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
@@ -150,43 +130,34 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                     </p>
                   </li>
                   {adminNavigation.map((item) => {
-                const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
-                return (
-                  <li key={item.name}>
-                    <Link
-                      href={item.href}
-                      className={`group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 ${
-                        isActive
-                          ? "bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-purple-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                      }`}
-                    >
-                      <item.icon
-                        className={`h-5 w-5 shrink-0 ${
-                          isActive
-                            ? "text-purple-600 dark:text-purple-400"
-                            : "text-gray-400 group-hover:text-purple-600 dark:text-gray-500"
-                        }`}
-                      />
-                      {item.name}
-                      <Badge className="ml-auto text-[10px] bg-purple-100 text-purple-700">Admin</Badge>
-                    </Link>
-                  </li>
-                );
-              })}
+                    const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
+                    return (
+                      <li key={item.name}>
+                        <Link
+                          href={item.href}
+                          className={`group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 ${
+                            isActive
+                              ? "bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400"
+                              : "text-gray-700 hover:bg-gray-50 hover:text-purple-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                          }`}
+                        >
+                          <item.icon
+                            className={`h-5 w-5 shrink-0 ${
+                              isActive
+                                ? "text-purple-600 dark:text-purple-400"
+                                : "text-gray-400 group-hover:text-purple-600 dark:text-gray-500"
+                            }`}
+                          />
+                          {item.name}
+                          <Badge className="ml-auto text-[10px] bg-purple-100 text-purple-700">Admin</Badge>
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </>
               )}
             </ul>
           </nav>
-          <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800 space-y-1">
-            <button
-              onClick={() => signOut({ callbackUrl: "/auth/signin" })}
-              className="w-full group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
-            >
-              <LogOut className="h-5 w-5 shrink-0" />
-              Sign out
-            </button>
-          </div>
         </div>
       </div>
 
@@ -234,7 +205,6 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                   );
                 })}
                 
-                {/* Admin-only section mobile - only show for managers/admins */}
                 {userHasFullAccess && (
                   <>
                     <li className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
@@ -243,42 +213,33 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                       </p>
                     </li>
                     {adminNavigation.map((item) => {
-                  const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
-                  return (
-                    <li key={item.name}>
-                      <Link
-                        href={item.href}
-                        className={`group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 ${
-                          isActive
-                            ? "bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-purple-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                        }`}
-                      >
-                        <item.icon
-                          className={`h-5 w-5 shrink-0 ${
-                            isActive
-                              ? "text-purple-600 dark:text-purple-400"
-                              : "text-gray-400 group-hover:text-purple-600 dark:text-gray-500"
-                          }`}
-                        />
-                        {item.name}
-                      </Link>
-                    </li>
-                  );
-                })}
+                      const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
+                      return (
+                        <li key={item.name}>
+                          <Link
+                            href={item.href}
+                            className={`group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 ${
+                              isActive
+                                ? "bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400"
+                                : "text-gray-700 hover:bg-gray-50 hover:text-purple-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                            }`}
+                          >
+                            <item.icon
+                              className={`h-5 w-5 shrink-0 ${
+                                isActive
+                                  ? "text-purple-600 dark:text-purple-400"
+                                  : "text-gray-400 group-hover:text-purple-600 dark:text-gray-500"
+                              }`}
+                            />
+                            {item.name}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </>
                 )}
               </ul>
             </nav>
-            <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800">
-              <button
-                onClick={() => signOut({ callbackUrl: "/auth/signin" })}
-                className="w-full group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
-              >
-                <LogOut className="h-5 w-5 shrink-0" />
-                Sign out
-              </button>
-            </div>
           </SheetContent>
         </Sheet>
         <div className="flex-1">
@@ -327,7 +288,6 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     {userName}
                   </span>
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -345,11 +305,6 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                     Settings
                   </DropdownMenuItem>
                 </Link>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/auth/signin" })}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign out
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

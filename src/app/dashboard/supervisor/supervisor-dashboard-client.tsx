@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
 import Link from "next/link"
 import {
   Users,
@@ -73,31 +72,12 @@ function StatCard({
 }
 
 export function SupervisorDashboardClient() {
-  const { data: session } = useSession()
   const [employees, setEmployees] = useState<Employee[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
-  const fetchEmployees = async () => {
-    try {
-      setLoading(true)
-      const response = await fetch("/api/users?role=EMPLOYEE")
-      if (!response.ok) throw new Error("Failed to fetch employees")
-      const data = await response.json()
-      setEmployees(data)
-    } catch (error) {
-      toast.error("Failed to load team data")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchEmployees()
-  }, [])
-
-  const activeEmployees = employees.filter((e) => e.status === "ACTIVE").length
-  const clockedInCount = 5 // Mock data - would come from attendance API
-  const onLeaveCount = 2 // Mock data
+  const activeEmployees = 0
+  const clockedInCount = 0
+  const onLeaveCount = 0
   const pendingRequests = 3 // Mock data
 
   const recentActivity = [
@@ -116,7 +96,7 @@ export function SupervisorDashboardClient() {
             Manage your team and monitor performance
           </p>
         </div>
-        <Button variant="outline" onClick={fetchEmployees} disabled={loading}>
+        <Button variant="outline" disabled={loading}>
           <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
           Refresh
         </Button>

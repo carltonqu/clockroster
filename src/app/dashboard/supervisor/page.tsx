@@ -1,21 +1,7 @@
-import { getServerSession } from "next-auth"
-import { redirect } from "next/navigation"
-import { authOptions } from "@/lib/auth"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { SupervisorDashboardClient } from "./supervisor-dashboard-client"
 
-export default async function SupervisorDashboardPage() {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user) {
-    redirect("/auth/signin")
-  }
-
-  // Only supervisors and admins can access
-  if (session.user.role !== "SUPERVISOR" && session.user.role !== "ADMIN") {
-    redirect("/dashboard")
-  }
-
+export default function SupervisorDashboardPage() {
   return (
     <DashboardLayout title="Supervisor Dashboard">
       <SupervisorDashboardClient />
