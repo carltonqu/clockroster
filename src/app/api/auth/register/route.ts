@@ -107,14 +107,15 @@ export async function POST(req: Request) {
     console.error("Error message:", error.message);
     console.error("Error code:", error.code);
     
-    // Return detailed error in development
+    // Return detailed error for debugging (remove in production)
     return NextResponse.json(
       { 
         error: "Unable to create account. Please try again later.",
-        ...(process.env.NODE_ENV === "development" && { 
-          details: error.message,
-          code: error.code 
-        })
+        debug: {
+          message: error.message,
+          code: error.code,
+          meta: error.meta,
+        }
       },
       { status: 500 }
     );
