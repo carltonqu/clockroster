@@ -1,16 +1,23 @@
+import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { DashboardClient } from "./dashboard-client";
-import { mockCurrentUser } from "@/lib/mock-data";
+import { getSession } from "@/lib/auth";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const user = await getSession();
+
+  if (!user) {
+    redirect("/auth/login");
+  }
+
   return (
-    <DashboardLayout title="Dashboard">
+    <DashboardLayout title="Dashboard" user={user}>
       <DashboardClient
         user={{
-          id: mockCurrentUser.id,
-          name: mockCurrentUser.name,
-          email: mockCurrentUser.email,
-          role: mockCurrentUser.role,
+          id: user.id,
+          name: user.email.split("@")[0],
+          email: user.email,
+          role: "ADMIN",
           tier: "Pro",
         }}
         stats={{

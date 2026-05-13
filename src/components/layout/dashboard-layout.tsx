@@ -31,17 +31,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { mockNotifications, mockCurrentUser } from "@/lib/mock-data";
+import { mockNotifications } from "@/lib/mock-data";
+import { LogoutButton } from "@/components/auth/logout-button";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   title?: string;
+  user?: {
+    id: string;
+    email: string;
+  } | null;
 }
 
-// Use mock data for now - no auth
 const userRole = "ADMIN" as const;
-const userName = mockCurrentUser.name;
-const userId = mockCurrentUser.id;
 
 const isEmployee = (role: string): boolean => role === "EMPLOYEE";
 const hasFullAccess = (role: string): boolean => role === "SUPERVISOR" || role === "ADMIN";
@@ -75,12 +77,13 @@ const adminNavigation = [
   { name: "Supervisor Assignments", href: "/dashboard/supervisor-assignments", icon: Crown },
 ];
 
-export function DashboardLayout({ children, title }: DashboardLayoutProps) {
+export function DashboardLayout({ children, title, user }: DashboardLayoutProps) {
   const pathname = usePathname();
   const unreadCount = mockNotifications.filter((n) => !n.read).length;
   const userIsEmployee = isEmployee(userRole);
   const userHasFullAccess = hasFullAccess(userRole);
   const navigation = userIsEmployee ? employeeNavigation : managerNavigation;
+  const userEmail = user?.email || "user@example.com";
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -286,25 +289,23 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                     <UserCircle className="h-5 w-5 text-blue-600" />
                   </div>
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {userName}
+                    {userEmail}
                   </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <Link href={`/dashboard/employees/${userId}`}>
-                  <DropdownMenuItem>
-                    <UserCircle className="mr-2 h-4 w-4" />
-                    Profile
-                  </DropdownMenuItem>
-                </Link>
                 <Link href="/dashboard/settings">
                   <DropdownMenuItem>
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </DropdownMenuItem>
                 </Link>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <LogoutButton />
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
