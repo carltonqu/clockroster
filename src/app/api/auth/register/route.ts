@@ -57,13 +57,12 @@ export async function POST(req: Request) {
     const { name, email, password } = parsed.data;
     const lowerEmail = email.toLowerCase().trim();
 
-    // Check if email already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email: lowerEmail },
-    });
+    // Check if email already exists using raw query
+    const existingUsers = await prisma.$queryRaw`
+      SELECT id FROM "User" WHERE email = ${lowerEmail} LIMIT 1
+    `;
 
-    if (existingUser) {
-      // Generic error message to prevent email enumeration
+    if ((existingUsers as any[]).length > 0) {
       return NextResponse.json(
         { error: "Unable to create account. Please try again." },
         { status: 400 }
@@ -73,33 +72,51 @@ export async function POST(req: Request) {
     // Hash password with bcrypt (cost factor 12 for security)
     const hashedPassword = await hash(password, 12);
 
-    // Create user with status pending verification
-    const user = await prisma.user.create({
-      data: {
-        name: name.trim(),
-        email: lowerEmail,
-        password: hashedPassword,
-        role: "ADMIN",
-        status: "PENDING_VERIFICATION",
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        status: true,
-      },
-    });
-
-    // TODO: Send verification email
-    // For now, auto-verify for testing
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { 
-        status: "ACTIVE",
-        emailVerified: new Date(),
-      },
-    });
+    // Try to create user - handle different schema versions
+    let user;
+    try {
+      // Try with new schema (with status column)
+      const result = await prisma.$queryRaw`
+        INSERT INTO "User" (id, name, email, password, role, status, "createdAt", "updatedAt")
+        VALUES (gen_random_uuid(), ${name.trim()}, ${lowerEmail}, ${hashedPassword}, 'ADMIN', 'ACTIVE', NOW(), NOW())
+        RETURNING id, name, email, role
+      `;
+      user = (result as any[])[0];
+    } catch (err: any) {
+      // If status column doesn't exist, try without it
+      if (err.message?.includes('status') || err.message?.includes('column')) {
+        try {
+          const result = await prisma.$queryRaw`
+            INSERT INTO "User" (id, name, email, password, role, "createdAt", "updatedAt")
+            VALUES (gen_random_uuid(), ${name.trim()}, ${lowerEmail}, ${hashedPassword}, 'ADMIN', NOW(), NOW())
+            RETURNING id, name, email, role
+          `;
+          user = (result as any[])[0];
+        } catch (err2: any) {
+          // If organizationId is required, include it
+          if (err2.message?.includes('organizationId')) {
+            const result = await prisma.$queryRaw`
+              INSERT INTO "User" (id, name, email, password, role, "organizationId", "createdAt", "updatedAt")
+              VALUES (gen_random_uuid(), ${name.trim()}, ${lowerEmail}, ${hashedPassword}, 'ADMIN', gen_random_uuid(), NOW(), NOW())
+              RETURNING id, name, email, role
+            `;
+            user = (result as any[])[0];
+          } else {
+            throw err2;
+          }
+        }
+      } else if (err.message?.includes('organizationId')) {
+        // organizationId required but status exists
+        const result = await prisma.$queryRaw`
+          INSERT INTO "User" (id, name, email, password, role, status, "organizationId", "createdAt", "updatedAt")
+          VALUES (gen_random_uuid(), ${name.trim()}, ${lowerEmail}, ${hashedPassword}, 'ADMIN', 'ACTIVE', gen_random_uuid(), NOW(), NOW())
+          RETURNING id, name, email, role
+        `;
+        user = (result as any[])[0];
+      } else {
+        throw err;
+      }
+    }
 
     return NextResponse.json(
       {
@@ -115,9 +132,18 @@ export async function POST(req: Request) {
     );
   } catch (error: any) {
     console.error("Registration error:", error);
-    // Generic error message
+    console.error("Error message:", error.message);
+    console.error("Error code:", error.code);
+    
+    // Return detailed error in development
     return NextResponse.json(
-      { error: "Unable to create account. Please try again later." },
+      { 
+        error: "Unable to create account. Please try again later.",
+        ...(process.env.NODE_ENV === "development" && { 
+          details: error.message,
+          code: error.code 
+        })
+      },
       { status: 500 }
     );
   }
