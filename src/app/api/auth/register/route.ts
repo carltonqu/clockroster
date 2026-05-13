@@ -7,7 +7,7 @@ const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  organizationName: z.string().min(2, "Organization name must be at least 2 characters"),
+  organizationName: z.string().optional(),
 });
 
 export async function POST(req: Request) {
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { name, email, password, organizationName } = parsed.data;
+    const { name, email, password } = parsed.data;
 
     // Check if email already exists
     const existingUser = await prisma.user.findUnique({
@@ -40,24 +40,14 @@ export async function POST(req: Request) {
     // Hash password
     const hashedPassword = await hash(password, 10);
 
-    // Create organization
-    const organization = await prisma.organization.create({
-      data: {
-        id: crypto.randomUUID(),
-        name: organizationName,
-        slug: organizationName.toLowerCase().replace(/\s+/g, "-"),
-      },
-    });
-
     // Create user with ADMIN role
     const user = await prisma.user.create({
       data: {
-        id: crypto.randomUUID(),
         name,
         email: email.toLowerCase(),
         password: hashedPassword,
         role: "ADMIN",
-        organizationId: organization.id,
+        status: "ACTIVE",
       },
     });
 

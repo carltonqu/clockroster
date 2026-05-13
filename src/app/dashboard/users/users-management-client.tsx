@@ -61,7 +61,7 @@ interface User {
 }
 
 export function UsersManagementClient() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
@@ -84,9 +84,19 @@ export function UsersManagementClient() {
   const [submitting, setSubmitting] = useState(false)
 
   const fetchUsers = async () => {
+    if (status !== "authenticated") return
+
     try {
       setLoading(true)
-      const response = await fetch("/api/users")
+      const response = await fetch("/api/users", {
+        credentials: "include",
+      })
+
+      if (response.status === 401) {
+        toast.error("Session expired. Please sign in again.")
+        return
+      }
+
       if (!response.ok) throw new Error("Failed to fetch users")
       const data = await response.json()
       setUsers(data)
@@ -98,8 +108,12 @@ export function UsersManagementClient() {
   }
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    if (status === "authenticated") {
+      fetchUsers()
+    } else if (status === "unauthenticated") {
+      setLoading(false)
+    }
+  }, [status])
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -8,34 +8,28 @@ datasource db {
 }
 
 model User {
-  id             String   @id @default(cuid())
-  email          String   @unique
-  name           String?
-  password       String?
-  role           UserRole
-  emailVerified  DateTime?
-  image          String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  organizationId String
-  employeeId     String?
-  
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  accounts       Account[]
-  sessions       Session[]
-  
-  @@index([email])
-  @@index([organizationId])
-}
+  id           String     @id @default(cuid())
+  email        String     @unique
+  name         String
+  password     String
+  role         UserRole   @default(EMPLOYEE)
+  status       UserStatus @default(ACTIVE)
+  supervisorId String?
+  phone        String?
+  department   String?
+  position     String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  lastLoginAt  DateTime?
+  createdBy    String?
+  accounts     Account[]
+  sessions     Session[]
+  User         User?      @relation("UserToUser", fields: [supervisorId], references: [id])
+  other_User   User[]     @relation("UserToUser")
 
-model Organization {
-  id        String   @id
-  name      String
-  slug      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  users     User[]
+  @@index([email])
+  @@index([role])
+  @@index([supervisorId])
 }
 
 model Account {
@@ -51,8 +45,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
@@ -80,4 +73,9 @@ enum UserRole {
   ADMIN
   SUPERVISOR
   EMPLOYEE
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
 }
