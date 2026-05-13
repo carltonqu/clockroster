@@ -72,16 +72,15 @@ export async function POST(req: Request) {
     // Hash password with bcrypt (cost factor 12 for security)
     const hashedPassword = await hash(password, 12);
 
-    // Create user with proper enum casting for PostgreSQL
+    // Create user without status column (production DB doesn't have it yet)
     const result = await prisma.$queryRaw`
-      INSERT INTO "User" (id, name, email, password, role, status, "createdAt", "updatedAt")
+      INSERT INTO "User" (id, name, email, password, role, "createdAt", "updatedAt")
       VALUES (
         gen_random_uuid(), 
         ${name.trim()}, 
         ${lowerEmail}, 
         ${hashedPassword}, 
-        ${"ADMIN"}::"UserRole", 
-        ${"ACTIVE"}::"UserStatus", 
+        'ADMIN'::"UserRole", 
         NOW(), 
         NOW()
       )

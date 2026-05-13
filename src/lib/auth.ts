@@ -52,11 +52,6 @@ export const authOptions: NextAuthOptions = {
         // Generic error - don't reveal if user exists
         if (!user || !user.password) return null;
 
-        // Check if account is active
-        if (user.status !== "ACTIVE") {
-          throw new Error("Account is not active. Please verify your email or contact support.");
-        }
-
         const valid = await compare(password, user.password);
         if (!valid) return null;
 
