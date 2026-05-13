@@ -72,23 +72,46 @@ export async function POST(req: Request) {
     // Hash password with bcrypt (cost factor 12 for security)
     const hashedPassword = await hash(password, 12);
 
-    // Create user WITH status column (it's required in production DB)
-    const result = await prisma.$queryRaw`
-      INSERT INTO "User" (id, name, email, password, role, status, "createdAt", "updatedAt")
-      VALUES (
-        gen_random_uuid(), 
-        ${name.trim()}, 
-        ${lowerEmail}, 
-        ${hashedPassword}, 
-        'ADMIN'::"UserRole", 
-        'ACTIVE'::"UserStatus", 
-        NOW(), 
-        NOW()
-      )
-      RETURNING id, name, email, role
-    `;
-    
-    const user = (result as any[])[0];
+    // Try to create user - handle schema variations between local and production
+    let user;
+    try {
+      // Try WITH status column first (local DB has it)
+      const result = await prisma.$queryRaw`
+        INSERT INTO "User" (id, name, email, password, role, status, "createdAt", "updatedAt")
+        VALUES (
+          gen_random_uuid(), 
+          ${name.trim()}, 
+          ${lowerEmail}, 
+          ${hashedPassword}, 
+          'ADMIN'::"UserRole", 
+          'ACTIVE'::"UserStatus", 
+          NOW(), 
+          NOW()
+        )
+        RETURNING id, name, email, role
+      `;
+      user = (result as any[])[0];
+    } catch (insertError: any) {
+      // If status column doesn't exist (production), try WITHOUT it
+      if (insertError.message?.includes('status') && insertError.code === 'P2010') {
+        const result = await prisma.$queryRaw`
+          INSERT INTO "User" (id, name, email, password, role, "createdAt", "updatedAt")
+          VALUES (
+            gen_random_uuid(), 
+            ${name.trim()}, 
+            ${lowerEmail}, 
+            ${hashedPassword}, 
+            'ADMIN'::"UserRole", 
+            NOW(), 
+            NOW()
+          )
+          RETURNING id, name, email, role
+        `;
+        user = (result as any[])[0];
+      } else {
+        throw insertError;
+      }
+    }
 
     return NextResponse.json(
       {
