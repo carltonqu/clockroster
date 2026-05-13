@@ -89,7 +89,14 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("Registration error:", error);
     return NextResponse.json(
-      { error: "Unable to create account. Please try again later." },
+      { 
+        error: "Unable to create account. Please try again later.",
+        debug: {
+          message: error.message,
+          code: error.code,
+          stack: error.stack?.split('\n').slice(0, 3)
+        }
+      },
       { status: 500 }
     );
   }
