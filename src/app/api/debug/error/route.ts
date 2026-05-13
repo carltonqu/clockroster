@@ -45,32 +45,33 @@ export async function GET() {
       results.tests.push({ name: "Enum types", status: "FAIL", error: e.message });
     }
 
-    // Test 4: Try actual insert WITHOUT status column
+    // Test 4: Try actual insert WITH status column (it's required)
     try {
       const hashedPassword = await hash("Test123!@#", 12);
       const email = `debug_${Date.now()}@test.com`;
       
       const insertResult = await prisma.$queryRaw`
-        INSERT INTO "User" (id, name, email, password, role, "createdAt", "updatedAt")
+        INSERT INTO "User" (id, name, email, password, role, status, "createdAt", "updatedAt")
         VALUES (
           gen_random_uuid(), 
           'Debug Test', 
           ${email}, 
           ${hashedPassword}, 
           'ADMIN'::"UserRole", 
+          'ACTIVE'::"UserStatus", 
           NOW(), 
           NOW()
         )
         RETURNING id, email
       `;
       
-      results.tests.push({ name: "Insert user (no status)", status: "PASS", user: (insertResult as any[])[0] });
+      results.tests.push({ name: "Insert user (with status)", status: "PASS", user: (insertResult as any[])[0] });
       
       // Cleanup
       await prisma.$queryRaw`DELETE FROM "User" WHERE email = ${email}`;
       results.tests.push({ name: "Cleanup", status: "PASS" });
     } catch (e: any) {
-      results.tests.push({ name: "Insert user (no status)", status: "FAIL", error: e.message, code: e.code });
+      results.tests.push({ name: "Insert user (with status)", status: "FAIL", error: e.message, code: e.code });
     }
 
     await prisma.$disconnect();
