@@ -178,14 +178,14 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
               )}
             </ul>
           </nav>
-          <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800">
-            <Link
-              href="/"
-              className="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-blue-600 dark:text-gray-300 dark:hover:bg-gray-800"
+          <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800 space-y-1">
+            <button
+              onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+              className="w-full group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
             >
-              <LogOut className="h-5 w-5 shrink-0 text-gray-400 group-hover:text-blue-600 dark:text-gray-500" />
-              Back to Home
-            </Link>
+              <LogOut className="h-5 w-5 shrink-0" />
+              Sign out
+            </button>
           </div>
         </div>
       </div>
@@ -270,6 +270,15 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
                 )}
               </ul>
             </nav>
+            <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800">
+              <button
+                onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+                className="w-full group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+              >
+                <LogOut className="h-5 w-5 shrink-0" />
+                Sign out
+              </button>
+            </div>
           </SheetContent>
         </Sheet>
         <div className="flex-1">
