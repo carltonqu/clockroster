@@ -72,51 +72,23 @@ export async function POST(req: Request) {
     // Hash password with bcrypt (cost factor 12 for security)
     const hashedPassword = await hash(password, 12);
 
-    // Try to create user - handle different schema versions
-    let user;
-    try {
-      // Try with new schema (with status column)
-      const result = await prisma.$queryRaw`
-        INSERT INTO "User" (id, name, email, password, role, status, "createdAt", "updatedAt")
-        VALUES (gen_random_uuid(), ${name.trim()}, ${lowerEmail}, ${hashedPassword}, 'ADMIN', 'ACTIVE', NOW(), NOW())
-        RETURNING id, name, email, role
-      `;
-      user = (result as any[])[0];
-    } catch (err: any) {
-      // If status column doesn't exist, try without it
-      if (err.message?.includes('status') || err.message?.includes('column')) {
-        try {
-          const result = await prisma.$queryRaw`
-            INSERT INTO "User" (id, name, email, password, role, "createdAt", "updatedAt")
-            VALUES (gen_random_uuid(), ${name.trim()}, ${lowerEmail}, ${hashedPassword}, 'ADMIN', NOW(), NOW())
-            RETURNING id, name, email, role
-          `;
-          user = (result as any[])[0];
-        } catch (err2: any) {
-          // If organizationId is required, include it
-          if (err2.message?.includes('organizationId')) {
-            const result = await prisma.$queryRaw`
-              INSERT INTO "User" (id, name, email, password, role, "organizationId", "createdAt", "updatedAt")
-              VALUES (gen_random_uuid(), ${name.trim()}, ${lowerEmail}, ${hashedPassword}, 'ADMIN', gen_random_uuid(), NOW(), NOW())
-              RETURNING id, name, email, role
-            `;
-            user = (result as any[])[0];
-          } else {
-            throw err2;
-          }
-        }
-      } else if (err.message?.includes('organizationId')) {
-        // organizationId required but status exists
-        const result = await prisma.$queryRaw`
-          INSERT INTO "User" (id, name, email, password, role, status, "organizationId", "createdAt", "updatedAt")
-          VALUES (gen_random_uuid(), ${name.trim()}, ${lowerEmail}, ${hashedPassword}, 'ADMIN', 'ACTIVE', gen_random_uuid(), NOW(), NOW())
-          RETURNING id, name, email, role
-        `;
-        user = (result as any[])[0];
-      } else {
-        throw err;
-      }
-    }
+    // Create user with proper enum casting for PostgreSQL
+    const result = await prisma.$queryRaw`
+      INSERT INTO "User" (id, name, email, password, role, status, "createdAt", "updatedAt")
+      VALUES (
+        gen_random_uuid(), 
+        ${name.trim()}, 
+        ${lowerEmail}, 
+        ${hashedPassword}, 
+        ${"ADMIN"}::"UserRole", 
+        ${"ACTIVE"}::"UserStatus", 
+        NOW(), 
+        NOW()
+      )
+      RETURNING id, name, email, role
+    `;
+    
+    const user = (result as any[])[0];
 
     return NextResponse.json(
       {
